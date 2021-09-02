@@ -54,8 +54,6 @@ BORDER_BB = [0, 0, CARD_WIDTH, CARD_HEIGHT]
 BORDER_WIDTH = int(CARD_MARGIN/2)
 BORDER_CORNER_RADIUS = 20
 
-
-
 # Title parameters
 TITLE_FONT = ImageFont.truetype(str(LEAGUE_GOTHIC_FONT_PATH), 60)
 TITLE_ANCHOR = "ma"  # Top Middle.
@@ -113,7 +111,8 @@ def wrap_body_text(body_text:str)->str:
   lines = []
   working_text = []
   for token in tokens:
-    if BODY_TEXT_FONT.getsize(" ".join(working_text + [token]))[0] > BODY_TEXT_WIDTH:
+    if BODY_TEXT_FONT.getsize(
+      " ".join(working_text + [token]))[0] > BODY_TEXT_WIDTH:
       lines.append(" ".join(working_text))
       working_text = []
     working_text.append(token)
@@ -193,14 +192,6 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
 
   print("Saving card:", output_path)
   img.save(output_path)
-
-
-
-
-
-
-
-
 
 
 def to_card_desc(attr:Dict[str, Any]):
