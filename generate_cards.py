@@ -9,6 +9,10 @@ import shutil
 import csv
 import dataclasses
 import textwrap
+import random
+import math
+import hashlib
+import colorsys
 
 CARDS_CSV_PATH = pathlib.Path("./cards.csv")
 assert CARDS_CSV_PATH.is_file()
@@ -57,17 +61,18 @@ BORDER_CORNER_RADIUS = 20
 # Title parameters
 TITLE_FONT = ImageFont.truetype(str(LEAGUE_GOTHIC_FONT_PATH), 60)
 TITLE_ANCHOR = "ma"  # Top Middle.
-TITLE_COORD = (CARD_WIDTH/2, CARD_MARGIN)
+TITLE_COORD = (int(CARD_WIDTH/2), CARD_MARGIN)
 TITLE_FONT_COLOR=BLACK
 
 # Cost parameters
-COST_WIDTH = CARD_WIDTH / 7
+COST_WIDTH = int(CARD_WIDTH / 7)
 COST_BACKGROUND_BB = [
   CARD_MARGIN, CARD_MARGIN, COST_WIDTH + CARD_MARGIN, COST_WIDTH + CARD_MARGIN]
 COST_BACKGROUND_COLOR = GOLD
 COST_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 50)
 COST_ANCHOR = "mm"  # Middle
-COST_COORD = (CARD_MARGIN + COST_WIDTH / 2, CARD_MARGIN + COST_WIDTH / 2)
+COST_COORD = (int(CARD_MARGIN + COST_WIDTH / 2),
+              int(CARD_MARGIN + COST_WIDTH / 2))
 COST_FONT_COLOR = WHITE
 
 # Describes the max width of card contents
@@ -76,8 +81,8 @@ CONTENT_WIDTH = CARD_WIDTH - 2*CARD_MARGIN
 # Card image parameters
 # Width and height of card image
 CARD_IMAGE_WIDTH = CONTENT_WIDTH
-CARD_IMAGE_HEIGHT = CARD_HEIGHT * 0.4
-CARD_IMAGE_TOP = CARD_HEIGHT / 7
+CARD_IMAGE_HEIGHT = int(CARD_HEIGHT * 0.4)
+CARD_IMAGE_TOP = int(CARD_HEIGHT / 7)
 CARD_IMAGE_BOTTOM = CARD_IMAGE_TOP + CARD_IMAGE_HEIGHT
 CARD_IMAGE_BB = [
   CARD_MARGIN,
@@ -85,6 +90,16 @@ CARD_IMAGE_BB = [
   CARD_MARGIN + CONTENT_WIDTH,
   CARD_IMAGE_BOTTOM,
 ]
+
+RAND_SHAPE_MIN_RADIUS =  min(CARD_IMAGE_WIDTH, CARD_IMAGE_HEIGHT) * 0.1
+RAND_SHAPE_MAX_RADIUS =  min(CARD_IMAGE_WIDTH, CARD_IMAGE_HEIGHT) * 0.3
+# We want to generate between 3 sided and 10-sided shapes.
+RAND_MIN_POINT_GEN_STEP_RADS = 2 * math.pi / 20
+RAND_MAX_POINT_GEN_STEP_RADS = 2 * math.pi / 3
+RAND_MIN_SHAPES = 10
+RAND_MAX_SHAPES = 100
+
+
 
 # Body text
 BODY_TEXT_FONT = ImageFont.truetype(str(COLWELLA_FONT_PATH), 20)
@@ -101,8 +116,8 @@ BODY_TEXT_BG_COLOR = DARK_BEIGE
 # Estimate text size of body text
 BODY_TEXT_WIDTH = CONTENT_WIDTH - CARD_PADDING
 BODY_TEXT_HEIGHT = BODY_TEXT_BG_BOTTOM - BODY_TEXT_BG_TOP - CARD_PADDING
-BODY_TEXT_COORD = (CARD_MARGIN + CARD_PADDING * 3 / 2,
-              BODY_TEXT_BG_TOP + CARD_PADDING / 2)
+BODY_TEXT_COORD = (int(CARD_MARGIN + CARD_PADDING * 3 / 2),
+                   int(BODY_TEXT_BG_TOP + CARD_PADDING / 2))
 BODY_TEXT_ANCHOR = "la" # top left
 
 
@@ -124,9 +139,14 @@ def wrap_body_text(body_text:str)->str:
 class CardDesc:
   name: str
   cost: int
-  types: Set[str]
+  types: List[str]
   body_text: str
   flavor_text: str
+
+  def hash(self):
+    text = (f"{self.name}{self.cost}{self.types}{self.body_text}"
+            f"{self.flavor_text}")
+    return hashlib.md5(text.encode("utf-8")).hexdigest()
 
 EXPECTED_CSV_HEADER = set([
   "Name",
@@ -135,6 +155,90 @@ EXPECTED_CSV_HEADER = set([
   "Body Text",
   "Flavor Text",
 ])
+
+
+def rand_shape(x_offset: float, y_offset: float, scale:float)->List[int]:
+  """Returns the points of a shape in clockwise order centered at offset."""
+  points = []
+  angle_offset = random.random() * 2 * math.pi
+  angle = 0
+  while angle < 2*math.pi:
+    magnitude = random.uniform(
+      RAND_SHAPE_MIN_RADIUS, RAND_SHAPE_MAX_RADIUS) * scale
+    x = math.cos(angle + angle_offset) * magnitude + x_offset
+    y = math.sin(angle + angle_offset) * magnitude + y_offset
+    points.append((x, y))
+    angle += random.uniform(RAND_MIN_POINT_GEN_STEP_RADS,
+                            RAND_MAX_POINT_GEN_STEP_RADS)
+  return points
+
+@dataclasses.dataclass
+class ColorPalette:
+  # These are in 0-1
+  primary_hue: float
+  secondary_hue: float
+  alt_hues: List[float]
+
+  def primary(self)->Tuple[int, int, int]:
+    return tuple(
+      int(255*c) for c in colorsys.hsv_to_rgb(self.primary_hue, 1, 1))
+
+  def secondary(self)->Tuple[int, int, int]:
+    return tuple(
+      int(255*c) for c in colorsys.hsv_to_rgb(self.secondary_hue, 1, 1))
+
+
+def rand_color_palette()->ColorPalette:
+  primary_hue = random.random()
+  secondary_hue = (primary_hue + 0.5 + random.uniform(-0.2, 0.2)) % 1
+  alt_hues = [
+    ((primary_hue - secondary_hue)/2) % 1,
+    ((secondary_hue - primary_hue)/2) % 1,
+    random.random(), random.random(), random.random(),
+  ]
+  return ColorPalette(primary_hue, secondary_hue, alt_hues)
+
+def rand_color(palette:ColorPalette)->Tuple[int, int, int]:
+  hue = random.choices(
+    [palette.primary_hue, palette.secondary_hue] + palette.alt_hues,
+    weights=[0.5, 0.25] + [0.25/len(palette.alt_hues) for _ in palette.alt_hues]
+  )[0]
+  saturation = random.uniform(0.5, 1)
+  value = random.uniform(0, 1)
+  return tuple(int(255*c) for c in colorsys.hsv_to_rgb(hue, saturation, value))
+
+
+def generate_card_art(desc:CardDesc)->Image:
+  # Seed random number gen with deterministic hash of card description. This
+  # gives us the same image if we run the generation script twice.
+  random.seed(desc.hash())
+
+  # We generate an internal image and paste it into the card.
+  img = Image.new(mode="RGBA", size=(CARD_IMAGE_WIDTH, CARD_IMAGE_HEIGHT))
+  draw = ImageDraw.Draw(img)
+
+  draw.rectangle([0, 0, CARD_IMAGE_WIDTH, CARD_IMAGE_HEIGHT],
+                 fill=BLACK)
+
+  num_shapes = random.randint(RAND_MIN_SHAPES, RAND_MAX_SHAPES)
+  color_palette = rand_color_palette()
+  for shape_idx in range(num_shapes):
+    offset_x = random.uniform(0, CARD_IMAGE_WIDTH)
+    offset_y = random.uniform(0, CARD_IMAGE_HEIGHT)
+    shape = rand_shape(offset_x, offset_y, scale=1)
+    draw.polygon(shape, fill=rand_color(color_palette))
+  # Draw a big secondary
+  offset_x = random.uniform(CARD_IMAGE_WIDTH*0.1, CARD_IMAGE_WIDTH*0.9)
+  offset_y = random.uniform(CARD_IMAGE_HEIGHT*0.1, CARD_IMAGE_HEIGHT*0.9)
+  shape = rand_shape(offset_x, offset_y, scale=3)
+  draw.polygon(shape, fill=color_palette.secondary())
+
+  offset_x = random.uniform(CARD_IMAGE_WIDTH*0.1, CARD_IMAGE_WIDTH*0.9)
+  offset_y = random.uniform(CARD_IMAGE_HEIGHT*0.1, CARD_IMAGE_HEIGHT*0.9)
+  shape = rand_shape(offset_x, offset_y, scale=3)
+  draw.polygon(shape, fill=color_palette.primary())
+
+  return img
 
 def generate_card(desc:CardDesc, output_path:pathlib.Path):
   assert not output_path.exists(), f"{output_path} already exists"
@@ -171,10 +275,8 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
     anchor=COST_ANCHOR)
 
   # Card image placeholder.
-  # TODO replace this with some filler image.
-  draw.rectangle(
-    CARD_IMAGE_BB,
-    fill=BLACK)
+  card_art = generate_card_art(desc)
+  img.paste(card_art, CARD_IMAGE_BB[:2])
 
   # Body text
   draw.rectangle(
@@ -199,7 +301,7 @@ def to_card_desc(attr:Dict[str, Any]):
   return CardDesc(
     name=attr["Name"],
     cost=int(attr["Cost"]),
-    types=set(attr["Types"].split(",")),
+    types=list(attr["Types"].split(",")),
     body_text=attr["Body Text"],
     flavor_text=attr["Flavor Text"],
   )
