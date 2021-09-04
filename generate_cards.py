@@ -91,6 +91,7 @@ CARD_IMAGE_BB = [
   CARD_IMAGE_BOTTOM,
 ]
 
+# Random generation parameters
 RAND_SHAPE_MIN_RADIUS =  min(CARD_IMAGE_WIDTH, CARD_IMAGE_HEIGHT) * 0.1
 RAND_SHAPE_MAX_RADIUS =  min(CARD_IMAGE_WIDTH, CARD_IMAGE_HEIGHT) * 0.3
 # We want to generate between 3 sided and 10-sided shapes.
@@ -99,11 +100,17 @@ RAND_MAX_POINT_GEN_STEP_RADS = 2 * math.pi / 3
 RAND_MIN_SHAPES = 10
 RAND_MAX_SHAPES = 100
 
-
+# Card Types
+CARD_TYPE_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 25)
+CARD_TYPE_ANCHOR = "md" # middle bottom
+CARD_TYPE_HEIGHT = CARD_HEIGHT / 20
+CARD_TYPE_BOTTOM = CARD_IMAGE_BOTTOM + CARD_TYPE_HEIGHT
+CARD_TYPE_COORD = (CARD_WIDTH/2, CARD_TYPE_BOTTOM)
+CARD_TYPE_COLOR = BLACK
 
 # Body text
-BODY_TEXT_FONT = ImageFont.truetype(str(COLWELLA_FONT_PATH), 20)
-BODY_TEXT_BG_TOP = CARD_IMAGE_BOTTOM + CARD_PADDING
+BODY_TEXT_FONT = ImageFont.truetype(str(COLWELLA_FONT_PATH), 25)
+BODY_TEXT_BG_TOP = CARD_TYPE_BOTTOM + CARD_PADDING
 BODY_TEXT_BG_BOTTOM = CARD_HEIGHT - CARD_MARGIN - CARD_PADDING
 BODY_TEXT_BG_BB = [
   CARD_MARGIN,
@@ -119,6 +126,8 @@ BODY_TEXT_HEIGHT = BODY_TEXT_BG_BOTTOM - BODY_TEXT_BG_TOP - CARD_PADDING
 BODY_TEXT_COORD = (int(CARD_MARGIN + CARD_PADDING * 3 / 2),
                    int(BODY_TEXT_BG_TOP + CARD_PADDING / 2))
 BODY_TEXT_ANCHOR = "la" # top left
+# Number of pixels between lines.
+BODY_TEXT_SPACING = 10
 
 
 def wrap_body_text(body_text:str)->str:
@@ -278,6 +287,15 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
   card_art = generate_card_art(desc)
   img.paste(card_art, CARD_IMAGE_BB[:2])
 
+  # Card type text
+  draw.text(
+    CARD_TYPE_COORD,
+    ", ".join(desc.types),
+    CARD_TYPE_COLOR,
+    font=CARD_TYPE_FONT,
+    anchor=CARD_TYPE_ANCHOR,
+  )
+
   # Body text
   draw.rectangle(
     BODY_TEXT_BG_BB,
@@ -289,7 +307,9 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
     fill=BODY_TEXT_COLOR,
     anchor=BODY_TEXT_ANCHOR,
     align="left",
-    font=BODY_TEXT_FONT)
+    font=BODY_TEXT_FONT,
+    spacing=BODY_TEXT_SPACING,
+  )
 
 
   print("Saving card:", output_path)
