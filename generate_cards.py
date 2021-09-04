@@ -13,6 +13,7 @@ import random
 import math
 import hashlib
 import colorsys
+import enum
 
 CARDS_CSV_PATH = pathlib.Path("./cards.csv")
 assert CARDS_CSV_PATH.is_file()
@@ -147,6 +148,7 @@ def wrap_body_text(body_text:str)->str:
 
 @dataclasses.dataclass
 class CardDesc:
+  card_type:str
   title: str
   cost: int
   attributes: List[str]
@@ -158,7 +160,23 @@ class CardDesc:
             f"{self.flavor_text}")
     return hashlib.md5(text.encode("utf-8")).hexdigest()
 
+class CardType(enum.Enum):
+  SPELL = "Spell"
+  HOLDING = "Holding"
+  UNIT = "Unit"
+
+  def validate(s:str):
+    if s == CardType.SPELL:
+      return s
+    if s == CardType.HOLDING:
+      return s
+    if s == CardType.UNIT:
+      return s
+    raise ValueError(f"Not a CardType: {s}")
+
+
 EXPECTED_CSV_HEADER = set([
+  "Card Type",
   "Title",
   "Cost",
   "Attributes",
@@ -288,7 +306,7 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
   card_art = generate_card_art(desc)
   img.paste(card_art, CARD_IMAGE_BB[:2])
 
-  # Card type text
+  # Card card_type text
   draw.text(
     ATTRIBUTE_COORD,
     ", ".join(desc.attributes),
@@ -318,8 +336,9 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
 
 
 def to_card_desc(attr:Dict[str, Any]):
-  assert set(attr.keys()) == EXPECTED_CSV_HEADER
+  assert set(attr.keys()) == EXPECTED_CSV_HEADER, f"{set(attr.keys())}"
   return CardDesc(
+    card_type=attr["Card Type"],
     title=attr["Title"],
     cost=int(attr["Cost"]),
     attributes=list(attr["Attributes"].split(",")),
