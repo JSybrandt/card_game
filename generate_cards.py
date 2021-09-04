@@ -130,6 +130,7 @@ BODY_TEXT_ANCHOR = "la" # top left
 BODY_TEXT_SPACING = 10
 
 
+
 def wrap_body_text(body_text:str)->str:
   tokens = body_text.split()
   lines = []
@@ -146,19 +147,19 @@ def wrap_body_text(body_text:str)->str:
 
 @dataclasses.dataclass
 class CardDesc:
-  name: str
+  title: str
   cost: int
   types: List[str]
   body_text: str
   flavor_text: str
 
   def hash(self):
-    text = (f"{self.name}{self.cost}{self.types}{self.body_text}"
+    text = (f"{self.title}{self.cost}{self.types}{self.body_text}"
             f"{self.flavor_text}")
     return hashlib.md5(text.encode("utf-8")).hexdigest()
 
 EXPECTED_CSV_HEADER = set([
-  "Name",
+  "Title",
   "Cost",
   "Types",
   "Body Text",
@@ -266,7 +267,7 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
   # Title, center text at top of card.
   draw.text(
     TITLE_COORD,
-    desc.name,
+    desc.title,
     TITLE_FONT_COLOR,
     font=TITLE_FONT,
     anchor=TITLE_ANCHOR)
@@ -319,7 +320,7 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
 def to_card_desc(attr:Dict[str, Any]):
   assert set(attr.keys()) == EXPECTED_CSV_HEADER
   return CardDesc(
-    name=attr["Name"],
+    title=attr["Title"],
     cost=int(attr["Cost"]),
     types=list(attr["Types"].split(",")),
     body_text=attr["Body Text"],
