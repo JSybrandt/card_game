@@ -54,6 +54,10 @@ GOLD = (218,165,32)
 BEIGE = (224, 201, 166)
 DARK_BEIGE = (163, 146, 119)
 
+def get_bb_center(bb:Tuple[int, int, int, int])->Tuple[int, int]:
+  assert len(bb) == 4
+  x1, y1, x2, y2 = bb
+  return int((x1+x2)/2), int((y1+y2)/2)
 
 # Background parameters
 SPELL_BACKGROUND_COLOR = LIGHT_BLUE
@@ -79,8 +83,7 @@ COST_BACKGROUND_BB = [
 COST_BACKGROUND_COLOR = GOLD
 COST_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 50)
 COST_ANCHOR = "mm"  # Middle
-COST_COORD = (int(CARD_MARGIN + COST_WIDTH / 2),
-              int(CARD_MARGIN + COST_WIDTH / 2))
+COST_COORD = get_bb_center(COST_BACKGROUND_BB)
 COST_FONT_COLOR = WHITE
 
 # Card Type Icon
@@ -90,15 +93,13 @@ CARD_TYPE_ICON_BACKGROUND_BB =[
   CARD_MARGIN,
   CARD_WIDTH-CARD_MARGIN,
   CARD_TYPE_ICON_WIDTH + CARD_MARGIN]
+CARD_TYPE_ICON_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 50)
+CARD_TYPE_ICON_ANCHOR= "mm"  # Middle
+CARD_TYPE_ICON_COORD = get_bb_center(CARD_TYPE_ICON_BACKGROUND_BB)
+CARD_TYPE_ICON_FONT_COLOR = WHITE
 CARD_TYPE_ICON_BACKGROUND_COLOR_SPELL = DARK_BLUE
 CARD_TYPE_ICON_BACKGROUND_COLOR_HOLDING= DARK_BEIGE
 CARD_TYPE_ICON_BACKGROUND_COLOR_UNIT = DARK_RED
-CARD_TYPE_ICON_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 50)
-CARD_TYPE_ICON_ACHOR = "mm"  # Middle
-CARD_TYPE_ICON_COORD = (
-  int(CARD_TYPE_ICON_BACKGROUND_BB[2]+CARD_TYPE_ICON_BACKGROUND_BB[0]/2)
-  int(CARD_TYPE_ICON_BACKGROUND_BB[3]+CARD_TYPE_ICON_BACKGROUND_BB[1]/2))
-CARD_TYPE_ICON_FONT_COLOR = WHITE
 
 
 # Describes the max width of card contents
@@ -183,11 +184,9 @@ class CardDesc:
   cost: int
   attributes: List[str]
   body_text: str
-  flavor_text: str
 
   def hash(self):
-    text = (f"{self.title}{self.cost}{self.attributes}{self.body_text}"
-            f"{self.flavor_text}")
+    text = f"{self.title}{self.cost}{self.attributes}{self.body_text}"
     return hashlib.md5(text.encode("utf-8")).hexdigest()
 
 
@@ -197,7 +196,6 @@ EXPECTED_CSV_HEADER = set([
   "Cost",
   "Attributes",
   "Body Text",
-  "Flavor Text",
 ])
 
 def get_background_color(desc:CardDesc):
@@ -349,7 +347,7 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
   )
   draw.text(
     CARD_TYPE_ICON_COORD,
-    str(desc.card_type)[0],
+    str(desc.card_type.value)[0],
     CARD_TYPE_ICON_FONT_COLOR,
     font=CARD_TYPE_ICON_FONT,
     anchor=CARD_TYPE_ICON_ANCHOR)
@@ -395,7 +393,6 @@ def to_card_desc(attr:Dict[str, Any]):
     cost=int(attr["Cost"]),
     attributes=list(attr["Attributes"].split(",")),
     body_text=attr["Body Text"],
-    flavor_text=attr["Flavor Text"],
   )
 
 if __name__ == "__main__":
