@@ -44,16 +44,21 @@ CARD_PADDING = int(CARD_PADDING_INCH * PIXELS_PER_INCH)
 BLACK = (0,0,0)
 WHITE = (255,255,255)
 RED = (255, 0, 0)
+LIGHT_RED = (250, 132, 144)
+DARK_RED = (156, 70, 70)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
+LIGHT_BLUE = (114, 122, 212)
+DARK_BLUE = (77, 70, 156)
 GOLD = (218,165,32)
 BEIGE = (224, 201, 166)
 DARK_BEIGE = (163, 146, 119)
 
+
 # Background parameters
-SPELL_BACKGROUND_COLOR = BEIGE
+SPELL_BACKGROUND_COLOR = LIGHT_BLUE
 HOLDING_BACKGROUND_COLOR = BEIGE
-UNIT_BACKGROUND_COLOR = BEIGE
+UNIT_BACKGROUND_COLOR = LIGHT_RED
 
 # Border parameters
 BORDER_COLOR = BLACK
@@ -122,7 +127,6 @@ BODY_TEXT_BG_BB = [
   BODY_TEXT_BG_BOTTOM,
 ]
 BODY_TEXT_COLOR = BLACK
-BODY_TEXT_BG_COLOR = DARK_BEIGE
 # Estimate text size of body text
 BODY_TEXT_WIDTH = CONTENT_WIDTH - CARD_PADDING
 BODY_TEXT_HEIGHT = BODY_TEXT_BG_BOTTOM - BODY_TEXT_BG_TOP - CARD_PADDING
@@ -131,7 +135,9 @@ BODY_TEXT_COORD = (int(CARD_MARGIN + CARD_PADDING * 3 / 2),
 BODY_TEXT_ANCHOR = "la" # top left
 # Number of pixels between lines.
 BODY_TEXT_SPACING = 10
-
+BODY_TEXT_BG_COLOR_SPELL = DARK_BLUE
+BODY_TEXT_BG_COLOR_HOLDING = DARK_BEIGE
+BODY_TEXT_BG_COLOR_UNIT= DARK_RED
 
 
 def wrap_body_text(body_text:str)->str:
@@ -147,10 +153,14 @@ def wrap_body_text(body_text:str)->str:
   lines.append(" ".join(working_text))
   return "\n".join(lines)
 
+class CardType(enum.Enum):
+  SPELL = "Spell"
+  HOLDING = "Holding"
+  UNIT = "Unit"
 
 @dataclasses.dataclass
 class CardDesc:
-  card_type:str
+  card_type:CardType
   title: str
   cost: int
   attributes: List[str]
@@ -162,20 +172,6 @@ class CardDesc:
             f"{self.flavor_text}")
     return hashlib.md5(text.encode("utf-8")).hexdigest()
 
-class CardType(enum.Enum):
-  SPELL = "Spell"
-  HOLDING = "Holding"
-  UNIT = "Unit"
-
-  def validate(s:str):
-    if s == CardType.SPELL:
-      return s
-    if s == CardType.HOLDING:
-      return s
-    if s == CardType.UNIT:
-      return s
-    raise ValueError(f"Not a CardType: {s}")
-
 
 EXPECTED_CSV_HEADER = set([
   "Card Type",
@@ -185,6 +181,23 @@ EXPECTED_CSV_HEADER = set([
   "Body Text",
   "Flavor Text",
 ])
+
+def get_background_color(desc:CardDesc):
+  if desc.card_type == CardType.SPELL:
+    return SPELL_BACKGROUND_COLOR
+  if desc.card_type == CardType.HOLDING:
+    return HOLDING_BACKGROUND_COLOR
+  if desc.card_type == CardType.UNIT:
+    return UNIT_BACKGROUND_COLOR
+
+def get_body_text_background_color(desc:CardDesc):
+  if desc.card_type == CardType.SPELL:
+    return BODY_TEXT_BG_COLOR_SPELL
+  if desc.card_type == CardType.HOLDING:
+    return BODY_TEXT_BG_COLOR_HOLDING
+  if desc.card_type == CardType.UNIT:
+    return BODY_TEXT_BG_COLOR_UNIT
+
 
 
 def rand_shape(x_offset: float, y_offset: float, scale:float)->List[int]:
@@ -270,13 +283,6 @@ def generate_card_art(desc:CardDesc)->Image:
 
   return img
 
-def get_background_color(desc:CardDesc):
-  if desc.card_type == CardType.SPELL:
-    return SPELL_BACKGROUND_COLOR
-  if desc.card_type == CardType.HOLDING:
-    return HOLDING_BACKGROUND_COLOR
-  if desc.card_type == CardType.UNIT:
-    return UNIT_BACKGROUND_COLOR
 
 def generate_card(desc:CardDesc, output_path:pathlib.Path):
   assert not output_path.exists(), f"{output_path} already exists"
@@ -328,7 +334,7 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
   # Body text
   draw.rectangle(
     BODY_TEXT_BG_BB,
-    fill=BODY_TEXT_BG_COLOR)
+    fill=get_body_text_background_color(desc))
 
   draw.multiline_text(
     BODY_TEXT_COORD,
@@ -348,7 +354,7 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
 def to_card_desc(attr:Dict[str, Any]):
   assert set(attr.keys()) == EXPECTED_CSV_HEADER, f"{set(attr.keys())}"
   return CardDesc(
-    card_type=attr["Card Type"],
+    card_type=CardType(attr["Card Type"]),
     title=attr["Title"],
     cost=int(attr["Cost"]),
     attributes=list(attr["Attributes"].split(",")),
