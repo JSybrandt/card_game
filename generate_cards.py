@@ -51,7 +51,9 @@ BEIGE = (224, 201, 166)
 DARK_BEIGE = (163, 146, 119)
 
 # Background parameters
-BACKGROUND_COLOR = BEIGE
+SPELL_BACKGROUND_COLOR = BEIGE
+HOLDING_BACKGROUND_COLOR = BEIGE
+UNIT_BACKGROUND_COLOR = BEIGE
 
 # Border parameters
 BORDER_COLOR = BLACK
@@ -268,6 +270,14 @@ def generate_card_art(desc:CardDesc)->Image:
 
   return img
 
+def get_background_color(desc:CardDesc):
+  if desc.card_type == CardType.SPELL:
+    return SPELL_BACKGROUND_COLOR
+  if desc.card_type == CardType.HOLDING:
+    return HOLDING_BACKGROUND_COLOR
+  if desc.card_type == CardType.UNIT:
+    return UNIT_BACKGROUND_COLOR
+
 def generate_card(desc:CardDesc, output_path:pathlib.Path):
   assert not output_path.exists(), f"{output_path} already exists"
   img = Image.new(mode="RGBA", size=(CARD_WIDTH, CARD_HEIGHT))
@@ -279,7 +289,7 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
     outline=BORDER_COLOR,
     width=BORDER_WIDTH,
     radius=BORDER_CORNER_RADIUS,
-    fill=BACKGROUND_COLOR
+    fill=get_background_color(desc),
   )
 
   # Title, center text at top of card.
