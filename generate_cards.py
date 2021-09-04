@@ -83,6 +83,24 @@ COST_COORD = (int(CARD_MARGIN + COST_WIDTH / 2),
               int(CARD_MARGIN + COST_WIDTH / 2))
 COST_FONT_COLOR = WHITE
 
+# Card Type Icon
+CARD_TYPE_ICON_WIDTH = int(CARD_WIDTH/7)
+CARD_TYPE_ICON_BACKGROUND_BB =[
+  CARD_WIDTH-CARD_TYPE_ICON_WIDTH-CARD_MARGIN,
+  CARD_MARGIN,
+  CARD_WIDTH-CARD_MARGIN,
+  CARD_TYPE_ICON_WIDTH + CARD_MARGIN]
+CARD_TYPE_ICON_BACKGROUND_COLOR_SPELL = DARK_BLUE
+CARD_TYPE_ICON_BACKGROUND_COLOR_HOLDING= DARK_BEIGE
+CARD_TYPE_ICON_BACKGROUND_COLOR_UNIT = DARK_RED
+CARD_TYPE_ICON_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 50)
+CARD_TYPE_ICON_ACHOR = "mm"  # Middle
+CARD_TYPE_ICON_COORD = (
+  int(CARD_TYPE_ICON_BACKGROUND_BB[2]+CARD_TYPE_ICON_BACKGROUND_BB[0]/2)
+  int(CARD_TYPE_ICON_BACKGROUND_BB[3]+CARD_TYPE_ICON_BACKGROUND_BB[1]/2))
+CARD_TYPE_ICON_FONT_COLOR = WHITE
+
+
 # Describes the max width of card contents
 CONTENT_WIDTH = CARD_WIDTH - 2*CARD_MARGIN
 
@@ -198,7 +216,13 @@ def get_body_text_background_color(desc:CardDesc):
   if desc.card_type == CardType.UNIT:
     return BODY_TEXT_BG_COLOR_UNIT
 
-
+def get_card_type_icon_background_color(desc:CardDesc):
+  if desc.card_type == CardType.SPELL:
+    return CARD_TYPE_ICON_BACKGROUND_COLOR_SPELL
+  if desc.card_type == CardType.HOLDING:
+    return CARD_TYPE_ICON_BACKGROUND_COLOR_HOLDING
+  if desc.card_type == CardType.UNIT:
+    return CARD_TYPE_ICON_BACKGROUND_COLOR_UNIT
 
 def rand_shape(x_offset: float, y_offset: float, scale:float)->List[int]:
   """Returns the points of a shape in clockwise order centered at offset."""
@@ -317,6 +341,18 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
     COST_FONT_COLOR,
     font=COST_FONT,
     anchor=COST_ANCHOR)
+
+  # Card type icon in the top right.
+  draw.ellipse(
+    CARD_TYPE_ICON_BACKGROUND_BB,
+    fill=get_card_type_icon_background_color(desc)
+  )
+  draw.text(
+    CARD_TYPE_ICON_COORD,
+    str(desc.card_type)[0],
+    CARD_TYPE_ICON_FONT_COLOR,
+    font=CARD_TYPE_ICON_FONT,
+    anchor=CARD_TYPE_ICON_ANCHOR)
 
   # Card image placeholder.
   card_art = generate_card_art(desc)
