@@ -100,17 +100,17 @@ RAND_MAX_POINT_GEN_STEP_RADS = 2 * math.pi / 3
 RAND_MIN_SHAPES = 10
 RAND_MAX_SHAPES = 100
 
-# Card Types
-CARD_TYPE_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 25)
-CARD_TYPE_ANCHOR = "md" # middle bottom
-CARD_TYPE_HEIGHT = CARD_HEIGHT / 20
-CARD_TYPE_BOTTOM = CARD_IMAGE_BOTTOM + CARD_TYPE_HEIGHT
-CARD_TYPE_COORD = (CARD_WIDTH/2, CARD_TYPE_BOTTOM)
-CARD_TYPE_COLOR = BLACK
+# Card Attributes
+ATTRIBUTE_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 25)
+ATTRIBUTE_ANCHOR = "md" # middle bottom
+ATTRIBUTE_HEIGHT = CARD_HEIGHT / 20
+ATTRIBUTE_BOTTOM = CARD_IMAGE_BOTTOM + ATTRIBUTE_HEIGHT
+ATTRIBUTE_COORD = (CARD_WIDTH/2, ATTRIBUTE_BOTTOM)
+ATTRIBUTE_TEXT_COLOR = BLACK
 
 # Body text
 BODY_TEXT_FONT = ImageFont.truetype(str(COLWELLA_FONT_PATH), 25)
-BODY_TEXT_BG_TOP = CARD_TYPE_BOTTOM + CARD_PADDING
+BODY_TEXT_BG_TOP = ATTRIBUTE_BOTTOM + CARD_PADDING
 BODY_TEXT_BG_BOTTOM = CARD_HEIGHT - CARD_MARGIN - CARD_PADDING
 BODY_TEXT_BG_BB = [
   CARD_MARGIN,
@@ -149,19 +149,19 @@ def wrap_body_text(body_text:str)->str:
 class CardDesc:
   title: str
   cost: int
-  types: List[str]
+  attributes: List[str]
   body_text: str
   flavor_text: str
 
   def hash(self):
-    text = (f"{self.title}{self.cost}{self.types}{self.body_text}"
+    text = (f"{self.title}{self.cost}{self.attributes}{self.body_text}"
             f"{self.flavor_text}")
     return hashlib.md5(text.encode("utf-8")).hexdigest()
 
 EXPECTED_CSV_HEADER = set([
   "Title",
   "Cost",
-  "Types",
+  "Attributes",
   "Body Text",
   "Flavor Text",
 ])
@@ -290,11 +290,11 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
 
   # Card type text
   draw.text(
-    CARD_TYPE_COORD,
-    ", ".join(desc.types),
-    CARD_TYPE_COLOR,
-    font=CARD_TYPE_FONT,
-    anchor=CARD_TYPE_ANCHOR,
+    ATTRIBUTE_COORD,
+    ", ".join(desc.attributes),
+    ATTRIBUTE_TEXT_COLOR,
+    font=ATTRIBUTE_FONT,
+    anchor=ATTRIBUTE_ANCHOR,
   )
 
   # Body text
@@ -322,7 +322,7 @@ def to_card_desc(attr:Dict[str, Any]):
   return CardDesc(
     title=attr["Title"],
     cost=int(attr["Cost"]),
-    types=list(attr["Types"].split(",")),
+    attributes=list(attr["Attributes"].split(",")),
     body_text=attr["Body Text"],
     flavor_text=attr["Flavor Text"],
   )
