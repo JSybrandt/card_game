@@ -42,7 +42,32 @@ def get_bb_center(bb:Tuple[int, int, int, int])->Tuple[int, int]:
   x1, y1, x2, y2 = bb
   return int((x1 + x2) / 2), int((y1 + y2) / 2)
 
+class CardType(enum.Enum):
+  SPELL = "Spell"
+  HOLDING = "Holding"
+  UNIT = "Unit"
+
+@dataclasses.dataclass
+class CardDesc:
+  card_type:CardType
+  title: str
+  cost: int
+  attributes: List[str]
+  body_text: str
+
+  def hash(self):
+    text = f"{self.title}{self.cost}{self.attributes}{self.body_text}"
+    return hashlib.md5(text.encode("utf-8")).hexdigest()
+
 # Constants
+
+EXPECTED_CSV_HEADER = set([
+  "Card Type",
+  "Title",
+  "Cost",
+  "Attributes",
+  "Body Text",
+])
 
 CARDS_CSV_PATH = pathlib.Path("./cards.csv")
 assert CARDS_CSV_PATH.is_file()
@@ -83,10 +108,21 @@ GOLD = (218,165,32)
 BEIGE = (224, 201, 166)
 DARK_BEIGE = (163, 146, 119)
 
-# Background parameters
-SPELL_BACKGROUND_COLOR = LIGHT_BLUE
-HOLDING_BACKGROUND_COLOR = BEIGE
-UNIT_BACKGROUND_COLOR = LIGHT_RED
+def get_card_type_light_color(card_type:CardType):
+  if card_type == CardType.SPELL:
+    return LIGHT_BLUE
+  if card_type == CardType.HOLDING:
+    return BEIGE
+  if card_type == CardType.UNIT:
+    return LIGHT_RED
+
+def get_card_type_dark_color(card_type:CardType):
+  if card_type == CardType.SPELL:
+    return DARK_BLUE
+  if card_type == CardType.HOLDING:
+    return DARK_BEIGE
+  if card_type == CardType.UNIT:
+    return DARK_RED
 
 # Border parameters
 BORDER_COLOR = BLACK
@@ -108,14 +144,12 @@ COST_BACKGROUND_COLOR = GOLD
 COST_FONT_COLOR = WHITE
 
 # Card Type Icon
-CARD_TYPE_RADIUS = int(CARD_WIDTH / 14)
-CARD_TYPE_COORD = (CARD_WIDTH-CARD_TYPE_RADIUS-CARD_MARGIN,
-                   CARD_MARGIN+CARD_TYPE_RADIUS)
-CARD_TYPE_ICON_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 50)
-CARD_TYPE_ICON_FONT_COLOR = WHITE
-CARD_TYPE_ICON_BACKGROUND_COLOR_SPELL = DARK_BLUE
-CARD_TYPE_ICON_BACKGROUND_COLOR_HOLDING= DARK_BEIGE
-CARD_TYPE_ICON_BACKGROUND_COLOR_UNIT = DARK_RED
+TYPE_RADIUS = int(CARD_WIDTH / 14)
+TYPE_COORD = (CARD_WIDTH-TYPE_RADIUS-CARD_MARGIN,
+                   CARD_MARGIN+TYPE_RADIUS)
+TYPE_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 50)
+TYPE_FONT_COLOR = WHITE
+# cons use card_type dark
 
 # Describes the max width of card contents
 CONTENT_WIDTH = CARD_WIDTH - 2*CARD_MARGIN
@@ -169,9 +203,7 @@ BODY_TEXT_COORD = (int(CARD_MARGIN + CARD_PADDING * 3 / 2),
 BODY_TEXT_ANCHOR = "la" # top left
 # Number of pixels between lines.
 BODY_TEXT_SPACING = 10
-BODY_TEXT_BG_COLOR_SPELL = DARK_BLUE
-BODY_TEXT_BG_COLOR_HOLDING = DARK_BEIGE
-BODY_TEXT_BG_COLOR_UNIT= DARK_RED
+# Background uses card type dark.
 
 
 def wrap_body_text(body_text:str)->str:
@@ -187,55 +219,8 @@ def wrap_body_text(body_text:str)->str:
   lines.append(" ".join(working_text))
   return "\n".join(lines)
 
-class CardType(enum.Enum):
-  SPELL = "Spell"
-  HOLDING = "Holding"
-  UNIT = "Unit"
-
-@dataclasses.dataclass
-class CardDesc:
-  card_type:CardType
-  title: str
-  cost: int
-  attributes: List[str]
-  body_text: str
-
-  def hash(self):
-    text = f"{self.title}{self.cost}{self.attributes}{self.body_text}"
-    return hashlib.md5(text.encode("utf-8")).hexdigest()
 
 
-EXPECTED_CSV_HEADER = set([
-  "Card Type",
-  "Title",
-  "Cost",
-  "Attributes",
-  "Body Text",
-])
-
-def get_background_color(desc:CardDesc):
-  if desc.card_type == CardType.SPELL:
-    return SPELL_BACKGROUND_COLOR
-  if desc.card_type == CardType.HOLDING:
-    return HOLDING_BACKGROUND_COLOR
-  if desc.card_type == CardType.UNIT:
-    return UNIT_BACKGROUND_COLOR
-
-def get_body_text_background_color(desc:CardDesc):
-  if desc.card_type == CardType.SPELL:
-    return BODY_TEXT_BG_COLOR_SPELL
-  if desc.card_type == CardType.HOLDING:
-    return BODY_TEXT_BG_COLOR_HOLDING
-  if desc.card_type == CardType.UNIT:
-    return BODY_TEXT_BG_COLOR_UNIT
-
-def get_card_type_icon_background_color(desc:CardDesc):
-  if desc.card_type == CardType.SPELL:
-    return CARD_TYPE_ICON_BACKGROUND_COLOR_SPELL
-  if desc.card_type == CardType.HOLDING:
-    return CARD_TYPE_ICON_BACKGROUND_COLOR_HOLDING
-  if desc.card_type == CardType.UNIT:
-    return CARD_TYPE_ICON_BACKGROUND_COLOR_UNIT
 
 def rand_shape(x_offset: float, y_offset: float, scale:float)->List[int]:
   """Returns the points of a shape in clockwise order centered at offset."""
@@ -349,7 +334,7 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
     outline=BORDER_COLOR,
     width=BORDER_WIDTH,
     radius=BORDER_CORNER_RADIUS,
-    fill=get_background_color(desc),
+    fill=get_card_type_light_color(desc.card_type),
   )
 
   # Title, center text at top of card.
@@ -365,10 +350,10 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
             COST_BACKGROUND_COLOR, COST_FONT_COLOR, COST_FONT)
 
   # Card type icon in the top right.
-  draw_icon(draw, CARD_TYPE_COORD, CARD_TYPE_RADIUS,
+  draw_icon(draw, TYPE_COORD, TYPE_RADIUS,
             str(desc.card_type.value)[0],
-            get_card_type_icon_background_color(desc),
-            CARD_TYPE_ICON_FONT_COLOR, CARD_TYPE_ICON_FONT)
+            get_card_type_dark_color(desc.card_type),
+            TYPE_FONT_COLOR, TYPE_FONT)
 
   # Card image placeholder.
   card_art = generate_card_art(desc)
@@ -386,7 +371,7 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
   # Body text
   draw.rectangle(
     BODY_TEXT_BG_BB,
-    fill=get_body_text_background_color(desc))
+    fill=get_card_type_dark_color(desc.card_type))
 
   draw.multiline_text(
     BODY_TEXT_COORD,
