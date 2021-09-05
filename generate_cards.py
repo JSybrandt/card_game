@@ -51,7 +51,7 @@ class CardType(enum.Enum):
 class CardDesc:
   card_type:CardType
   title: str
-  cost: int
+  cost: str
   attributes: List[str]
   body_text: str
 
@@ -346,7 +346,7 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
     anchor=TITLE_ANCHOR)
 
   # Cost in the top left.
-  draw_icon(draw, COST_COORD, COST_RADIUS, str(desc.cost),
+  draw_icon(draw, COST_COORD, COST_RADIUS, desc.cost,
             COST_BACKGROUND_COLOR, COST_FONT_COLOR, COST_FONT)
 
   # Card type icon in the top right.
@@ -393,7 +393,7 @@ def to_card_desc(attr:Dict[str, Any]):
   return CardDesc(
     card_type=CardType(attr["Card Type"]),
     title=attr["Title"],
-    cost=int(attr["Cost"]),
+    cost=attr["Cost"],
     attributes=list(attr["Attributes"].split(",")),
     body_text=attr["Body Text"],
   )
