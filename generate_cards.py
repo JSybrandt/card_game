@@ -15,6 +15,35 @@ import hashlib
 import colorsys
 import enum
 
+# Helper functions and types
+
+Color = Tuple[int, int, int]
+
+def assert_valid_color(color:Color):
+  assert len(color) == 3, f"Invalid color: {color}"
+  assert 0 <= color[0] <= 255, f"Invalid color: {color}"
+  assert 0 <= color[1] <= 255, f"Invalid color: {color}"
+  assert 0 <= color[2] <= 255, f"Invalid color: {color}"
+
+Coord = Tuple[int, int]
+
+def assert_valid_coord(coord:Coord):
+  assert len(coord) == 2, f"Invalid coord: {coord}"
+
+BoundingBox = Tuple[int, int, int, int]
+
+def assert_valid_bb(bb: BoundingBox):
+  assert len(bb) == 4, f"Invalid bounding box: {bb}"
+  assert bb[0] <= bb[2], f"Invalid bounding box: {bb}"
+  assert bb[1] <= bb[3], f"Invalid bounding box: {bb}"
+
+def get_bb_center(bb:Tuple[int, int, int, int])->Tuple[int, int]:
+  assert_valid_bb(bb)
+  x1, y1, x2, y2 = bb
+  return int((x1 + x2) / 2), int((y1 + y2) / 2)
+
+# Constants
+
 CARDS_CSV_PATH = pathlib.Path("./cards.csv")
 assert CARDS_CSV_PATH.is_file()
 OUTPUT_DIR= pathlib.Path("./img")
@@ -54,11 +83,6 @@ GOLD = (218,165,32)
 BEIGE = (224, 201, 166)
 DARK_BEIGE = (163, 146, 119)
 
-def get_bb_center(bb:Tuple[int, int, int, int])->Tuple[int, int]:
-  assert len(bb) == 4
-  x1, y1, x2, y2 = bb
-  return int((x1+x2)/2), int((y1+y2)/2)
-
 # Background parameters
 SPELL_BACKGROUND_COLOR = LIGHT_BLUE
 HOLDING_BACKGROUND_COLOR = BEIGE
@@ -77,30 +101,21 @@ TITLE_COORD = (int(CARD_WIDTH/2), CARD_MARGIN)
 TITLE_FONT_COLOR=BLACK
 
 # Cost parameters
-COST_WIDTH = int(CARD_WIDTH / 7)
-COST_BACKGROUND_BB = [
-  CARD_MARGIN, CARD_MARGIN, COST_WIDTH + CARD_MARGIN, COST_WIDTH + CARD_MARGIN]
-COST_BACKGROUND_COLOR = GOLD
+COST_RADIUS = int(CARD_WIDTH / 14)
+COST_COORD = (CARD_MARGIN + COST_RADIUS, CARD_MARGIN + COST_RADIUS)
 COST_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 50)
-COST_ANCHOR = "mm"  # Middle
-COST_COORD = get_bb_center(COST_BACKGROUND_BB)
+COST_BACKGROUND_COLOR = GOLD
 COST_FONT_COLOR = WHITE
 
 # Card Type Icon
-CARD_TYPE_ICON_WIDTH = int(CARD_WIDTH/7)
-CARD_TYPE_ICON_BACKGROUND_BB =[
-  CARD_WIDTH-CARD_TYPE_ICON_WIDTH-CARD_MARGIN,
-  CARD_MARGIN,
-  CARD_WIDTH-CARD_MARGIN,
-  CARD_TYPE_ICON_WIDTH + CARD_MARGIN]
+CARD_TYPE_RADIUS = int(CARD_WIDTH / 14)
+CARD_TYPE_COORD = (CARD_WIDTH-CARD_TYPE_RADIUS-CARD_MARGIN,
+                   CARD_MARGIN+CARD_TYPE_RADIUS)
 CARD_TYPE_ICON_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 50)
-CARD_TYPE_ICON_ANCHOR= "mm"  # Middle
-CARD_TYPE_ICON_COORD = get_bb_center(CARD_TYPE_ICON_BACKGROUND_BB)
 CARD_TYPE_ICON_FONT_COLOR = WHITE
 CARD_TYPE_ICON_BACKGROUND_COLOR_SPELL = DARK_BLUE
 CARD_TYPE_ICON_BACKGROUND_COLOR_HOLDING= DARK_BEIGE
 CARD_TYPE_ICON_BACKGROUND_COLOR_UNIT = DARK_RED
-
 
 # Describes the max width of card contents
 CONTENT_WIDTH = CARD_WIDTH - 2*CARD_MARGIN
@@ -306,6 +321,23 @@ def generate_card_art(desc:CardDesc)->Image:
   return img
 
 
+def draw_icon(draw:ImageDraw.Draw, center_coord:Coord, radius:float, text:str,
+              bg_color:Color, text_color:Color, font:ImageFont.ImageFont):
+  assert radius > 0, f"Radius must be positive: {radius}"
+  assert len(text) == 1, f"drawn_icon can only draw 1-letter icons, not {text}"
+  assert_valid_color(bg_color)
+  assert_valid_color(text_color)
+  assert_valid_coord(center_coord)
+  center_x, center_y = center_coord
+  background_bb = [
+    center_x - radius,
+    center_y - radius,
+    center_x + radius,
+    center_y + radius,
+  ]
+  draw.ellipse(background_bb, fill=bg_color)
+  draw.text(center_coord, text, text_color, font=font, anchor="mm")
+
 def generate_card(desc:CardDesc, output_path:pathlib.Path):
   assert not output_path.exists(), f"{output_path} already exists"
   img = Image.new(mode="RGBA", size=(CARD_WIDTH, CARD_HEIGHT))
@@ -329,28 +361,14 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
     anchor=TITLE_ANCHOR)
 
   # Cost in the top left.
-  draw.ellipse(
-    COST_BACKGROUND_BB,
-    fill=COST_BACKGROUND_COLOR
-  )
-  draw.text(
-    COST_COORD,
-    str(desc.cost),
-    COST_FONT_COLOR,
-    font=COST_FONT,
-    anchor=COST_ANCHOR)
+  draw_icon(draw, COST_COORD, COST_RADIUS, str(desc.cost),
+            COST_BACKGROUND_COLOR, COST_FONT_COLOR, COST_FONT)
 
   # Card type icon in the top right.
-  draw.ellipse(
-    CARD_TYPE_ICON_BACKGROUND_BB,
-    fill=get_card_type_icon_background_color(desc)
-  )
-  draw.text(
-    CARD_TYPE_ICON_COORD,
-    str(desc.card_type.value)[0],
-    CARD_TYPE_ICON_FONT_COLOR,
-    font=CARD_TYPE_ICON_FONT,
-    anchor=CARD_TYPE_ICON_ANCHOR)
+  draw_icon(draw, CARD_TYPE_COORD, CARD_TYPE_RADIUS,
+            str(desc.card_type.value)[0],
+            get_card_type_icon_background_color(desc),
+            CARD_TYPE_ICON_FONT_COLOR, CARD_TYPE_ICON_FONT)
 
   # Card image placeholder.
   card_art = generate_card_art(desc)
