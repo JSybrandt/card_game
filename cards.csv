@@ -1,8 +1,4 @@
-Card Type,Title,Cost,Attributes,Body Text
-Spell,Test Name,3,"TypeA,TypeB",This is an example card.
-Spell,Test Name,3,"TypeA,TypeB",This is a long long looooong example of some card text. Who knows what is going to happen?
-Holding,Test Name,4,"TypeA,TypeB",This is a long long looooong example of some card text. Who knows what is going to happen?
-Unit,Test Name,5,"TypeA,TypeB",This is a long long looooong example of some card text. Who knows what is going to happen?
-Spell,Test Name,6,"TypeA,TypeB",This is a long long looooong example of some card text. Who knows what is going to happen?
-Spell,Test Name,7,"TypeA,TypeB",This is a long long looooong example of some card text. Who knows what is going to happen?
-Spell,Test Name,*,"TypeA,TypeB",This is a long long looooong example of some card text. Who knows what is going to happen?
+Card Type,Title,Cost,Attributes,Body Text,Revenue,Power,Health,Defense
+Spell,Fireball,3,"Combat, Magic, Fire",Deal 3 damage to a unit at the current battle.,,,,
+Holding,Inn,3,Buisness,,3,,3,
+Unit,Soldier,3,Military,,,3,5,1

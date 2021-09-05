@@ -49,25 +49,53 @@ class CardType(enum.Enum):
 
 @dataclasses.dataclass
 class CardDesc:
-  card_type:CardType
-  title: str
-  cost: str
+  card_type:  CardType
+  title:      str
+  cost:       str
   attributes: List[str]
-  body_text: str
+  body_text:  str
+  revenue:    Optional[str]
+  revenue:    Optional[str]
+  power:      Optional[str]
+  health:     Optional[str]
+  defense:    Optional[str]
 
   def hash(self):
     text = f"{self.title}{self.cost}{self.attributes}{self.body_text}"
     return hashlib.md5(text.encode("utf-8")).hexdigest()
 
+def assert_valid_attributes(attr:Dict[str, any]):
+  missing_attr = [
+    a for a in [
+      "Card Type",
+      "Title",
+      "Cost",
+      "Attributes",
+      "Body Text",
+      "Revenue",
+      "Power",
+      "Health",
+      "Defense",
+    ] if a not in attr
+  ]
+  assert len(missing_attr) == 0, f"Missing attributes: {missing_attr}"
+
+def to_card_desc(attr:Dict[str, Any]):
+  assert_valid_attributes(attr)
+  return CardDesc(
+    card_type=CardType(attr["Card Type"]),
+    title=attr["Title"],
+    cost=attr["Cost"],
+    attributes=list(attr["Attributes"].split(",")),
+    body_text=attr["Body Text"],
+    revenue=None if len(attr["Revenue"]) == 0 else attr["Revenue"],
+    health=None if len(attr["Health"]) == 0 else attr["Health"],
+    power=None if len(attr["Power"]) == 0 else attr["Power"],
+    defense=None if len(attr["Defense"]) == 0 else attr["Defense"],
+  )
+
 # Constants
 
-EXPECTED_CSV_HEADER = set([
-  "Card Type",
-  "Title",
-  "Cost",
-  "Attributes",
-  "Body Text",
-])
 
 CARDS_CSV_PATH = pathlib.Path("./cards.csv")
 assert CARDS_CSV_PATH.is_file()
@@ -107,6 +135,7 @@ DARK_BLUE = (77, 70, 156)
 GOLD = (218,165,32)
 BEIGE = (224, 201, 166)
 DARK_BEIGE = (163, 146, 119)
+YELLOW = (250, 193, 87)
 
 def get_card_type_light_color(card_type:CardType):
   if card_type == CardType.SPELL:
@@ -136,20 +165,20 @@ TITLE_ANCHOR = "ma"  # Top Middle.
 TITLE_COORD = (int(CARD_WIDTH/2), CARD_MARGIN)
 TITLE_FONT_COLOR=BLACK
 
+# Default icon params
+STANDARD_ICON_RADIUS = int(CARD_WIDTH / 14)
+LARGE_ICON_RADIUS = STANDARD_ICON_RADIUS * 1.5
+STANDARD_ICON_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 50)
+STANDARD_ICON_FONT_COLOR = WHITE
+
 # Cost parameters
-COST_RADIUS = int(CARD_WIDTH / 14)
-COST_COORD = (CARD_MARGIN + COST_RADIUS, CARD_MARGIN + COST_RADIUS)
-COST_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 50)
+COST_COORD = (CARD_MARGIN + STANDARD_ICON_RADIUS,
+              CARD_MARGIN + STANDARD_ICON_RADIUS)
 COST_BACKGROUND_COLOR = GOLD
-COST_FONT_COLOR = WHITE
 
 # Card Type Icon
-TYPE_RADIUS = int(CARD_WIDTH / 14)
-TYPE_COORD = (CARD_WIDTH-TYPE_RADIUS-CARD_MARGIN,
-                   CARD_MARGIN+TYPE_RADIUS)
-TYPE_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 50)
-TYPE_FONT_COLOR = WHITE
-# cons use card_type dark
+TYPE_COORD = (CARD_WIDTH-STANDARD_ICON_RADIUS-CARD_MARGIN,
+              CARD_MARGIN+STANDARD_ICON_RADIUS)
 
 # Describes the max width of card contents
 CONTENT_WIDTH = CARD_WIDTH - 2*CARD_MARGIN
@@ -204,6 +233,25 @@ BODY_TEXT_ANCHOR = "la" # top left
 # Number of pixels between lines.
 BODY_TEXT_SPACING = 10
 # Background uses card type dark.
+
+# Optional icons
+REVENUE_COORD = get_bb_center(BODY_TEXT_BG_BB)
+REVENUE_BG_COLOR = GOLD
+
+LOWER_ICON_Y = CARD_HEIGHT - CARD_MARGIN - CARD_PADDING - STANDARD_ICON_RADIUS
+
+POWER_COORD = (CARD_WIDTH * .25, LOWER_ICON_Y)
+POWER_BG_COLOR = YELLOW
+
+HEALTH_COORD = (CARD_WIDTH / 2, LOWER_ICON_Y)
+HEALTH_BG_COLOR = RED
+
+DEFENSE_COORD = (CARD_WIDTH * .75, LOWER_ICON_Y)
+DEFENSE_BG_COLOR = BLUE
+
+
+
+# Layout functions
 
 
 def wrap_body_text(body_text:str)->str:
@@ -306,8 +354,14 @@ def generate_card_art(desc:CardDesc)->Image:
   return img
 
 
-def draw_icon(draw:ImageDraw.Draw, center_coord:Coord, radius:float, text:str,
-              bg_color:Color, text_color:Color, font:ImageFont.ImageFont):
+def draw_icon(
+    draw:ImageDraw.Draw,
+    center_coord:Coord,
+    text:str,
+    bg_color:Color,
+    radius:float=STANDARD_ICON_RADIUS,
+    text_color:Color=STANDARD_ICON_FONT_COLOR,
+    font:ImageFont.ImageFont=STANDARD_ICON_FONT):
   assert radius > 0, f"Radius must be positive: {radius}"
   assert len(text) == 1, f"drawn_icon can only draw 1-letter icons, not {text}"
   assert_valid_color(bg_color)
@@ -346,14 +400,11 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
     anchor=TITLE_ANCHOR)
 
   # Cost in the top left.
-  draw_icon(draw, COST_COORD, COST_RADIUS, desc.cost,
-            COST_BACKGROUND_COLOR, COST_FONT_COLOR, COST_FONT)
+  draw_icon(draw, COST_COORD, desc.cost, COST_BACKGROUND_COLOR)
 
   # Card type icon in the top right.
-  draw_icon(draw, TYPE_COORD, TYPE_RADIUS,
-            str(desc.card_type.value)[0],
-            get_card_type_dark_color(desc.card_type),
-            TYPE_FONT_COLOR, TYPE_FONT)
+  draw_icon(draw, TYPE_COORD, str(desc.card_type.value)[0],
+            get_card_type_dark_color(desc.card_type))
 
   # Card image placeholder.
   card_art = generate_card_art(desc)
@@ -383,20 +434,25 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
     spacing=BODY_TEXT_SPACING,
   )
 
+  # Draw icons
+  if desc.revenue is not None:
+    draw_icon(draw, REVENUE_COORD, desc.revenue, REVENUE_BG_COLOR,
+              LARGE_ICON_RADIUS)
+
+  if desc.health is not None:
+    draw_icon(draw, HEALTH_COORD, desc.health, HEALTH_BG_COLOR)
+
+  if desc.power is not None:
+    draw_icon(draw, POWER_COORD, desc.power, POWER_BG_COLOR)
+
+  if desc.defense is not None:
+    draw_icon(draw, DEFENSE_COORD, desc.defense, DEFENSE_BG_COLOR)
+
 
   print("Saving card:", output_path)
   img.save(output_path)
 
 
-def to_card_desc(attr:Dict[str, Any]):
-  assert set(attr.keys()) == EXPECTED_CSV_HEADER, f"{set(attr.keys())}"
-  return CardDesc(
-    card_type=CardType(attr["Card Type"]),
-    title=attr["Title"],
-    cost=attr["Cost"],
-    attributes=list(attr["Attributes"].split(",")),
-    body_text=attr["Body Text"],
-  )
 
 if __name__ == "__main__":
   if(OUTPUT_DIR.is_dir()):
