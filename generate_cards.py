@@ -469,7 +469,7 @@ if __name__ == "__main__":
   OUTPUT_DIR.mkdir(parents=True)
   with CARDS_CSV_PATH.open() as csv_file:
     for card_idx, row in enumerate(csv.DictReader(csv_file)):
-      output_path = OUTPUT_DIR.joinpath(f"card_{card_idx}.png")
+      output_path = OUTPUT_DIR.joinpath(f"card_{card_idx:03d}.png")
       card_desc = to_card_desc(row)
       pprint.pprint(card_desc)
       generate_card(card_desc, output_path)
