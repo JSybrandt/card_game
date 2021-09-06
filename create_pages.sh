@@ -7,6 +7,7 @@ if [[ ! -d img ]]; then
   exit 1
 fi
 
+rm -rf card_sheets
 mkdir -p card_sheets
 
 montage -tile 3x3 -mode concatenate img/*.png card_sheets/%d.png
