@@ -47,6 +47,7 @@ class CardType(enum.Enum):
   SPELL = "Spell"
   HOLDING = "Holding"
   UNIT = "Unit"
+  LEADER = "Leader"
 
 @dataclasses.dataclass
 class CardDesc:
@@ -139,6 +140,8 @@ BEIGE = (224, 201, 166)
 DARK_BEIGE = (163, 146, 119)
 YELLOW = (250, 193, 87)
 ORANGE = (250, 158, 87)
+LIGHT_GREY = (211,211,211)
+DARK_GREY = (192,192,192)
 
 def get_card_type_light_color(card_type:CardType):
   if card_type == CardType.SPELL:
@@ -147,6 +150,8 @@ def get_card_type_light_color(card_type:CardType):
     return BEIGE
   if card_type == CardType.UNIT:
     return LIGHT_RED
+  if card_type == CardType.LEADER:
+    return LIGHT_GREY
 
 def get_card_type_dark_color(card_type:CardType):
   if card_type == CardType.SPELL:
@@ -155,6 +160,8 @@ def get_card_type_dark_color(card_type:CardType):
     return DARK_BEIGE
   if card_type == CardType.UNIT:
     return DARK_RED
+  if card_type == CardType.LEADER:
+    return DARK_GREY
 
 # Border parameters
 BORDER_COLOR = BLACK
@@ -163,15 +170,15 @@ BORDER_WIDTH = int(CARD_MARGIN/2)
 BORDER_CORNER_RADIUS = 20
 
 # Title parameters
-TITLE_FONT = ImageFont.truetype(str(LEAGUE_GOTHIC_FONT_PATH), 60)
+TITLE_FONT = ImageFont.truetype(str(LEAGUE_GOTHIC_FONT_PATH), 50)
 TITLE_ANCHOR = "ma"  # Top Middle.
 TITLE_COORD = (int(CARD_WIDTH/2), CARD_MARGIN)
 TITLE_FONT_COLOR=BLACK
 
 # Default icon params
-STANDARD_ICON_RADIUS = int(CARD_WIDTH / 14)
-LARGE_ICON_RADIUS = STANDARD_ICON_RADIUS * 1.5
-STANDARD_ICON_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 50)
+STANDARD_ICON_RADIUS = 0.15 * PIXELS_PER_INCH
+LARGE_ICON_RADIUS = 0.2 * PIXELS_PER_INCH
+STANDARD_ICON_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 40)
 STANDARD_ICON_FONT_COLOR = WHITE
 
 # Cost parameters
@@ -433,8 +440,9 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
     )
 
   # Draw icons
-  draw_icon(draw, TYPE_COORD, str(desc.card_type.value)[0],
-            get_card_type_dark_color(desc.card_type))
+  if desc.card_type != CardType.LEADER:
+    draw_icon(draw, TYPE_COORD, str(desc.card_type.value)[0],
+              get_card_type_dark_color(desc.card_type))
   if desc.cost is not None:
     draw_icon(draw, COST_COORD, desc.cost, COST_BACKGROUND_COLOR)
   if desc.revenue is not None:

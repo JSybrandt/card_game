@@ -27,9 +27,9 @@ Unit,Horseman,2,"Military, Fire",You may use this unit as if it was not played t
 Spell,Strike to the heart,2,"Combat, Magic, Dark",Destroy target creature,,,,
 Spell,Invoke Fervor,1,"Combat, Magic, Fire",Give target unit +2 power,,,,
 Spell,Holy Chant,1,"Combat, Magic, Holy",Prevent damage dealt to target unit this turn,,,,
-Holding,"Ervest, Bandit King of Dawnset",,Leader,"Pay 2,  tap: Discard a card, then draw a card",,,,
-Holding,Banker of Bankdom,,Leader,"Pay x Gold, tap: Reduce target unit's attack by X",,,,
-Holding,"Head Priest, Shrine Dark Hearts",,Leader,"When one of your flanks or straights are destroyed, you may sacrifice a unit to draw a card. Sacrifice 6 units to make a 6/4/2 Demon",,,,
+Leader,"Ervest, Bandit King of Dawnset",,Leader,"Pay 2,  tap: Discard a card, then draw a card",,,,
+Leader,Banker of Bankdom,,Leader,"Pay x Gold, tap: Reduce target unit's attack by X",,,,
+Leader,"Head Priest, Shrine Dark Hearts",,Leader,"When one of your flanks or straights are destroyed, you may sacrifice a unit to draw a card. Sacrifice 6 units to make a 6/4/2 Demon",,,,
 Holding,Library of Crescent Hill,,Resource,"Pay 3 and a hdyro, tap: Look at the top five cards of your library. You may reveal 1 spell and place it into your hand. Shuffle the remaining cards into your deck",,,,
 Unit,Catapults,3,Military,"Tap, deal 1 damage to target unit",,1,2,2
 Unit,Ralier of the Cavelry,1,Military,Tap: Target unit may attack as if they were not played this turn,,1,1,
