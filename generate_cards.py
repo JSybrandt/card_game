@@ -14,6 +14,7 @@ import math
 import hashlib
 import colorsys
 import enum
+import pprint
 
 # Helper functions and types
 
@@ -52,7 +53,7 @@ class CardDesc:
   card_type:  CardType
   title:      str
   cost:       str
-  attributes: List[str]
+  attributes: str
   body_text:  str
   revenue:    Optional[str]
   revenue:    Optional[str]
@@ -64,8 +65,8 @@ class CardDesc:
     text = f"{self.title}{self.cost}{self.attributes}{self.body_text}"
     return hashlib.md5(text.encode("utf-8")).hexdigest()
 
-def assert_valid_attributes(attr:Dict[str, any]):
-  missing_attr = [
+def assert_valid_card_desc(fields:Dict[str, Any]):
+  missing_fields = [
     a for a in [
       "Card Type",
       "Title",
@@ -76,26 +77,27 @@ def assert_valid_attributes(attr:Dict[str, any]):
       "Power",
       "Health",
       "Defense",
-    ] if a not in attr
+    ] if a not in fields
   ]
-  assert len(missing_attr) == 0, f"Missing attributes: {missing_attr}"
+  assert len(missing_fields) == 0, f"Missing attributes: {missing_fields}"
 
-def to_card_desc(attr:Dict[str, Any]):
-  assert_valid_attributes(attr)
+def to_card_desc(fields:Dict[str, Any]):
+  assert_valid_card_desc(fields)
+  fields = {k: str(v).strip() for k, v in fields.items()}
+  fields = {k: v if len(v) > 0 else None for k, v in fields.items()}
   return CardDesc(
-    card_type=CardType(attr["Card Type"]),
-    title=attr["Title"],
-    cost=attr["Cost"],
-    attributes=list(attr["Attributes"].split(",")),
-    body_text=attr["Body Text"],
-    revenue=None if len(attr["Revenue"]) == 0 else attr["Revenue"],
-    health=None if len(attr["Health"]) == 0 else attr["Health"],
-    power=None if len(attr["Power"]) == 0 else attr["Power"],
-    defense=None if len(attr["Defense"]) == 0 else attr["Defense"],
+    card_type=CardType(fields["Card Type"]),
+    title=fields["Title"],
+    cost=fields["Cost"],
+    attributes=fields["Attributes"],
+    body_text=fields["Body Text"],
+    revenue=fields["Revenue"],
+    health=fields["Health"],
+    power=fields["Power"],
+    defense=fields["Defense"],
   )
 
 # Constants
-
 
 CARDS_CSV_PATH = pathlib.Path("./cards.csv")
 assert CARDS_CSV_PATH.is_file()
@@ -364,7 +366,7 @@ def draw_icon(
     text_color:Color=STANDARD_ICON_FONT_COLOR,
     font:ImageFont.ImageFont=STANDARD_ICON_FONT):
   assert radius > 0, f"Radius must be positive: {radius}"
-  assert len(text) == 1, f"drawn_icon can only draw 1-letter icons, not {text}"
+  assert len(text) == 1, f"drawn_icon can only draw 1-char icons, not `{text}`"
   assert_valid_color(bg_color)
   assert_valid_color(text_color)
   assert_valid_coord(center_coord)
@@ -400,52 +402,48 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
     font=TITLE_FONT,
     anchor=TITLE_ANCHOR)
 
-  # Cost in the top left.
-  draw_icon(draw, COST_COORD, desc.cost, COST_BACKGROUND_COLOR)
-
-  # Card type icon in the top right.
-  draw_icon(draw, TYPE_COORD, str(desc.card_type.value)[0],
-            get_card_type_dark_color(desc.card_type))
-
   # Card image placeholder.
   card_art = generate_card_art(desc)
   img.paste(card_art, CARD_IMAGE_BB[:2])
 
   # Card card_type text
-  draw.text(
-    ATTRIBUTE_COORD,
-    ", ".join(desc.attributes),
-    ATTRIBUTE_TEXT_COLOR,
-    font=ATTRIBUTE_FONT,
-    anchor=ATTRIBUTE_ANCHOR,
-  )
+  if desc.attributes is not None:
+    draw.text(
+      ATTRIBUTE_COORD,
+      desc.attributes,
+      ATTRIBUTE_TEXT_COLOR,
+      font=ATTRIBUTE_FONT,
+      anchor=ATTRIBUTE_ANCHOR,
+    )
 
   # Body text
   draw.rectangle(
     BODY_TEXT_BG_BB,
     fill=get_card_type_dark_color(desc.card_type))
 
-  draw.multiline_text(
-    BODY_TEXT_COORD,
-    text=wrap_body_text(desc.body_text),
-    fill=BODY_TEXT_COLOR,
-    anchor=BODY_TEXT_ANCHOR,
-    align="left",
-    font=BODY_TEXT_FONT,
-    spacing=BODY_TEXT_SPACING,
-  )
+  if desc.body_text is not None:
+    draw.multiline_text(
+      BODY_TEXT_COORD,
+      text=wrap_body_text(desc.body_text),
+      fill=BODY_TEXT_COLOR,
+      anchor=BODY_TEXT_ANCHOR,
+      align="left",
+      font=BODY_TEXT_FONT,
+      spacing=BODY_TEXT_SPACING,
+    )
 
   # Draw icons
+  draw_icon(draw, TYPE_COORD, str(desc.card_type.value)[0],
+            get_card_type_dark_color(desc.card_type))
+  if desc.cost is not None:
+    draw_icon(draw, COST_COORD, desc.cost, COST_BACKGROUND_COLOR)
   if desc.revenue is not None:
     draw_icon(draw, REVENUE_COORD, desc.revenue, REVENUE_BG_COLOR,
               LARGE_ICON_RADIUS)
-
   if desc.health is not None:
     draw_icon(draw, HEALTH_COORD, desc.health, HEALTH_BG_COLOR)
-
   if desc.power is not None:
     draw_icon(draw, POWER_COORD, desc.power, POWER_BG_COLOR)
-
   if desc.defense is not None:
     draw_icon(draw, DEFENSE_COORD, desc.defense, DEFENSE_BG_COLOR)
 
@@ -465,4 +463,5 @@ if __name__ == "__main__":
     for card_idx, row in enumerate(csv.DictReader(csv_file)):
       output_path = OUTPUT_DIR.joinpath(f"card_{card_idx}.png")
       card_desc = to_card_desc(row)
+      pprint.pprint(card_desc)
       generate_card(card_desc, output_path)
