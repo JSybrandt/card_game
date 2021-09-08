@@ -15,91 +15,9 @@ import hashlib
 import colorsys
 import enum
 import pprint
-
-# Helper functions and types
-
-Color = Tuple[int, int, int]
-
-def assert_valid_color(color:Color):
-  assert len(color) == 3, f"Invalid color: {color}"
-  assert 0 <= color[0] <= 255, f"Invalid color: {color}"
-  assert 0 <= color[1] <= 255, f"Invalid color: {color}"
-  assert 0 <= color[2] <= 255, f"Invalid color: {color}"
-
-Coord = Tuple[int, int]
-
-def assert_valid_coord(coord:Coord):
-  assert len(coord) == 2, f"Invalid coord: {coord}"
-
-BoundingBox = Tuple[int, int, int, int]
-
-def assert_valid_bb(bb: BoundingBox):
-  assert len(bb) == 4, f"Invalid bounding box: {bb}"
-  assert bb[0] <= bb[2], f"Invalid bounding box: {bb}"
-  assert bb[1] <= bb[3], f"Invalid bounding box: {bb}"
-
-def get_bb_center(bb:Tuple[int, int, int, int])->Tuple[int, int]:
-  assert_valid_bb(bb)
-  x1, y1, x2, y2 = bb
-  return int((x1 + x2) / 2), int((y1 + y2) / 2)
-
-class CardType(enum.Enum):
-  SPELL = "Spell"
-  HOLDING = "Holding"
-  UNIT = "Unit"
-  LEADER = "Leader"
-
-class Element(enum.Enum):
-  FIRE = "F"
-  WATER = "W"
-  LIGHT = "L"
-  DARK = "D"
-  NATURE = "N"
-  GENERIC = "G"
-
-@dataclasses.dataclass
-class CardDesc:
-  element: Element
-  card_type:  CardType
-  title:      str
-  cost:       str
-  attributes: str
-  body_text:  str
-  power:      Optional[str]
-  health:     Optional[str]
-
-  def hash(self):
-    return hashlib.md5(self.title.encode("utf-8")).hexdigest()
-
-def assert_valid_card_desc(fields:Dict[str, Any]):
-  missing_fields = [
-    a for a in [
-      "Element",
-      "Card Type",
-      "Title",
-      "Cost",
-      "Attributes",
-      "Body Text",
-      "Power",
-      "Health",
-    ] if a not in fields
-  ]
-  assert len(missing_fields) == 0, f"Missing attributes: {missing_fields}"
-
-def to_card_desc(fields:Dict[str, Any]):
-  assert_valid_card_desc(fields)
-  fields = {k: str(v).strip() for k, v in fields.items()}
-  fields = {k: v if len(v) > 0 else None for k, v in fields.items()}
-  return CardDesc(
-    element=Element(fields["Element"]),
-    card_type=CardType(fields["Card Type"]),
-    title=fields["Title"],
-    cost=fields["Cost"],
-    attributes=fields["Attributes"],
-    body_text=fields["Body Text"],
-    health=fields["Health"],
-    power=fields["Power"],
-  )
+import colors
+import util
+import card_art
 
 # Constants
 
@@ -128,46 +46,28 @@ CARD_HEIGHT = int(CARD_HEIGHT_INCH * PIXELS_PER_INCH)
 CARD_MARGIN = int(CARD_MARGIN_INCH * PIXELS_PER_INCH)
 CARD_PADDING = int(CARD_PADDING_INCH * PIXELS_PER_INCH)
 
-# Color pallet (r, g, b)
-BLACK = (0,0,0)
-WHITE = (255,255,255)
-RED = (255, 0, 0)
-LIGHT_RED = (250, 132, 144)
-DARK_RED = (156, 70, 70)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-LIGHT_BLUE = (114, 122, 212)
-DARK_BLUE = (77, 70, 156)
-GOLD = (218,165,32)
-BEIGE = (224, 201, 166)
-DARK_BEIGE = (163, 146, 119)
-YELLOW = (250, 193, 87)
-ORANGE = (250, 158, 87)
-LIGHT_GREY = (211,211,211)
-DARK_GREY = (192,192,192)
+def get_card_type_light_color(card_type:util.CardType):
+  if card_type == util.CardType.SPELL:
+    return colors.LIGHT_BLUE_500
+  if card_type == util.CardType.HOLDING:
+    return colors.YELLOW_500
+  if card_type == util.CardType.UNIT:
+    return colors.RED_300
+  if card_type == util.CardType.LEADER:
+    return colors.BLUE_GREY_200
 
-def get_card_type_light_color(card_type:CardType):
-  if card_type == CardType.SPELL:
-    return LIGHT_BLUE
-  if card_type == CardType.HOLDING:
-    return BEIGE
-  if card_type == CardType.UNIT:
-    return LIGHT_RED
-  if card_type == CardType.LEADER:
-    return LIGHT_GREY
-
-def get_card_type_dark_color(card_type:CardType):
-  if card_type == CardType.SPELL:
-    return DARK_BLUE
-  if card_type == CardType.HOLDING:
-    return DARK_BEIGE
-  if card_type == CardType.UNIT:
-    return DARK_RED
-  if card_type == CardType.LEADER:
-    return DARK_GREY
+def get_card_type_dark_color(card_type:util.CardType):
+  if card_type == util.CardType.SPELL:
+    return colors.INDIGO_500
+  if card_type == util.CardType.HOLDING:
+    return colors.AMBER_500
+  if card_type == util.CardType.UNIT:
+    return colors.RED_700
+  if card_type == util.CardType.LEADER:
+    return colors.GREY_500
 
 # Border parameters
-BORDER_COLOR = BLACK
+BORDER_COLOR = colors.BLACK
 BORDER_BB = [0, 0, CARD_WIDTH, CARD_HEIGHT]
 BORDER_WIDTH = int(CARD_MARGIN/2)
 BORDER_CORNER_RADIUS = 20
@@ -176,18 +76,18 @@ BORDER_CORNER_RADIUS = 20
 TITLE_FONT = ImageFont.truetype(str(LEAGUE_GOTHIC_FONT_PATH), 50)
 TITLE_ANCHOR = "ma"  # Top Middle.
 TITLE_COORD = (int(CARD_WIDTH/2), CARD_MARGIN)
-TITLE_FONT_COLOR=BLACK
+TITLE_FONT_COLOR=colors.BLACK
 
 # Default icon params
 STANDARD_ICON_RADIUS = 0.15 * PIXELS_PER_INCH
 LARGE_ICON_RADIUS = 0.2 * PIXELS_PER_INCH
 STANDARD_ICON_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 40)
-STANDARD_ICON_FONT_COLOR = WHITE
+STANDARD_ICON_FONT_COLOR = colors.WHITE
 
 # Cost parameters
 COST_COORD = (CARD_MARGIN + STANDARD_ICON_RADIUS,
               CARD_MARGIN + STANDARD_ICON_RADIUS)
-COST_BACKGROUND_COLOR = GOLD
+COST_BACKGROUND_COLOR = colors.YELLOW_700
 
 # Card Type Icon
 TYPE_COORD = (CARD_WIDTH-STANDARD_ICON_RADIUS-CARD_MARGIN,
@@ -209,14 +109,6 @@ CARD_IMAGE_BB = [
   CARD_IMAGE_BOTTOM,
 ]
 
-# Random generation parameters
-RAND_SHAPE_MIN_RADIUS =  min(CARD_IMAGE_WIDTH, CARD_IMAGE_HEIGHT) * 0.1
-RAND_SHAPE_MAX_RADIUS =  min(CARD_IMAGE_WIDTH, CARD_IMAGE_HEIGHT) * 0.3
-# We want to generate between 3 sided and 10-sided shapes.
-RAND_MIN_POINT_GEN_STEP_RADS = 2 * math.pi / 20
-RAND_MAX_POINT_GEN_STEP_RADS = 2 * math.pi / 3
-RAND_MIN_SHAPES = 10
-RAND_MAX_SHAPES = 100
 
 # Card Attributes
 ATTRIBUTE_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 25)
@@ -224,7 +116,7 @@ ATTRIBUTE_ANCHOR = "md" # middle bottom
 ATTRIBUTE_HEIGHT = CARD_HEIGHT / 20
 ATTRIBUTE_BOTTOM = CARD_IMAGE_BOTTOM + ATTRIBUTE_HEIGHT
 ATTRIBUTE_COORD = (CARD_WIDTH/2, ATTRIBUTE_BOTTOM)
-ATTRIBUTE_TEXT_COLOR = BLACK
+ATTRIBUTE_TEXT_COLOR = colors.BLACK
 
 # Body text
 BODY_TEXT_FONT = ImageFont.truetype(str(COLWELLA_FONT_PATH), 25)
@@ -236,7 +128,7 @@ BODY_TEXT_BG_BB = [
   CARD_MARGIN + CONTENT_WIDTH,
   BODY_TEXT_BG_BOTTOM,
 ]
-BODY_TEXT_COLOR = BLACK
+BODY_TEXT_COLOR = colors.BLACK
 # Estimate text size of body text
 BODY_TEXT_WIDTH = CONTENT_WIDTH - CARD_PADDING
 BODY_TEXT_HEIGHT = BODY_TEXT_BG_BOTTOM - BODY_TEXT_BG_TOP - CARD_PADDING
@@ -247,25 +139,16 @@ BODY_TEXT_ANCHOR = "la" # top left
 BODY_TEXT_SPACING = 10
 # Background uses card type dark.
 
-# Optional icons
-REVENUE_COORD = get_bb_center(BODY_TEXT_BG_BB)
-REVENUE_BG_COLOR = GOLD
-
 LOWER_ICON_Y = CARD_HEIGHT - CARD_MARGIN - CARD_PADDING - STANDARD_ICON_RADIUS
 
 POWER_COORD = (CARD_WIDTH * .25, LOWER_ICON_Y)
-POWER_BG_COLOR = ORANGE
+POWER_BG_COLOR = colors.GREY_700
 
 HEALTH_COORD = (CARD_WIDTH / 2, LOWER_ICON_Y)
-HEALTH_BG_COLOR = RED
-
-DEFENSE_COORD = (CARD_WIDTH * .75, LOWER_ICON_Y)
-DEFENSE_BG_COLOR = BLUE
-
+HEALTH_BG_COLOR = colors.RED_500
 
 
 # Layout functions
-
 
 def wrap_body_text(body_text:str)->str:
   tokens = body_text.split()
@@ -281,105 +164,19 @@ def wrap_body_text(body_text:str)->str:
   return "\n".join(lines)
 
 
-
-
-def rand_shape(x_offset: float, y_offset: float, scale:float)->List[int]:
-  """Returns the points of a shape in clockwise order centered at offset."""
-  points = []
-  angle_offset = random.random() * 2 * math.pi
-  angle = 0
-  while angle < 2*math.pi:
-    magnitude = random.uniform(
-      RAND_SHAPE_MIN_RADIUS, RAND_SHAPE_MAX_RADIUS) * scale
-    x = math.cos(angle + angle_offset) * magnitude + x_offset
-    y = math.sin(angle + angle_offset) * magnitude + y_offset
-    points.append((x, y))
-    angle += random.uniform(RAND_MIN_POINT_GEN_STEP_RADS,
-                            RAND_MAX_POINT_GEN_STEP_RADS)
-  return points
-
-@dataclasses.dataclass
-class ColorPalette:
-  # These are in 0-1
-  primary_hue: float
-  secondary_hue: float
-  alt_hues: List[float]
-
-  def primary(self)->Tuple[int, int, int]:
-    return tuple(
-      int(255*c) for c in colorsys.hsv_to_rgb(self.primary_hue, 1, 1))
-
-  def secondary(self)->Tuple[int, int, int]:
-    return tuple(
-      int(255*c) for c in colorsys.hsv_to_rgb(self.secondary_hue, 1, 1))
-
-
-def rand_color_palette()->ColorPalette:
-  primary_hue = random.random()
-  secondary_hue = (primary_hue + 0.5 + random.uniform(-0.2, 0.2)) % 1
-  alt_hues = [
-    ((primary_hue - secondary_hue)/2) % 1,
-    ((secondary_hue - primary_hue)/2) % 1,
-    random.random(), random.random(), random.random(),
-  ]
-  return ColorPalette(primary_hue, secondary_hue, alt_hues)
-
-def rand_color(palette:ColorPalette)->Tuple[int, int, int]:
-  hue = random.choices(
-    [palette.primary_hue, palette.secondary_hue] + palette.alt_hues,
-    weights=[0.5, 0.25] + [0.25/len(palette.alt_hues) for _ in palette.alt_hues]
-  )[0]
-  saturation = random.uniform(0.5, 1)
-  value = random.uniform(0, 1)
-  return tuple(int(255*c) for c in colorsys.hsv_to_rgb(hue, saturation, value))
-
-
-def generate_card_art(desc:CardDesc)->Image:
-  # Seed random number gen with deterministic hash of card description. This
-  # gives us the same image if we run the generation script twice.
-  random.seed(desc.hash())
-
-  # We generate an internal image and paste it into the card.
-  img = Image.new(mode="RGBA", size=(CARD_IMAGE_WIDTH, CARD_IMAGE_HEIGHT))
-  draw = ImageDraw.Draw(img)
-
-  draw.rectangle([0, 0, CARD_IMAGE_WIDTH, CARD_IMAGE_HEIGHT],
-                 fill=BLACK)
-
-  num_shapes = random.randint(RAND_MIN_SHAPES, RAND_MAX_SHAPES)
-  color_palette = rand_color_palette()
-  for shape_idx in range(num_shapes):
-    offset_x = random.uniform(0, CARD_IMAGE_WIDTH)
-    offset_y = random.uniform(0, CARD_IMAGE_HEIGHT)
-    shape = rand_shape(offset_x, offset_y, scale=1)
-    draw.polygon(shape, fill=rand_color(color_palette))
-  # Draw a big secondary
-  offset_x = random.uniform(CARD_IMAGE_WIDTH*0.1, CARD_IMAGE_WIDTH*0.9)
-  offset_y = random.uniform(CARD_IMAGE_HEIGHT*0.1, CARD_IMAGE_HEIGHT*0.9)
-  shape = rand_shape(offset_x, offset_y, scale=3)
-  draw.polygon(shape, fill=color_palette.secondary())
-
-  offset_x = random.uniform(CARD_IMAGE_WIDTH*0.1, CARD_IMAGE_WIDTH*0.9)
-  offset_y = random.uniform(CARD_IMAGE_HEIGHT*0.1, CARD_IMAGE_HEIGHT*0.9)
-  shape = rand_shape(offset_x, offset_y, scale=3)
-  draw.polygon(shape, fill=color_palette.primary())
-
-  return img
-
-
 def draw_icon(
     draw:ImageDraw.Draw,
-    center_coord:Coord,
+    center_coord:util.Coord,
     text:str,
-    bg_color:Color,
+    bg_color:colors.Color,
     radius:float=STANDARD_ICON_RADIUS,
-    text_color:Color=STANDARD_ICON_FONT_COLOR,
+    text_color:colors.Color=STANDARD_ICON_FONT_COLOR,
     font:ImageFont.ImageFont=STANDARD_ICON_FONT):
   assert radius > 0, f"Radius must be positive: {radius}"
   assert len(text) == 1, f"drawn_icon can only draw 1-char icons, not `{text}`"
-  assert_valid_color(bg_color)
-  assert_valid_color(text_color)
-  assert_valid_coord(center_coord)
+  colors.assert_valid_color(bg_color)
+  colors.assert_valid_color(text_color)
+  util.assert_valid_coord(center_coord)
   center_x, center_y = center_coord
   background_bb = [
     center_x - radius,
@@ -390,7 +187,7 @@ def draw_icon(
   draw.ellipse(background_bb, fill=bg_color)
   draw.text(center_coord, text, text_color, font=font, anchor="mm")
 
-def generate_card(desc:CardDesc, output_path:pathlib.Path):
+def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
   assert not output_path.exists(), f"{output_path} already exists"
   img = Image.new(mode="RGBA", size=(CARD_WIDTH, CARD_HEIGHT))
   draw = ImageDraw.Draw(img)
@@ -413,8 +210,9 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
     anchor=TITLE_ANCHOR)
 
   # Card image placeholder.
-  card_art = generate_card_art(desc)
-  img.paste(card_art, CARD_IMAGE_BB[:2])
+  art = card_art.generate_card_art(
+    desc, CARD_IMAGE_WIDTH, CARD_IMAGE_HEIGHT)
+  img.paste(art, CARD_IMAGE_BB[:2])
 
   # Card card_type text
   if desc.attributes is not None:
@@ -443,7 +241,7 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
     )
 
   # Draw icons
-  if desc.card_type != CardType.LEADER:
+  if desc.card_type != util.CardType.LEADER:
     draw_icon(draw, TYPE_COORD, str(desc.card_type.value)[0],
               get_card_type_dark_color(desc.card_type))
   if desc.cost is not None:
@@ -468,6 +266,6 @@ if __name__ == "__main__":
   with CARDS_CSV_PATH.open() as csv_file:
     for card_idx, row in enumerate(csv.DictReader(csv_file)):
       output_path = OUTPUT_DIR.joinpath(f"card_{card_idx:03d}.png")
-      card_desc = to_card_desc(row)
+      card_desc = util.to_card_desc(row)
       pprint.pprint(card_desc)
       generate_card(card_desc, output_path)
