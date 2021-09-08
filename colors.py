@@ -1,5 +1,8 @@
 from typing import *
 
+# Take a look here for all the colors:
+# https://material.io/resources/color/#!/
+
 Color = Tuple[int, int, int]
 
 def assert_valid_color(color:Color):

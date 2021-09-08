@@ -7,13 +7,6 @@ from typing import *
 import pathlib
 import shutil
 import csv
-import dataclasses
-import textwrap
-import random
-import math
-import hashlib
-import colorsys
-import enum
 import pprint
 import colors
 import util
@@ -46,52 +39,29 @@ CARD_HEIGHT = int(CARD_HEIGHT_INCH * PIXELS_PER_INCH)
 CARD_MARGIN = int(CARD_MARGIN_INCH * PIXELS_PER_INCH)
 CARD_PADDING = int(CARD_PADDING_INCH * PIXELS_PER_INCH)
 
-def get_card_type_light_color(card_type:util.CardType):
-  if card_type == util.CardType.SPELL:
-    return colors.LIGHT_BLUE_500
-  if card_type == util.CardType.HOLDING:
-    return colors.YELLOW_500
-  if card_type == util.CardType.UNIT:
-    return colors.RED_300
-  if card_type == util.CardType.LEADER:
-    return colors.BLUE_GREY_200
-
-def get_card_type_dark_color(card_type:util.CardType):
-  if card_type == util.CardType.SPELL:
-    return colors.INDIGO_500
-  if card_type == util.CardType.HOLDING:
-    return colors.AMBER_500
-  if card_type == util.CardType.UNIT:
-    return colors.RED_700
-  if card_type == util.CardType.LEADER:
-    return colors.GREY_500
+# Default icon params
+SMALL_ICON_RADIUS = int(0.15 * PIXELS_PER_INCH)
+LARGE_ICON_RADIUS = int(0.2 * PIXELS_PER_INCH)
+SMALL_ICON_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 40)
+LARGE_ICON_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 60)
+SMALL_ICON_FONT_COLOR = colors.WHITE
+LARGE_ICON_FONT_COLOR = colors.WHITE
 
 # Border parameters
-BORDER_COLOR = colors.BLACK
 BORDER_BB = [0, 0, CARD_WIDTH, CARD_HEIGHT]
 BORDER_WIDTH = int(CARD_MARGIN/2)
-BORDER_CORNER_RADIUS = 20
+BORDER_CORNER_RADIUS = 30
+
+TOP_ICON_Y = SMALL_ICON_RADIUS + CARD_MARGIN
 
 # Title parameters
 TITLE_FONT = ImageFont.truetype(str(LEAGUE_GOTHIC_FONT_PATH), 50)
-TITLE_ANCHOR = "ma"  # Top Middle.
-TITLE_COORD = (int(CARD_WIDTH/2), CARD_MARGIN)
+TITLE_ANCHOR = "mm"  # Middle Middle.
+TITLE_COORD = (int(CARD_WIDTH/2), TOP_ICON_Y)
 TITLE_FONT_COLOR=colors.BLACK
 
-# Default icon params
-STANDARD_ICON_RADIUS = 0.15 * PIXELS_PER_INCH
-LARGE_ICON_RADIUS = 0.2 * PIXELS_PER_INCH
-STANDARD_ICON_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 40)
-STANDARD_ICON_FONT_COLOR = colors.WHITE
-
 # Cost parameters
-COST_COORD = (CARD_MARGIN + STANDARD_ICON_RADIUS,
-              CARD_MARGIN + STANDARD_ICON_RADIUS)
-COST_BACKGROUND_COLOR = colors.YELLOW_700
-
-# Card Type Icon
-TYPE_COORD = (CARD_WIDTH-STANDARD_ICON_RADIUS-CARD_MARGIN,
-              CARD_MARGIN+STANDARD_ICON_RADIUS)
+COST_COORD = (CARD_MARGIN + SMALL_ICON_RADIUS, TOP_ICON_Y)
 
 # Describes the max width of card contents
 CONTENT_WIDTH = CARD_WIDTH - 2*CARD_MARGIN
@@ -100,7 +70,7 @@ CONTENT_WIDTH = CARD_WIDTH - 2*CARD_MARGIN
 # Width and height of card image
 CARD_IMAGE_WIDTH = CONTENT_WIDTH
 CARD_IMAGE_HEIGHT = int(CARD_HEIGHT * 0.4)
-CARD_IMAGE_TOP = int(CARD_HEIGHT / 7)
+CARD_IMAGE_TOP = TOP_ICON_Y + SMALL_ICON_RADIUS + CARD_PADDING
 CARD_IMAGE_BOTTOM = CARD_IMAGE_TOP + CARD_IMAGE_HEIGHT
 CARD_IMAGE_BB = [
   CARD_MARGIN,
@@ -121,14 +91,16 @@ ATTRIBUTE_TEXT_COLOR = colors.BLACK
 # Body text
 BODY_TEXT_FONT = ImageFont.truetype(str(COLWELLA_FONT_PATH), 25)
 BODY_TEXT_BG_TOP = ATTRIBUTE_BOTTOM + CARD_PADDING
-BODY_TEXT_BG_BOTTOM = CARD_HEIGHT - CARD_MARGIN - CARD_PADDING
+BODY_TEXT_BG_BOTTOM = CARD_HEIGHT - LARGE_ICON_RADIUS - CARD_MARGIN
 BODY_TEXT_BG_BB = [
   CARD_MARGIN,
   BODY_TEXT_BG_TOP,
   CARD_MARGIN + CONTENT_WIDTH,
   BODY_TEXT_BG_BOTTOM,
 ]
+BODY_TEXT_BG_RADIUS = 10
 BODY_TEXT_COLOR = colors.BLACK
+BODY_TEXT_BG_COLOR = colors.BROWN_100
 # Estimate text size of body text
 BODY_TEXT_WIDTH = CONTENT_WIDTH - CARD_PADDING
 BODY_TEXT_HEIGHT = BODY_TEXT_BG_BOTTOM - BODY_TEXT_BG_TOP - CARD_PADDING
@@ -139,13 +111,15 @@ BODY_TEXT_ANCHOR = "la" # top left
 BODY_TEXT_SPACING = 10
 # Background uses card type dark.
 
-LOWER_ICON_Y = CARD_HEIGHT - CARD_MARGIN - CARD_PADDING - STANDARD_ICON_RADIUS
+BOTTOM_ICON_Y = CARD_HEIGHT - LARGE_ICON_RADIUS - CARD_MARGIN
 
-POWER_COORD = (CARD_WIDTH * .25, LOWER_ICON_Y)
-POWER_BG_COLOR = colors.GREY_700
+POWER_COORD = (CARD_WIDTH * 0.25, BOTTOM_ICON_Y)
+POWER_BG_COLOR = colors.BLUE_GREY_800
 
-HEALTH_COORD = (CARD_WIDTH / 2, LOWER_ICON_Y)
-HEALTH_BG_COLOR = colors.RED_500
+HEALTH_COORD = (CARD_WIDTH * 0.75, BOTTOM_ICON_Y)
+HEALTH_BG_COLOR = colors.RED_A400
+
+MANA_COORD = (CARD_WIDTH/2, BOTTOM_ICON_Y)
 
 
 # Layout functions
@@ -169,9 +143,9 @@ def draw_icon(
     center_coord:util.Coord,
     text:str,
     bg_color:colors.Color,
-    radius:float=STANDARD_ICON_RADIUS,
-    text_color:colors.Color=STANDARD_ICON_FONT_COLOR,
-    font:ImageFont.ImageFont=STANDARD_ICON_FONT):
+    radius:float,
+    text_color:colors.Color,
+    font:ImageFont.ImageFont):
   assert radius > 0, f"Radius must be positive: {radius}"
   assert len(text) == 1, f"drawn_icon can only draw 1-char icons, not `{text}`"
   colors.assert_valid_color(bg_color)
@@ -195,10 +169,10 @@ def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
   # Border + background
   draw.rounded_rectangle(
     BORDER_BB,
-    outline=BORDER_COLOR,
+    outline=desc.element.get_dark_color(),
     width=BORDER_WIDTH,
     radius=BORDER_CORNER_RADIUS,
-    fill=get_card_type_light_color(desc.card_type),
+    fill=desc.element.get_light_color(),
   )
 
   # Title, center text at top of card.
@@ -218,16 +192,17 @@ def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
   if desc.attributes is not None:
     draw.text(
       ATTRIBUTE_COORD,
-      desc.attributes,
+      f"{desc.card_type.value}— {desc.attributes}",
       ATTRIBUTE_TEXT_COLOR,
       font=ATTRIBUTE_FONT,
       anchor=ATTRIBUTE_ANCHOR,
     )
 
   # Body text
-  draw.rectangle(
+  draw.rounded_rectangle(
     BODY_TEXT_BG_BB,
-    fill=get_card_type_dark_color(desc.card_type))
+    radius=BODY_TEXT_BG_RADIUS,
+    fill=BODY_TEXT_BG_COLOR)
 
   if desc.body_text is not None:
     draw.multiline_text(
@@ -241,15 +216,18 @@ def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
     )
 
   # Draw icons
-  if desc.card_type != util.CardType.LEADER:
-    draw_icon(draw, TYPE_COORD, str(desc.card_type.value)[0],
-              get_card_type_dark_color(desc.card_type))
   if desc.cost is not None:
-    draw_icon(draw, COST_COORD, desc.cost, COST_BACKGROUND_COLOR)
+    draw_icon(draw, COST_COORD, desc.cost, desc.element.get_dark_color(),
+              SMALL_ICON_RADIUS, SMALL_ICON_FONT_COLOR, SMALL_ICON_FONT)
   if desc.health is not None:
-    draw_icon(draw, HEALTH_COORD, desc.health, HEALTH_BG_COLOR)
+    draw_icon(draw, HEALTH_COORD, desc.health, HEALTH_BG_COLOR,
+              LARGE_ICON_RADIUS, LARGE_ICON_FONT_COLOR, LARGE_ICON_FONT)
   if desc.power is not None:
-    draw_icon(draw, POWER_COORD, desc.power, POWER_BG_COLOR)
+    draw_icon(draw, POWER_COORD, desc.power, POWER_BG_COLOR, LARGE_ICON_RADIUS,
+              LARGE_ICON_FONT_COLOR, LARGE_ICON_FONT)
+  if desc.card_type == util.CardType.HOLDING:
+    draw_icon(draw, MANA_COORD, "1", desc.element.get_primary_color(),
+               LARGE_ICON_RADIUS, colors.BLACK, LARGE_ICON_FONT)
 
 
   print("Saving card:", output_path)

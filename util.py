@@ -2,6 +2,7 @@ from typing import *
 import enum
 import dataclasses
 import hashlib
+import colors
 
 Coord = Tuple[int, int]
 
@@ -33,6 +34,49 @@ class Element(enum.Enum):
   DARK = "D"
   NATURE = "N"
   GENERIC = "G"
+
+  def get_primary_color(self)->colors.Color:
+    if self == Element.FIRE:
+      return colors.RED_500
+    if self == Element.WATER:
+      return colors.BLUE_500
+    if self == Element.LIGHT:
+      return colors.YELLOW_500
+    if self == Element.DARK:
+      return colors.PURPLE_500
+    if self == Element.NATURE:
+      return colors.GREEN_500
+    if self == Element.GENERIC:
+      return colors.GREY_400
+
+  def get_light_color(self)->colors.Color:
+    if self == Element.FIRE:
+      return colors.RED_200
+    if self == Element.WATER:
+      return colors.BLUE_200
+    if self == Element.LIGHT:
+      return colors.YELLOW_200
+    if self == Element.DARK:
+      return colors.PURPLE_200
+    if self == Element.NATURE:
+      return colors.GREEN_200
+    if self == Element.GENERIC:
+      return colors.GREY_200
+
+  def get_dark_color(self)->colors.Color:
+    if self == Element.FIRE:
+      return colors.RED_900
+    if self == Element.WATER:
+      return colors.BLUE_900
+    if self == Element.LIGHT:
+      return colors.YELLOW_900
+    if self == Element.DARK:
+      return colors.PURPLE_900
+    if self == Element.NATURE:
+      return colors.GREEN_900
+    if self == Element.GENERIC:
+      return colors.GREY_600
+
 
 @dataclasses.dataclass
 class CardDesc:
