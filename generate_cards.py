@@ -49,35 +49,39 @@ class CardType(enum.Enum):
   UNIT = "Unit"
   LEADER = "Leader"
 
+class Element(enum.Enum):
+  FIRE = "F"
+  WATER = "W"
+  LIGHT = "L"
+  DARK = "D"
+  NATURE = "N"
+  GENERIC = "G"
+
 @dataclasses.dataclass
 class CardDesc:
+  element: Element
   card_type:  CardType
   title:      str
   cost:       str
   attributes: str
   body_text:  str
-  revenue:    Optional[str]
-  revenue:    Optional[str]
   power:      Optional[str]
   health:     Optional[str]
-  defense:    Optional[str]
 
   def hash(self):
-    text = f"{self.title}{self.cost}{self.attributes}{self.body_text}"
-    return hashlib.md5(text.encode("utf-8")).hexdigest()
+    return hashlib.md5(self.title.encode("utf-8")).hexdigest()
 
 def assert_valid_card_desc(fields:Dict[str, Any]):
   missing_fields = [
     a for a in [
+      "Element",
       "Card Type",
       "Title",
       "Cost",
       "Attributes",
       "Body Text",
-      "Revenue",
       "Power",
       "Health",
-      "Defense",
     ] if a not in fields
   ]
   assert len(missing_fields) == 0, f"Missing attributes: {missing_fields}"
@@ -87,15 +91,14 @@ def to_card_desc(fields:Dict[str, Any]):
   fields = {k: str(v).strip() for k, v in fields.items()}
   fields = {k: v if len(v) > 0 else None for k, v in fields.items()}
   return CardDesc(
+    element=Element(fields["Element"]),
     card_type=CardType(fields["Card Type"]),
     title=fields["Title"],
     cost=fields["Cost"],
     attributes=fields["Attributes"],
     body_text=fields["Body Text"],
-    revenue=fields["Revenue"],
     health=fields["Health"],
     power=fields["Power"],
-    defense=fields["Defense"],
   )
 
 # Constants
@@ -445,15 +448,10 @@ def generate_card(desc:CardDesc, output_path:pathlib.Path):
               get_card_type_dark_color(desc.card_type))
   if desc.cost is not None:
     draw_icon(draw, COST_COORD, desc.cost, COST_BACKGROUND_COLOR)
-  if desc.revenue is not None:
-    draw_icon(draw, REVENUE_COORD, desc.revenue, REVENUE_BG_COLOR,
-              LARGE_ICON_RADIUS)
   if desc.health is not None:
     draw_icon(draw, HEALTH_COORD, desc.health, HEALTH_BG_COLOR)
   if desc.power is not None:
     draw_icon(draw, POWER_COORD, desc.power, POWER_BG_COLOR)
-  if desc.defense is not None:
-    draw_icon(draw, DEFENSE_COORD, desc.defense, DEFENSE_BG_COLOR)
 
 
   print("Saving card:", output_path)
