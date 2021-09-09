@@ -1,2 +1,2 @@
 Element,Card Type,Title,Cost,Attributes,Body Text,Power,Health
-G,Unit,Testy Mc. Testface,2,Military,<ACTION> (4B) <EXHAUST> : Draw a card. <ACTION> <COMBAT> (2D) <EXHAUST> : Deal 2 damage to target unit. Then do some extra targeting to make this line wrap. <ACTION> <RANGED> (3D) <EXHAUST> : Deal 3 damage to target unit.,2,3
+G,Unit,Testy Mc. Testface,2,Military,<ACTION> <4W> <EXHAUST> : Draw a card. <ACTION> <COMBAT> <2D> <EXHAUST> : Deal 2 damage to target unit. Then do some extra targeting to make this line wrap. <ACTION> <RANGED> <3D> <EXHAUST> : Deal 3 damage to target unit.,2,3

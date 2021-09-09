@@ -16,3 +16,4 @@ def draw_circle_with_text(draw:ImageDraw.Draw, center:util.Coord,
   icon_bb = util.get_centered_bb(center, side, side)
   draw.ellipse(icon_bb, fill=background_color)
   draw.text(center, text, font_color, anchor="mm", font=font)
+

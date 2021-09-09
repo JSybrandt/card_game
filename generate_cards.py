@@ -95,7 +95,6 @@ ATTRIBUTE_COORD = (CARD_WIDTH/2, ATTRIBUTE_BOTTOM)
 ATTRIBUTE_TEXT_COLOR = colors.BLACK
 
 # Body text
-BODY_TEXT_FONT = ImageFont.truetype(str(GARAMOND_MATH_FONT_PATH), 25)
 BODY_TEXT_BG_BB = [
   CARD_MARGIN,
   ATTRIBUTE_BOTTOM + CARD_PADDING,
@@ -154,7 +153,7 @@ def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
       anchor=ATTRIBUTE_ANCHOR,
     )
 
-  body_text.draw_body_text(draw, desc.body_text, BODY_TEXT_BG_BB, BODY_TEXT_FONT)
+  body_text.draw_body_text(draw, desc.body_text, BODY_TEXT_BG_BB)
 
   # Draw icons
   if desc.cost is not None:
