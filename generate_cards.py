@@ -12,6 +12,7 @@ import colors
 import util
 import card_art
 import icons
+import body_text
 
 # Constants
 
@@ -95,26 +96,12 @@ ATTRIBUTE_TEXT_COLOR = colors.BLACK
 
 # Body text
 BODY_TEXT_FONT = ImageFont.truetype(str(GARAMOND_MATH_FONT_PATH), 25)
-BODY_TEXT_BG_TOP = ATTRIBUTE_BOTTOM + CARD_PADDING
-BODY_TEXT_BG_BOTTOM = CARD_HEIGHT - int(LARGE_ICON_HEIGHT / 2) - CARD_MARGIN
 BODY_TEXT_BG_BB = [
   CARD_MARGIN,
-  BODY_TEXT_BG_TOP,
+  ATTRIBUTE_BOTTOM + CARD_PADDING,
   CARD_MARGIN + CONTENT_WIDTH,
-  BODY_TEXT_BG_BOTTOM,
+  CARD_HEIGHT - int(LARGE_ICON_HEIGHT / 2) - CARD_MARGIN,
 ]
-BODY_TEXT_BG_RADIUS = 10
-BODY_TEXT_COLOR = colors.BLACK
-BODY_TEXT_BG_COLOR = colors.BROWN_100
-# Estimate text size of body text
-BODY_TEXT_WIDTH = CONTENT_WIDTH - CARD_PADDING
-BODY_TEXT_HEIGHT = BODY_TEXT_BG_BOTTOM - BODY_TEXT_BG_TOP - CARD_PADDING
-BODY_TEXT_COORD = (int(CARD_MARGIN + CARD_PADDING * 3 / 2),
-                   int(BODY_TEXT_BG_TOP + CARD_PADDING / 2))
-BODY_TEXT_ANCHOR = "la" # top left
-# Number of pixels between lines.
-BODY_TEXT_SPACING = 10
-# Background uses card type dark.
 
 BOTTOM_ICON_Y = CARD_HEIGHT - int(LARGE_ICON_HEIGHT / 2) - CARD_MARGIN
 
@@ -128,31 +115,6 @@ MANA_COORD = (CARD_WIDTH/2, BOTTOM_ICON_Y)
 
 
 # Layout functions
-
-def clean_body_text(text:str)->str:
-  text = text.replace("<ACTION>", "\n•")
-  # These are pulled from the wikipedia on unicode math symbols
-  text = text.replace("<ANY>", "")
-  text = text.replace("<HOLDING>", "\U0000201d")
-  text = text.replace("<RECRUIT>", "\U0000211d")
-  text = text.replace("<COMBAT>", "\U00002102")
-  text = text.replace("<RANGED>", "\U000021e2")
-  text = text.replace("<EXHAUST>", "\U000021a9")
-  text = text.strip()
-  return text
-
-def wrap_body_text(body_text:str)->str:
-  literal_lines = []
-  for logical_line in clean_body_text(body_text).split("\n"):
-    working_text = []
-    for token in logical_line.split():
-      if BODY_TEXT_FONT.getsize(
-        " ".join(working_text + [token]))[0] > BODY_TEXT_WIDTH:
-        literal_lines.append(" ".join(working_text))
-        working_text = []
-      working_text.append(token)
-    literal_lines.append(" ".join(working_text))
-  return "\n".join(literal_lines)
 
 
 def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
@@ -192,22 +154,7 @@ def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
       anchor=ATTRIBUTE_ANCHOR,
     )
 
-  # Body text
-  draw.rounded_rectangle(
-    BODY_TEXT_BG_BB,
-    radius=BODY_TEXT_BG_RADIUS,
-    fill=BODY_TEXT_BG_COLOR)
-
-  if desc.body_text is not None:
-    draw.multiline_text(
-      BODY_TEXT_COORD,
-      text=wrap_body_text(desc.body_text),
-      fill=BODY_TEXT_COLOR,
-      anchor=BODY_TEXT_ANCHOR,
-      align="left",
-      font=BODY_TEXT_FONT,
-      spacing=BODY_TEXT_SPACING,
-    )
+  body_text.draw_body_text(draw, desc.body_text, BODY_TEXT_BG_BB, BODY_TEXT_FONT)
 
   # Draw icons
   if desc.cost is not None:
