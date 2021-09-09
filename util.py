@@ -16,10 +16,15 @@ def assert_valid_bb(bb: BoundingBox):
   assert bb[0] <= bb[2], f"Invalid bounding box: {bb}"
   assert bb[1] <= bb[3], f"Invalid bounding box: {bb}"
 
-def get_bb_center(bb:Tuple[int, int, int, int])->Tuple[int, int]:
+def get_bb_center(bb:BoundingBox)->Coord:
   assert_valid_bb(bb)
   x1, y1, x2, y2 = bb
   return int((x1 + x2) / 2), int((y1 + y2) / 2)
+
+def get_centered_bb(center:Coord, width:int, height:int)->BoundingBox:
+  x, y = center
+  return [int(x - width / 2), int(y - height / 2),
+          int(x + width / 2), int(y + height / 2)]
 
 class CardType(enum.Enum):
   SPELL = "Spell"
