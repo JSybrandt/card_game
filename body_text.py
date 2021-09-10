@@ -71,7 +71,9 @@ class TextToken(Token):
   def is_token(cls, text:str)->bool:
     return text[0] != "<" and text[-1] != ">"
 
-MANA_ICON_WIDTH = MANA_ICON_HEIGHT = int(TEXT_HEIGHT * 0.9)
+ICON_WIDTH = TEXT_HEIGHT
+
+MANA_ICON_HEIGHT = ICON_WIDTH
 MANA_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH), int(util.PIXELS_PER_INCH * 0.08))
 MANA_ICON_FONT_COLOR = colors.WHITE
 MANA_ICON_REGEX = "<(.+)([FWDLNG])>"
@@ -84,25 +86,22 @@ class ManaToken(Token):
     self.element = util.Element(mana_match.group(2))
 
   def render(self,im:Image,  draw:ImageDraw.Draw, cursor_x:int, cursor_y:int):
-    center = cursor_x + int(MANA_ICON_WIDTH / 2), cursor_y
+    center = cursor_x + int(ICON_WIDTH / 2), cursor_y
     icons.draw_circle_with_text(
-      draw, center, MANA_ICON_WIDTH, MANA_ICON_HEIGHT, self.icon_text,
+      draw, center, ICON_WIDTH, MANA_ICON_HEIGHT, self.icon_text,
       MANA_ICON_FONT, MANA_ICON_FONT_COLOR, self.element.get_dark_color())
 
   def width(self):
-    return MANA_ICON_WIDTH
+    return ICON_WIDTH
 
   @classmethod
   def is_token(cls, text:str)->bool:
     return bool(re.match(MANA_ICON_REGEX, text))
 
 
-ACTION_ICON_WIDTH = int(util.PIXELS_PER_INCH * 0.075)
-ACTION_ICON_COLOR = colors.BLACK
-
 ACTION_TYPES = {
-  "<HOLDING_ACTION>": util.ICON_DIR.joinpath("any_action.png"),
-  "<RECRUIT_ACTION>": util.ICON_DIR.joinpath("any_action.png"),
+  "<HOLDING_ACTION>": util.ICON_DIR.joinpath("holding_action.png"),
+  "<RECRUIT_ACTION>": util.ICON_DIR.joinpath("recruit_action.png"),
   "<COMBAT_ACTION>": util.ICON_DIR.joinpath("any_action.png"),
   "<RANGED_ACTION>": util.ICON_DIR.joinpath("any_action.png"),
   "<ANY_ACTION>": util.ICON_DIR.joinpath("any_action.png"),
@@ -122,19 +121,40 @@ class ActionToken(Token):
 
   def render(self, im:Image, draw:ImageDraw.Draw, cursor_x:int, cursor_y:int):
     bb = [cursor_x, cursor_y - int(TEXT_HEIGHT / 2),
-          cursor_x + ACTION_ICON_WIDTH,
+          cursor_x + ICON_WIDTH,
           cursor_y + int(TEXT_HEIGHT/2)
           ]
     with Image.open(self.icon_path) as icon:
-      icon = icon.convert("RGBA").resize((ACTION_ICON_WIDTH, TEXT_HEIGHT))
+      icon = icon.convert("RGBA").resize((ICON_WIDTH, TEXT_HEIGHT))
       im.paste(icon, bb, icon)
 
   def width(self):
-    return ACTION_ICON_WIDTH
+    return ICON_WIDTH
 
   @classmethod
   def is_token(cls, text:str)->bool:
     return text in ACTION_TYPES
+
+EXHAUST_ICON_PATH = util.ICON_DIR.joinpath("exhaust.png")
+class ExhaustToken(Token):
+  def __init__(self, text:str):
+    super().__init__(text)
+
+  def render(self, im:Image, draw:ImageDraw.Draw, cursor_x:int, cursor_y:int):
+    bb = [cursor_x, cursor_y - int(TEXT_HEIGHT / 2),
+          cursor_x + ICON_WIDTH,
+          cursor_y + int(TEXT_HEIGHT/2)
+          ]
+    with Image.open(EXHAUST_ICON_PATH) as icon:
+      icon = icon.convert("RGBA").resize((ICON_WIDTH, TEXT_HEIGHT))
+      im.paste(icon, bb, icon)
+
+  def width(self):
+    return ICON_WIDTH
+
+  @classmethod
+  def is_token(cls, text:str)->bool:
+    return text == "<EXHAUST>"
 
 
 class BodyTextWriter():
@@ -202,6 +222,8 @@ class BodyTextWriter():
       return Newline(text)
     if EndCost.is_token(text):
       return EndCost(text)
+    if ExhaustToken.is_token(text):
+      return ExhaustToken(text)
     if ActionToken.is_token(text):
       return ActionToken(text)
     if ManaToken.is_token(text):
