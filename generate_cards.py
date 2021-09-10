@@ -20,36 +20,24 @@ CARDS_CSV_PATH = pathlib.Path("./cards.csv")
 assert CARDS_CSV_PATH.is_file()
 OUTPUT_DIR= pathlib.Path("./img")
 assert OUTPUT_DIR.is_dir() or not OUTPUT_DIR.exists()
-FONT_DIR= pathlib.Path("./fonts")
-assert FONT_DIR.is_dir()
-LEAGUE_GOTHIC_FONT_PATH = FONT_DIR.joinpath("LeagueGothic-Regular.otf")
-assert LEAGUE_GOTHIC_FONT_PATH.is_file()
-LATO_FONT_PATH = FONT_DIR.joinpath("Lato-Regular.ttf")
-assert LATO_FONT_PATH.is_file()
-COLWELLA_FONT_PATH = FONT_DIR.joinpath("Colwella.ttf")
-assert COLWELLA_FONT_PATH.is_file()
-EB_GARAMOND_FONT_PATH = FONT_DIR.joinpath("EBGaramond-VariableFont_wght.ttf")
-assert EB_GARAMOND_FONT_PATH.is_file()
-GARAMOND_MATH_FONT_PATH = FONT_DIR.joinpath("Garamond-Math.otf")
-assert GARAMOND_MATH_FONT_PATH.is_file()
+
 
 # Card size in inches.
 CARD_WIDTH_INCH = 2.5
 CARD_HEIGHT_INCH = 3.5
 CARD_MARGIN_INCH = 0.1
 CARD_PADDING_INCH = 0.025
-PIXELS_PER_INCH = 200
 # Unless specified, all sizes are in pixels.
-CARD_WIDTH = int(CARD_WIDTH_INCH * PIXELS_PER_INCH)
-CARD_HEIGHT = int(CARD_HEIGHT_INCH * PIXELS_PER_INCH)
-CARD_MARGIN = int(CARD_MARGIN_INCH * PIXELS_PER_INCH)
-CARD_PADDING = int(CARD_PADDING_INCH * PIXELS_PER_INCH)
+CARD_WIDTH = int(CARD_WIDTH_INCH * util.PIXELS_PER_INCH)
+CARD_HEIGHT = int(CARD_HEIGHT_INCH * util.PIXELS_PER_INCH)
+CARD_MARGIN = int(CARD_MARGIN_INCH * util.PIXELS_PER_INCH)
+CARD_PADDING = int(CARD_PADDING_INCH * util.PIXELS_PER_INCH)
 
 # Default icon params
-SMALL_ICON_HEIGHT = SMALL_ICON_WIDTH = int(0.3*PIXELS_PER_INCH)
-LARGE_ICON_HEIGHT = LARGE_ICON_WIDTH = int(0.4*PIXELS_PER_INCH)
-SMALL_ICON_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 40)
-LARGE_ICON_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 60)
+SMALL_ICON_HEIGHT = SMALL_ICON_WIDTH = int(0.3*util.PIXELS_PER_INCH)
+LARGE_ICON_HEIGHT = LARGE_ICON_WIDTH = int(0.4*util.PIXELS_PER_INCH)
+SMALL_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH), int(util.PIXELS_PER_INCH * 0.2))
+LARGE_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH), int(util.PIXELS_PER_INCH * 0.3))
 SMALL_ICON_FONT_COLOR = colors.WHITE
 LARGE_ICON_FONT_COLOR = colors.WHITE
 
@@ -61,7 +49,7 @@ BORDER_CORNER_RADIUS = 30
 TOP_ICON_Y = int(SMALL_ICON_HEIGHT / 2) + CARD_MARGIN
 
 # Title parameters
-TITLE_FONT = ImageFont.truetype(str(LEAGUE_GOTHIC_FONT_PATH), 50)
+TITLE_FONT = ImageFont.truetype(str(util.LEAGUE_GOTHIC_FONT_PATH), int(util.PIXELS_PER_INCH * 0.25))
 TITLE_ANCHOR = "mm"  # Middle Middle.
 TITLE_COORD = (int(CARD_WIDTH/2), TOP_ICON_Y)
 TITLE_FONT_COLOR=colors.BLACK
@@ -87,7 +75,7 @@ CARD_IMAGE_BB = [
 
 
 # Card Attributes
-ATTRIBUTE_FONT = ImageFont.truetype(str(LATO_FONT_PATH), 25)
+ATTRIBUTE_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH), int(util.PIXELS_PER_INCH * 0.125))
 ATTRIBUTE_ANCHOR = "md" # middle bottom
 ATTRIBUTE_HEIGHT = int(CARD_HEIGHT / 20)
 ATTRIBUTE_BOTTOM = CARD_IMAGE_BOTTOM + ATTRIBUTE_HEIGHT
@@ -118,8 +106,8 @@ MANA_COORD = (CARD_WIDTH/2, BOTTOM_ICON_Y)
 
 def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
   assert not output_path.exists(), f"{output_path} already exists"
-  img = Image.new(mode="RGBA", size=(CARD_WIDTH, CARD_HEIGHT))
-  draw = ImageDraw.Draw(img)
+  im = Image.new(mode="RGBA", size=(CARD_WIDTH, CARD_HEIGHT))
+  draw = ImageDraw.Draw(im)
 
   # Border + background
   draw.rounded_rectangle(
@@ -141,7 +129,7 @@ def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
   # Card image placeholder.
   art = card_art.generate_card_art(
     desc, CARD_IMAGE_WIDTH, CARD_IMAGE_HEIGHT)
-  img.paste(art, CARD_IMAGE_BB[:2])
+  im.paste(art, CARD_IMAGE_BB[:2])
 
   # Card card_type text
   if desc.attributes is not None:
@@ -153,7 +141,7 @@ def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
       anchor=ATTRIBUTE_ANCHOR,
     )
 
-  body_text.render_body_text(draw, desc.body_text, BODY_TEXT_BG_BB)
+  body_text.render_body_text(im, draw, desc.body_text, BODY_TEXT_BG_BB)
 
   # Draw icons
   if desc.cost is not None:
@@ -175,7 +163,7 @@ def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
 
 
   print("Saving card:", output_path)
-  img.save(output_path)
+  im.save(output_path)
 
 
 

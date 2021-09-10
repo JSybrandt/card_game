@@ -3,6 +3,26 @@ import enum
 import dataclasses
 import hashlib
 import colors
+import pathlib
+
+PIXELS_PER_INCH = 600
+
+FONT_DIR= pathlib.Path("./fonts")
+assert FONT_DIR.is_dir()
+LEAGUE_GOTHIC_FONT_PATH = FONT_DIR.joinpath("LeagueGothic-Regular.otf")
+assert LEAGUE_GOTHIC_FONT_PATH.is_file()
+LATO_FONT_PATH = FONT_DIR.joinpath("Lato-Regular.ttf")
+assert LATO_FONT_PATH.is_file()
+COLWELLA_FONT_PATH = FONT_DIR.joinpath("Colwella.ttf")
+assert COLWELLA_FONT_PATH.is_file()
+EB_GARAMOND_FONT_PATH = FONT_DIR.joinpath("EBGaramond-VariableFont_wght.ttf")
+assert EB_GARAMOND_FONT_PATH.is_file()
+GARAMOND_MATH_FONT_PATH = FONT_DIR.joinpath("Garamond-Math.otf")
+assert GARAMOND_MATH_FONT_PATH.is_file()
+
+ICON_DIR= pathlib.Path("./icons")
+assert ICON_DIR.is_dir()
+
 
 Coord = Tuple[int, int]
 
