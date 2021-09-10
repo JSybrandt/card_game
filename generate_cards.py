@@ -153,7 +153,7 @@ def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
       anchor=ATTRIBUTE_ANCHOR,
     )
 
-  body_text.draw_body_text(draw, desc.body_text, BODY_TEXT_BG_BB)
+  body_text.render_body_text(draw, desc.body_text, BODY_TEXT_BG_BB)
 
   # Draw icons
   if desc.cost is not None:
