@@ -125,15 +125,64 @@ def render_card_art(im:Image, draw:ImageDraw.Draw, desc:util.CardDesc, image_bb:
                       max_saturation, min_value, max_value))
   im.paste(art_image, image_bb, art_image)
 
+def _get_random_coords(low:int, high:int, avg_step:int, variance:float)->List[int]:
+  step_low = avg_step - int(avg_step * variance)
+  step_high= avg_step + int(avg_step * variance)
+  cords = []
+  x = low
+  while x < high:
+    cords.append(x)
+    x += int(random.uniform(step_low, step_high))
+  cords.append(high)
+  return cords
+
+
 
 BORDER_WIDTH = int(0.05 * util.PIXELS_PER_INCH)
-BORDER_CORNER_RADIUS = int(0.15 * util.PIXELS_PER_INCH)
+BORDER_CORNER_RADIUS = int(0.2 * util.PIXELS_PER_INCH)
+BG_PATTERN_SIZE = int(0.25 * util.PIXELS_PER_INCH)
 def render_background(im:Image, draw:ImageDraw.Draw, desc:util.CardDesc, image_bb:util.BoundingBox)->Image:
-  # Border + background
+  color_palette = rand_color_palette(desc.element)
+  left, top, right, bottom = image_bb
+  # # Border + background
+  # draw.rounded_rectangle(
+    # image_bb,
+    # outline=desc.element.get_dark_color(),
+    # width=BORDER_WIDTH,
+    # radius=BORDER_CORNER_RADIUS,
+    # fill=desc.element.get_light_color(),
+  # )
+
+  # Generate a triangle mesh
+  bg_left = left - BG_PATTERN_SIZE 
+  bg_right = right + BG_PATTERN_SIZE 
+  bg_top = top - BG_PATTERN_SIZE 
+  bg_bottom = bottom + BG_PATTERN_SIZE 
+
+  x_cords = _get_random_coords(bg_left, bg_right, BG_PATTERN_SIZE, 0.2)
+  y_cords = _get_random_coords(bg_top, bg_bottom, BG_PATTERN_SIZE, 0.2)
+
+  for x, _ in enumerate(x_cords):
+    this_offset = 0 if x % 2 == 0 else int(BG_PATTERN_SIZE / 2)
+    next_offset = 0 if x % 2 == 0 else int(BG_PATTERN_SIZE / 2)
+    for y, _ in enumerate(y_cords):
+      if x + 1 < len(x_cords) and y + 1 < len(y_cords):
+        square = [
+          (x_cords[x], y_cords[y]+this_offset),
+          (x_cords[x+1], y_cords[y]+next_offset),
+          (x_cords[x+1], y_cords[y+1]+next_offset),
+          (x_cords[x], y_cords[y+1]+this_offset),
+        ]
+        draw.polygon(
+          square, fill=rand_color(color_palette.primary_hue, max_saturation=0.2, min_saturation=0.1, min_value=0.95))
   draw.rounded_rectangle(
     image_bb,
     outline=desc.element.get_dark_color(),
     width=BORDER_WIDTH,
     radius=BORDER_CORNER_RADIUS,
-    fill=desc.element.get_light_color(),
   )
+
+
+
+
+
