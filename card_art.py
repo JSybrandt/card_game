@@ -171,6 +171,8 @@ def render_background(im:Image, draw:ImageDraw.Draw, desc:util.CardDesc, image_b
 
   x_cords = _get_random_coords(bg_left, bg_right, BG_PATTERN_SIZE, 0.2)
   y_cords = _get_random_coords(bg_top, bg_bottom, BG_PATTERN_SIZE, 0.2)
+  min_saturation = 0 if desc.element == util.Element.GENERIC else 0.1
+  max_saturation = 0 if desc.element == util.Element.GENERIC else 0.3
 
   for x, _ in enumerate(x_cords):
     this_offset = 0 if x % 2 == 0 else int(BG_PATTERN_SIZE / 2)
@@ -184,8 +186,9 @@ def render_background(im:Image, draw:ImageDraw.Draw, desc:util.CardDesc, image_b
           (x_cords[x], y_cords[y+1]+this_offset),
         ]
         draw.polygon(square, fill=rand_color(color_palette.primary_hue,
-                                             max_saturation=0.3,
-                                             min_saturation=0.1, min_value=0.9))
+                                             max_saturation=max_saturation,
+                                             min_saturation=min_saturation,
+                                             min_value=0.9))
   _crop_corners(im, BORDER_CORNER_RADIUS)
 
 
@@ -196,8 +199,3 @@ def render_boarder(im:Image, draw:ImageDraw.Draw, desc:util.CardDesc, image_bb:u
     width=BORDER_WIDTH,
     radius=BORDER_CORNER_RADIUS,
   )
-
-
-
-
-
