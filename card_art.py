@@ -80,17 +80,17 @@ def rand_color(
   return tuple(int(255*c) for c in colorsys.hsv_to_rgb(hue, saturation, value))
 
 
-def generate_card_art(desc:util.CardDesc, width:float, height:float)->Image:
+def render_card_art(im:Image, draw:ImageDraw.Draw, desc:util.CardDesc, image_bb:util.BoundingBox)->Image:
+  left, top, right, bottom = image_bb
+  width = right - left
+  height = bottom - top
   # Seed random number gen with deterministic hash of card description. This
   # gives us the same image if we run the generation script twice.
   random.seed(desc.hash())
-
   # We generate an internal image and paste it into the card.
-  img = Image.new(mode="RGBA", size=(width, height))
-  draw = ImageDraw.Draw(img)
-
-  draw.rectangle([0, 0, width, height], fill=colors.BLACK)
-
+  art_image = Image.new(mode="RGBA", size=(width, height))
+  art_draw = ImageDraw.Draw(art_image)
+  art_draw.rectangle([0, 0, width, height], fill=colors.BLACK)
   num_shapes = random.randint(RAND_MIN_SHAPES, RAND_MAX_SHAPES)
   color_palette = rand_color_palette(desc.element)
   for shape_idx in range(num_shapes):
@@ -98,8 +98,7 @@ def generate_card_art(desc:util.CardDesc, width:float, height:float)->Image:
     offset_y = random.uniform(0, height)
     shape = rand_shape(offset_x, offset_y, min_radius=min(width,height)*0.1,
                        max_radius=min(width,height)*0.3)
-    draw.polygon(shape, fill=rand_color(color_palette.sample_hue()))
-
+    art_draw.polygon(shape, fill=rand_color(color_palette.sample_hue()))
   # These values make the primary and secondary shapes "pop"
   x_min_offset = width * 0.1
   x_max_offset = width * 0.9
@@ -111,20 +110,30 @@ def generate_card_art(desc:util.CardDesc, width:float, height:float)->Image:
   max_value = 1
   min_radius = min(width, height) * 0.3
   max_radius = min(width, height) * 0.6
-
   # Big secondary shape.
-  draw.polygon(
+  art_draw.polygon(
       rand_shape(random.uniform(x_min_offset, x_max_offset),
                  random.uniform(y_min_offset, y_max_offset),
                  min_radius, max_radius),
       fill=rand_color(color_palette.secondary_hue, min_saturation,
                       max_saturation, min_value, max_value))
-
-  draw.polygon(
+  art_draw.polygon(
       rand_shape(random.uniform(x_min_offset, x_max_offset),
                  random.uniform(y_min_offset, y_max_offset),
                  min_radius, max_radius),
       fill=rand_color(color_palette.primary_hue, min_saturation,
                       max_saturation, min_value, max_value))
+  im.paste(art_image, image_bb, art_image)
 
-  return img
+
+BORDER_WIDTH = int(0.05 * util.PIXELS_PER_INCH)
+BORDER_CORNER_RADIUS = int(0.15 * util.PIXELS_PER_INCH)
+def render_background(im:Image, draw:ImageDraw.Draw, desc:util.CardDesc, image_bb:util.BoundingBox)->Image:
+  # Border + background
+  draw.rounded_rectangle(
+    image_bb,
+    outline=desc.element.get_dark_color(),
+    width=BORDER_WIDTH,
+    radius=BORDER_CORNER_RADIUS,
+    fill=desc.element.get_light_color(),
+  )

@@ -28,10 +28,10 @@ CARD_HEIGHT_INCH = 3.5
 CARD_MARGIN_INCH = 0.1
 CARD_PADDING_INCH = 0.025
 # Unless specified, all sizes are in pixels.
-CARD_WIDTH = int(CARD_WIDTH_INCH * util.PIXELS_PER_INCH)
-CARD_HEIGHT = int(CARD_HEIGHT_INCH * util.PIXELS_PER_INCH)
-CARD_MARGIN = int(CARD_MARGIN_INCH * util.PIXELS_PER_INCH)
-CARD_PADDING = int(CARD_PADDING_INCH * util.PIXELS_PER_INCH)
+CARD_WIDTH = int(2.5 * util.PIXELS_PER_INCH)
+CARD_HEIGHT = int(3.5 * util.PIXELS_PER_INCH)
+CARD_MARGIN = int(0.1 * util.PIXELS_PER_INCH)
+CARD_PADDING = int(0.025 * util.PIXELS_PER_INCH)
 
 # Default icon params
 SMALL_ICON_HEIGHT = SMALL_ICON_WIDTH = int(0.3*util.PIXELS_PER_INCH)
@@ -40,11 +40,6 @@ SMALL_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH), int(util.PIXELS_P
 LARGE_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH), int(util.PIXELS_PER_INCH * 0.3))
 SMALL_ICON_FONT_COLOR = colors.WHITE
 LARGE_ICON_FONT_COLOR = colors.WHITE
-
-# Border parameters
-BORDER_BB = [0, 0, CARD_WIDTH, CARD_HEIGHT]
-BORDER_WIDTH = int(CARD_MARGIN/2)
-BORDER_CORNER_RADIUS = int(0.15 * util.PIXELS_PER_INCH)
 
 TOP_ICON_Y = int(SMALL_ICON_HEIGHT / 2) + CARD_MARGIN
 
@@ -109,14 +104,7 @@ def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
   im = Image.new(mode="RGBA", size=(CARD_WIDTH, CARD_HEIGHT))
   draw = ImageDraw.Draw(im)
 
-  # Border + background
-  draw.rounded_rectangle(
-    BORDER_BB,
-    outline=desc.element.get_dark_color(),
-    width=BORDER_WIDTH,
-    radius=BORDER_CORNER_RADIUS,
-    fill=desc.element.get_light_color(),
-  )
+  card_art.render_background(im, draw, desc, [0, 0, CARD_WIDTH, CARD_HEIGHT])
 
   # Title, center text at top of card.
   draw.text(
@@ -127,9 +115,7 @@ def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
     anchor=TITLE_ANCHOR)
 
   # Card image placeholder.
-  art = card_art.generate_card_art(
-    desc, CARD_IMAGE_WIDTH, CARD_IMAGE_HEIGHT)
-  im.paste(art, CARD_IMAGE_BB[:2])
+  card_art.render_card_art(im, draw, desc, CARD_IMAGE_BB)
 
   # Card card_type text
   if desc.attributes is not None:
