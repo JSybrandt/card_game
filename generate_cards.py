@@ -43,7 +43,6 @@ LARGE_ICON_FONT_COLOR = colors.WHITE
 
 TOP_ICON_Y = int(SMALL_ICON_HEIGHT / 2) + CARD_MARGIN
 
-# Title parameters
 TITLE_FONT = ImageFont.truetype(str(util.LEAGUE_GOTHIC_FONT_PATH), int(util.PIXELS_PER_INCH * 0.25))
 TITLE_ANCHOR = "mm"  # Middle Middle.
 TITLE_COORD = (int(CARD_WIDTH/2), TOP_ICON_Y)
@@ -99,6 +98,39 @@ MANA_COORD = (CARD_WIDTH/2, BOTTOM_ICON_Y)
 # Layout functions
 
 
+MAX_TITLE_WIDTH = int(CARD_WIDTH * 0.66)
+DEFAULT_TITLE_FONT_SIZE = int(util.PIXELS_PER_INCH * 0.25)
+TITLE_FONT_PATH = util.LEAGUE_GOTHIC_FONT_PATH
+DEFAULT_TITLE_FONT =  ImageFont.truetype(str(TITLE_FONT_PATH),
+                                         DEFAULT_TITLE_FONT_SIZE)
+TITLE_BG_COLOR = colors.GREY_50
+TITLE_BG_RADIUS = int(0.05 * util.PIXELS_PER_INCH)
+
+# We may need to shrink
+def _get_title_font(desc:util.CardDesc):
+  title_font = DEFAULT_TITLE_FONT
+  title_font_size = DEFAULT_TITLE_FONT_SIZE
+  while title_font.getsize(desc.title)[0] > MAX_TITLE_WIDTH:
+    title_font_size -= 1
+    title_font = ImageFont.truetype(str(TITLE_FONT_PATH), title_font_size)
+  return title_font
+
+def render_title(draw:ImageDraw.Draw, desc:util.CardDesc):
+  font = _get_title_font(desc)
+  width, height = font.getsize(desc.title)
+  width += 2 * CARD_PADDING
+  height += 2 * CARD_PADDING
+  bb = util.get_centered_bb(TITLE_COORD, width, height)
+  # Set the top to the top of the card
+  bb[1] = 0
+  draw.rounded_rectangle(bb, fill=TITLE_BG_COLOR, radius=TITLE_BG_RADIUS)
+  draw.text(
+    TITLE_COORD,
+    desc.title,
+    TITLE_FONT_COLOR,
+    font=font,
+    anchor=TITLE_ANCHOR)
+
 def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
   assert not output_path.exists(), f"{output_path} already exists"
   im = Image.new(mode="RGBA", size=(CARD_WIDTH, CARD_HEIGHT))
@@ -106,13 +138,7 @@ def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
 
   card_art.render_background(im, draw, desc, [0, 0, CARD_WIDTH, CARD_HEIGHT])
 
-  # Title, center text at top of card.
-  draw.text(
-    TITLE_COORD,
-    desc.title,
-    TITLE_FONT_COLOR,
-    font=TITLE_FONT,
-    anchor=TITLE_ANCHOR)
+  render_title(draw, desc)
 
   # Card image placeholder.
   card_art.render_card_art(im, draw, desc, CARD_IMAGE_BB)
@@ -146,6 +172,8 @@ def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
     icons.draw_circle_with_text(
       draw, MANA_COORD, LARGE_ICON_WIDTH, LARGE_ICON_HEIGHT, "1",
       LARGE_ICON_FONT, LARGE_ICON_FONT_COLOR, desc.element.get_dark_color())
+
+  card_art.render_boarder(im, draw, desc, [0, 0, CARD_WIDTH, CARD_HEIGHT])
 
   print("Saving card:", output_path)
   im.save(output_path)

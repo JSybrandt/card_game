@@ -150,7 +150,7 @@ def render_card_art(im:Image, draw:ImageDraw.Draw, desc:util.CardDesc, image_bb:
 BORDER_WIDTH = int(0.05 * util.PIXELS_PER_INCH)
 BORDER_CORNER_RADIUS = int(0.2 * util.PIXELS_PER_INCH)
 BG_PATTERN_SIZE = int(0.5 * util.PIXELS_PER_INCH)
-def render_background(im:Image, draw:ImageDraw.Draw, desc:util.CardDesc, image_bb:util.BoundingBox)->Image:
+def render_background(im:Image, draw:ImageDraw.Draw, desc:util.CardDesc, image_bb:util.BoundingBox):
   random.seed(desc.hash())
   color_palette = rand_color_palette(desc.element)
   left, top, right, bottom = image_bb
@@ -187,14 +187,15 @@ def render_background(im:Image, draw:ImageDraw.Draw, desc:util.CardDesc, image_b
                                              max_saturation=0.3,
                                              min_saturation=0.1, min_value=0.9))
   _crop_corners(im, BORDER_CORNER_RADIUS)
+
+
+def render_boarder(im:Image, draw:ImageDraw.Draw, desc:util.CardDesc, image_bb:util.BoundingBox):
   draw.rounded_rectangle(
     image_bb,
     outline=desc.element.get_dark_color(),
     width=BORDER_WIDTH,
     radius=BORDER_CORNER_RADIUS,
   )
-
-
 
 
 

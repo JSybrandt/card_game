@@ -13,7 +13,7 @@ import icons
 FONT = ImageFont.truetype(str(util.EB_GARAMOND_FONT_PATH), int(util.PIXELS_PER_INCH*0.1))
 FONT_COLOR = colors.BLACK
 BG_RADIUS = int(util.PIXELS_PER_INCH * 0.05)
-BG_COLOR = colors.BROWN_100
+BG_COLOR = colors.GREY_50
 BODY_TEXT_MARGIN = int(util.PIXELS_PER_INCH * 0.05)
 
 TEXT_HEIGHT = int(util.PIXELS_PER_INCH * 0.1)
