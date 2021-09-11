@@ -5,7 +5,7 @@ import hashlib
 import colors
 import pathlib
 
-PIXELS_PER_INCH = 600
+PIXELS_PER_INCH = 300
 
 FONT_DIR= pathlib.Path("./fonts")
 assert FONT_DIR.is_dir()
@@ -47,10 +47,12 @@ def get_centered_bb(center:Coord, width:int, height:int)->BoundingBox:
           int(x + width / 2), int(y + height / 2)]
 
 class CardType(enum.Enum):
+  ATTACHMENT = "Attachment"
   SPELL = "Spell"
   HOLDING = "Holding"
   UNIT = "Unit"
   LEADER = "Leader"
+  TOKEN = "Token"
 
 class Element(enum.Enum):
   FIRE = "F"

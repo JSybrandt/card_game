@@ -44,7 +44,7 @@ LARGE_ICON_FONT_COLOR = colors.WHITE
 # Border parameters
 BORDER_BB = [0, 0, CARD_WIDTH, CARD_HEIGHT]
 BORDER_WIDTH = int(CARD_MARGIN/2)
-BORDER_CORNER_RADIUS = 30
+BORDER_CORNER_RADIUS = int(0.15 * util.PIXELS_PER_INCH)
 
 TOP_ICON_Y = int(SMALL_ICON_HEIGHT / 2) + CARD_MARGIN
 
@@ -160,7 +160,6 @@ def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
     icons.draw_circle_with_text(
       draw, MANA_COORD, LARGE_ICON_WIDTH, LARGE_ICON_HEIGHT, "1",
       LARGE_ICON_FONT, LARGE_ICON_FONT_COLOR, desc.element.get_dark_color())
-
 
   print("Saving card:", output_path)
   im.save(output_path)

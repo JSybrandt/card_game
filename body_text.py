@@ -99,34 +99,31 @@ class ManaToken(Token):
     return bool(re.match(MANA_ICON_REGEX, text))
 
 
+def _load_image(img_path:pathlib.Path)->Image:
+  assert img_path.is_file(), str(is_file)
+  return Image.open(img_path).convert("RGBA").resize((ICON_WIDTH, TEXT_HEIGHT))
+
 
 ICONS = {
-  "<EXHAUST>": util.ICON_DIR.joinpath("exhaust.png"),
-  "<READY>": util.ICON_DIR.joinpath("ready.png"),
-  "<HOLDING_ACTION>": util.ICON_DIR.joinpath("holding_action.png"),
-  "<RECRUIT_ACTION>": util.ICON_DIR.joinpath("recruit_action.png"),
-  "<COMBAT_ACTION>": util.ICON_DIR.joinpath("combat_action.png"),
-  "<RANGED_ACTION>": util.ICON_DIR.joinpath("ranged_action.png"),
-  "<ANY_ACTION>": util.ICON_DIR.joinpath("any_action.png"),
-  "<BREAK_ACTION>": util.ICON_DIR.joinpath("break_action.png"),
+  "<EXHAUST>": _load_image( util.ICON_DIR.joinpath("exhaust.png")),
+  "<READY>": _load_image( util.ICON_DIR.joinpath("ready.png")),
+  "<HOLDING_ACTION>": _load_image( util.ICON_DIR.joinpath("holding_action.png")),
+  "<RECRUIT_ACTION>": _load_image( util.ICON_DIR.joinpath("recruit_action.png")),
+  "<COMBAT_ACTION>": _load_image( util.ICON_DIR.joinpath("combat_action.png")),
+  "<RANGED_ACTION>": _load_image( util.ICON_DIR.joinpath("ranged_action.png")),
+  "<ANY_ACTION>": _load_image( util.ICON_DIR.joinpath("any_action.png")),
+  "<BREAK_ACTION>": _load_image( util.ICON_DIR.joinpath("break_action.png")),
 }
-for _, v in ICONS.items():
-  assert v.is_file(), str(v)
 
 class IconToken(Token):
   def __init__(self, text:str):
     super().__init__(text)
     assert text in ICONS
-    self.icon_path = ICONS[text]
 
   def render(self, im:Image, draw:ImageDraw.Draw, cursor_x:int, cursor_y:int):
     bb = [cursor_x, cursor_y - int(TEXT_HEIGHT / 2),
-          cursor_x + ICON_WIDTH,
-          cursor_y + int(TEXT_HEIGHT/2)
-          ]
-    with Image.open(self.icon_path) as icon:
-      icon = icon.convert("RGBA").resize((ICON_WIDTH, TEXT_HEIGHT))
-      im.paste(icon, bb, icon)
+          cursor_x + ICON_WIDTH, cursor_y + int(TEXT_HEIGHT/2)]
+    im.paste(ICONS[self.text], bb, ICONS[self.text])
 
   def width(self):
     return ICON_WIDTH
@@ -185,12 +182,13 @@ class BodyTextWriter():
   def _render_action_line(self, action:ActionToken, cost:List[Token], content:List[Token]):
     action.render(self.im, self.draw, self.cursor_x, self.cursor_y)
     self.cursor_x += action.width() + TOKEN_PADDING_X
-    self._render_cost_background(cost)
-    self.cursor_x += COST_PADDING_X
-    for c in cost:
-      c.render(self.im, self.draw, self.cursor_x, self.cursor_y)
-      self.cursor_x += c.width() + TOKEN_PADDING_X
-    self.cursor_x += COST_PADDING_X
+    if len(cost) > 0:
+      self._render_cost_background(cost)
+      self.cursor_x += COST_PADDING_X
+      for c in cost:
+        c.render(self.im, self.draw, self.cursor_x, self.cursor_y)
+        self.cursor_x += c.width() + TOKEN_PADDING_X
+      self.cursor_x += COST_PADDING_X
     for c in content:
       if self.cursor_x + c.width() > self.right:
         self._newline(action.width())
