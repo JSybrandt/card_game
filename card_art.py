@@ -79,14 +79,32 @@ def rand_color(
   value = random.uniform(min_value, max_value)
   return tuple(int(255*c) for c in colorsys.hsv_to_rgb(hue, saturation, value))
 
+def _get_random_coords(low:int, high:int, avg_step:int, variance:float)->List[int]:
+  step_low = avg_step - int(avg_step * variance)
+  step_high= avg_step + int(avg_step * variance)
+  cords = []
+  x = low
+  while x < high:
+    cords.append(x)
+    x += int(random.uniform(step_low, step_high))
+  cords.append(high)
+  return cords
 
+def _crop_corners(im:Image, radius: int):
+  mask = Image.new("L", (im.width, im.height))
+  mask_draw = ImageDraw.Draw(mask)
+  mask_draw.rounded_rectangle([0,0,im.width,im.height], fill=255, radius=radius)
+  im.putalpha(mask)
+
+
+CARD_ART_RADIUS = int(0.1 * util.PIXELS_PER_INCH)
 def render_card_art(im:Image, draw:ImageDraw.Draw, desc:util.CardDesc, image_bb:util.BoundingBox)->Image:
-  left, top, right, bottom = image_bb
-  width = right - left
-  height = bottom - top
   # Seed random number gen with deterministic hash of card description. This
   # gives us the same image if we run the generation script twice.
   random.seed(desc.hash())
+  left, top, right, bottom = image_bb
+  width = right - left
+  height = bottom - top
   # We generate an internal image and paste it into the card.
   art_image = Image.new(mode="RGBA", size=(width, height))
   art_draw = ImageDraw.Draw(art_image)
@@ -123,25 +141,17 @@ def render_card_art(im:Image, draw:ImageDraw.Draw, desc:util.CardDesc, image_bb:
                  min_radius, max_radius),
       fill=rand_color(color_palette.primary_hue, min_saturation,
                       max_saturation, min_value, max_value))
+  _crop_corners(art_image, CARD_ART_RADIUS)
   im.paste(art_image, image_bb, art_image)
 
-def _get_random_coords(low:int, high:int, avg_step:int, variance:float)->List[int]:
-  step_low = avg_step - int(avg_step * variance)
-  step_high= avg_step + int(avg_step * variance)
-  cords = []
-  x = low
-  while x < high:
-    cords.append(x)
-    x += int(random.uniform(step_low, step_high))
-  cords.append(high)
-  return cords
 
 
 
 BORDER_WIDTH = int(0.05 * util.PIXELS_PER_INCH)
 BORDER_CORNER_RADIUS = int(0.2 * util.PIXELS_PER_INCH)
-BG_PATTERN_SIZE = int(0.25 * util.PIXELS_PER_INCH)
+BG_PATTERN_SIZE = int(0.5 * util.PIXELS_PER_INCH)
 def render_background(im:Image, draw:ImageDraw.Draw, desc:util.CardDesc, image_bb:util.BoundingBox)->Image:
+  random.seed(desc.hash())
   color_palette = rand_color_palette(desc.element)
   left, top, right, bottom = image_bb
   # # Border + background
@@ -154,10 +164,10 @@ def render_background(im:Image, draw:ImageDraw.Draw, desc:util.CardDesc, image_b
   # )
 
   # Generate a triangle mesh
-  bg_left = left - BG_PATTERN_SIZE 
-  bg_right = right + BG_PATTERN_SIZE 
-  bg_top = top - BG_PATTERN_SIZE 
-  bg_bottom = bottom + BG_PATTERN_SIZE 
+  bg_left = left - BG_PATTERN_SIZE
+  bg_right = right + BG_PATTERN_SIZE
+  bg_top = top - BG_PATTERN_SIZE
+  bg_bottom = bottom + BG_PATTERN_SIZE
 
   x_cords = _get_random_coords(bg_left, bg_right, BG_PATTERN_SIZE, 0.2)
   y_cords = _get_random_coords(bg_top, bg_bottom, BG_PATTERN_SIZE, 0.2)
@@ -173,14 +183,18 @@ def render_background(im:Image, draw:ImageDraw.Draw, desc:util.CardDesc, image_b
           (x_cords[x+1], y_cords[y+1]+next_offset),
           (x_cords[x], y_cords[y+1]+this_offset),
         ]
-        draw.polygon(
-          square, fill=rand_color(color_palette.primary_hue, max_saturation=0.2, min_saturation=0.1, min_value=0.95))
+        draw.polygon(square, fill=rand_color(color_palette.primary_hue,
+                                             max_saturation=0.3,
+                                             min_saturation=0.1, min_value=0.9))
+  _crop_corners(im, BORDER_CORNER_RADIUS)
   draw.rounded_rectangle(
     image_bb,
     outline=desc.element.get_dark_color(),
     width=BORDER_WIDTH,
     radius=BORDER_CORNER_RADIUS,
   )
+
+
 
 
 
