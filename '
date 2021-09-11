@@ -71,7 +71,7 @@ CARD_IMAGE_BB = [
 # Card Attributes
 ATTRIBUTE_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH), int(util.PIXELS_PER_INCH * 0.125))
 ATTRIBUTE_ANCHOR = "mm" # middle bottom
-ATTRIBUTE_HEIGHT = int(0.2 * util.PIXELS_PER_INCH)
+ATTRIBUTE_HEIGHT = int(0.3 * util.PIXELS_PER_INCH)
 ATTRIBUTE_BOTTOM = CARD_IMAGE_BOTTOM + ATTRIBUTE_HEIGHT
 ATTRIBUTE_COORD = (CARD_WIDTH/2, CARD_IMAGE_BOTTOM + int(ATTRIBUTE_HEIGHT/2))
 ATTRIBUTE_TEXT_COLOR = colors.BLACK
@@ -113,7 +113,7 @@ def _get_scaled_font(text:str, font:ImageFont.ImageFont, max_width:int):
 def render_title(draw:ImageDraw.Draw, desc:util.CardDesc):
   font = _get_scaled_font(desc.title, DEFAULT_TITLE_FONT, MAX_TITLE_WIDTH)
   width, height = font.getsize(desc.title)
-  width += 4 * CARD_PADDING
+  width += 2 * CARD_PADDING
   height += 2 * CARD_PADDING
   bb = util.get_centered_bb(TITLE_COORD, width, height)
   # Set the top to the top of the card
@@ -128,18 +128,16 @@ def render_title(draw:ImageDraw.Draw, desc:util.CardDesc):
 
 MAX_ATTRIBUTE_WIDTH = int(CARD_WIDTH * 0.9)
 ATTRIBUTE_BG_COLOR = colors.GREY_50
-ATTRIBUTE_BG_RADIUS = int(0.1 * util.PIXELS_PER_INCH)
+ATTRIBUTE_BG_RADIUS = int(0.025 * util.PIXELS_PER_INCH)
 def render_attributes(draw:ImageDraw.Draw, desc:util.CardDesc):
   text = desc.card_type.value
   if desc.attributes is not None:
     text += f"— {desc.attributes}"
   font = _get_scaled_font(text, ATTRIBUTE_FONT, MAX_ATTRIBUTE_WIDTH)
   width, height = font.getsize(text)
-  width += 4 * CARD_PADDING
+  width += 2 * CARD_PADDING
   height += 2 * CARD_PADDING
   bb = util.get_centered_bb(ATTRIBUTE_COORD, width, height)
-  # Move top under image
-  bb[1] -= 2 * ATTRIBUTE_BG_RADIUS
   draw.rounded_rectangle(bb, fill=ATTRIBUTE_BG_COLOR, radius=ATTRIBUTE_BG_RADIUS)
   draw.text(ATTRIBUTE_COORD, text, ATTRIBUTE_TEXT_COLOR, font=font, anchor=ATTRIBUTE_ANCHOR)
 
@@ -156,9 +154,10 @@ def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
 
   render_title(draw, desc)
 
-  render_attributes(draw, desc)
-
+  # Card image placeholder.
   card_art.render_card_art(im, draw, desc, CARD_IMAGE_BB)
+
+  render_attributes(draw, desc)
 
   body_text.render_body_text(im, draw, desc.body_text, BODY_TEXT_BG_BB)
 
