@@ -168,11 +168,11 @@ def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
       draw, COST_COORD, SMALL_ICON_WIDTH, SMALL_ICON_HEIGHT,  desc.cost,
       SMALL_ICON_FONT, SMALL_ICON_FONT_COLOR, desc.element.get_dark_color())
   if desc.health is not None:
-    icons.draw_circle_with_text(
+    icons.draw_heart_with_text(
       draw, HEALTH_COORD, LARGE_ICON_WIDTH, LARGE_ICON_HEIGHT, desc.health,
       LARGE_ICON_FONT, LARGE_ICON_FONT_COLOR, HEALTH_BG_COLOR)
   if desc.power is not None:
-    icons.draw_circle_with_text(
+    icons.draw_diamond_with_text(
       draw, POWER_COORD, LARGE_ICON_WIDTH, LARGE_ICON_HEIGHT, desc.power,
       LARGE_ICON_FONT, LARGE_ICON_FONT_COLOR, POWER_BG_COLOR)
   if desc.card_type == util.CardType.HOLDING:
