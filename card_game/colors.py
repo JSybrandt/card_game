@@ -5,11 +5,13 @@ from typing import *
 
 Color = Tuple[int, int, int]
 
-def assert_valid_color(color:Color):
+
+def assert_valid_color(color: Color):
   assert len(color) == 3, f"Invalid color: {color}"
   assert 0 <= color[0] <= 255, f"Invalid color: {color}"
   assert 0 <= color[1] <= 255, f"Invalid color: {color}"
   assert 0 <= color[2] <= 255, f"Invalid color: {color}"
+
 
 RED = 0xF4, 0x43, 0x36
 RED_50 = 0xFF, 0xEB, 0xEE
