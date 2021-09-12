@@ -2,7 +2,7 @@ from typing import *
 import enum
 import dataclasses
 import hashlib
-import colors
+from . import colors
 import pathlib
 
 PIXELS_PER_INCH = 300

@@ -5,8 +5,8 @@ from typing import *
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
-import colors
-import util
+from . import colors
+from . import util
 import math
 
 def draw_circle_with_text(draw:ImageDraw.Draw, center:util.Coord,

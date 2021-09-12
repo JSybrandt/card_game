@@ -8,19 +8,14 @@ import pathlib
 import shutil
 import csv
 import pprint
-import colors
-import util
-import card_art
-import icons
-import body_text
+from . import colors
+from . import util
+from . import card_art
+from . import icons
+from . import body_text
+import argparse
 
 # Constants
-
-CARDS_CSV_PATH = pathlib.Path("./cards.csv")
-assert CARDS_CSV_PATH.is_file()
-OUTPUT_DIR= pathlib.Path("./img")
-assert OUTPUT_DIR.is_dir() or not OUTPUT_DIR.exists()
-
 
 # Card size in inches.
 CARD_WIDTH_INCH = 2.5
@@ -188,14 +183,22 @@ def generate_card(desc:util.CardDesc, output_path:pathlib.Path):
 
 
 if __name__ == "__main__":
-  if(OUTPUT_DIR.is_dir()):
-    print("Deleting directory:", OUTPUT_DIR)
-    shutil.rmtree(OUTPUT_DIR)
-  print("Creating directory:", OUTPUT_DIR)
-  OUTPUT_DIR.mkdir(parents=True)
-  with CARDS_CSV_PATH.open() as csv_file:
+  parser = argparse.ArgumentParser()
+  parser.add_argument("--output_dir", type=pathlib.Path,
+                      default=pathlib.Path("./img"))
+  parser.add_argument("--cards_csv", type=pathlib.Path,
+                      default=pathlib.Path("./cards.csv"))
+  args = parser.parse_args()
+
+
+  if(args.output_dir.is_dir()):
+    print("Deleting directory:", args.output_dir)
+    shutil.rmtree(args.output_dir)
+  print("Creating directory:", args.output_dir)
+  args.output_dir.mkdir(parents=True)
+  with args.cards_csv.open() as csv_file:
     for card_idx, row in enumerate(csv.DictReader(csv_file)):
-      output_path = OUTPUT_DIR.joinpath(f"card_{card_idx:03d}.png")
+      output_path = args.output_dir.joinpath(f"card_{card_idx:03d}.png")
       card_desc = util.to_card_desc(row)
       pprint.pprint(card_desc)
       generate_card(card_desc, output_path)

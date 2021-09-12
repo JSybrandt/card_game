@@ -2,11 +2,11 @@ from typing import *
 from PIL import Image
 from PIL import ImageDraw
 from PIL import ImageFont
-import util
-import colors
+from . import util
+from . import colors
 import re
 import pathlib
-import icons
+from . import icons
 
 # Customizations of the body text area.
 

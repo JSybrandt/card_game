@@ -3,8 +3,8 @@ import random
 import dataclasses
 import colorsys
 import math
-import util
-import colors
+from . import util
+from . import colors
 from PIL import Image
 from PIL import ImageDraw
 
