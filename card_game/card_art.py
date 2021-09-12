@@ -1,12 +1,14 @@
-from typing import *
-import random
-import dataclasses
 import colorsys
+import dataclasses
 import math
-from . import util
-from . import colors
-from PIL import Image
-from PIL import ImageDraw
+import random
+from typing import List, Tuple
+
+from PIL import Image, ImageDraw
+
+from . import colors, util
+
+#pylint: disable=too-many-locals
 
 # We want to generate between 3 sided and 10-sided shapes.
 RAND_MIN_POINT_GEN_STEP_RADS = 2 * math.pi / 20
@@ -110,7 +112,7 @@ def _crop_corners(im: Image, radius: int):
 CARD_ART_RADIUS = int(0.1 * util.PIXELS_PER_INCH)
 
 
-def render_card_art(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
+def render_card_art(im: Image, desc: util.CardDesc,
                     image_bb: util.BoundingBox) -> Image:
   # Seed random number gen with deterministic hash of card description. This
   # gives us the same image if we run the generation script twice.
@@ -124,7 +126,7 @@ def render_card_art(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
   art_draw.rectangle([0, 0, width, height], fill=colors.BLACK)
   num_shapes = random.randint(RAND_MIN_SHAPES, RAND_MAX_SHAPES)
   color_palette = rand_color_palette(desc.element)
-  for shape_idx in range(num_shapes):
+  for _ in range(num_shapes):
     offset_x = random.uniform(0, width)
     offset_y = random.uniform(0, height)
     shape = rand_shape(offset_x,
@@ -207,7 +209,7 @@ def render_background(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
   _crop_corners(im, BORDER_CORNER_RADIUS)
 
 
-def render_boarder(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
+def render_boarder(draw: ImageDraw.Draw, desc: util.CardDesc,
                    image_bb: util.BoundingBox):
   draw.rounded_rectangle(
       image_bb,

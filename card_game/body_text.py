@@ -1,12 +1,13 @@
-from typing import *
-from PIL import Image
-from PIL import ImageDraw
-from PIL import ImageFont
-from . import util
-from . import colors
-import re
 import pathlib
-from . import icons
+import re
+from typing import List, Optional
+
+from PIL import Image, ImageDraw, ImageFont
+
+from . import colors, icons, util
+
+#pylint: disable=too-few-public-methods
+#pylint: disable=too-many-instance-attributes
 
 # Customizations of the body text area.
 
@@ -32,8 +33,9 @@ class Token():
   def __init__(self, text: str):
     self.text = text
 
-  def render(self, im: Image, draw: ImageDraw.Draw, cursor_x: int,
+  def render(self, _: Image, draw: ImageDraw.Draw, cursor_x: int,
              cursor_y: int):
+    print(f"Warning, unidentified token: {self.text}")
     draw.text((cursor_x, cursor_y),
               UNKNOWN_TEXT,
               FONT_COLOR,
@@ -41,17 +43,16 @@ class Token():
               anchor="lm")
 
   def width(self):
+    #pylint: disable=no-self-use
     return FONT.getsize(UNKNOWN_TEXT)[0]
 
   @classmethod
   def is_token(cls, text: str) -> bool:
+    #pylint: disable=unused-argument
     return True
 
 
 class Newline(Token):
-
-  def __init__(self, text: str):
-    super().__init__(text)
 
   @classmethod
   def is_token(cls, text: str) -> bool:
@@ -60,9 +61,6 @@ class Newline(Token):
 
 class EndCost(Token):
 
-  def __init__(self, text: str):
-    super().__init__(text)
-
   @classmethod
   def is_token(cls, text: str) -> bool:
     return text == "<END_COST>"
@@ -70,11 +68,9 @@ class EndCost(Token):
 
 class TextToken(Token):
 
-  def __init__(self, text: str):
-    super().__init__(text)
-
-  def render(self, im: Image, draw: ImageDraw.Draw, cursor_x: int,
+  def render(self, _: Image, draw: ImageDraw.Draw, cursor_x: int,
              cursor_y: int):
+    #pylint: disable=unused-argument
     draw.text((cursor_x, cursor_y),
               self.text,
               FONT_COLOR,
@@ -107,7 +103,7 @@ class ManaToken(Token):
     self.icon_text = mana_match.group(1)
     self.element = util.Element(mana_match.group(2))
 
-  def render(self, im: Image, draw: ImageDraw.Draw, cursor_x: int,
+  def render(self, _: Image, draw: ImageDraw.Draw, cursor_x: int,
              cursor_y: int):
     center = cursor_x + int(ICON_WIDTH / 2), cursor_y
     icons.draw_circle_with_text(draw, center, ICON_WIDTH, MANA_ICON_HEIGHT,
@@ -124,7 +120,7 @@ class ManaToken(Token):
 
 
 def _load_image(img_path: pathlib.Path) -> Image:
-  assert img_path.is_file(), str(is_file)
+  assert img_path.is_file(), str(img_path)
   return Image.open(img_path).convert("RGBA").resize((ICON_WIDTH, TEXT_HEIGHT))
 
 
@@ -172,12 +168,33 @@ class IconToken(Token):
 
 class ActionToken(IconToken):
 
-  def __init__(self, text: str):
-    super().__init__(text)
-
   @classmethod
   def is_token(cls, text: str) -> bool:
     return text in ICONS and re.match("<[A-Z]+_ACTION>", text)
+
+
+def _get_token(text: str) -> Token:
+  for token_class in [
+      Newline, EndCost, ActionToken, IconToken, ManaToken, TextToken, Token
+  ]:
+    if token_class.is_token(text):
+      return token_class(text)
+  return Token(text)
+
+
+def _get_logical_lines(text: str) -> List[Token]:
+  lines = []
+  current_line = []
+  for token in [_get_token(t) for t in text.split()]:
+    # This should remove all the newlines from the tokens.
+    if isinstance(token, (Newline, ActionToken)):
+      lines.append(current_line)
+      current_line = [token] if isinstance(token, ActionToken) else []
+    else:
+      current_line.append(token)
+  lines.append(current_line)
+  # check all our lines
+  return [l for l in lines if len(l) > 0]
 
 
 class BodyTextWriter():
@@ -192,7 +209,7 @@ class BodyTextWriter():
     self.cursor_y = self.top + int(TEXT_HEIGHT / 2)
 
   def render_text(self, text: str):
-    for line in self._get_logical_lines(text):
+    for line in _get_logical_lines(text):
       self._render_line(line)
 
   def _render_line(self, tokens: List[Token]):
@@ -249,36 +266,6 @@ class BodyTextWriter():
         self._newline()
       token.render(self.im, self.draw, self.cursor_x, self.cursor_y)
       self.cursor_x += token.width() + TOKEN_PADDING_X
-
-  def _get_token(self, text: str) -> Token:
-    if Newline.is_token(text):
-      return Newline(text)
-    if EndCost.is_token(text):
-      return EndCost(text)
-    if ActionToken.is_token(text):
-      return ActionToken(text)
-    if IconToken.is_token(text):
-      return IconToken(text)
-    if ManaToken.is_token(text):
-      return ManaToken(text)
-    if TextToken.is_token(text):
-      return TextToken(text)
-    return Token(text)
-
-  def _get_logical_lines(self, text: str) -> List[Token]:
-    lines = []
-    current_line = []
-    for token in [self._get_token(t) for t in text.split()]:
-      # This should remove all the newlines from the tokens.
-      if isinstance(token, Newline) or isinstance(token, ActionToken):
-        lines.append(current_line)
-        current_line = [token] if isinstance(token, ActionToken) else []
-      else:
-        current_line.append(token)
-    lines.append(current_line)
-
-    # check all our lines
-    return [l for l in lines if len(l) > 0]
 
 
 def render_body_text(im: Image, draw: ImageDraw.Draw, text: Optional[str],

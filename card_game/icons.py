@@ -1,13 +1,13 @@
 # This  module produces icons.
 
-from typing import *
-
-from PIL import Image
-from PIL import ImageDraw
-from PIL import ImageFont
-from . import colors
-from . import util
 import math
+
+from PIL import ImageDraw, ImageFont
+
+from . import colors, util
+
+#pylint: disable=too-many-arguments
+#pylint: disable=too-many-locals
 
 
 def draw_circle_with_text(draw: ImageDraw.Draw, center: util.Coord,

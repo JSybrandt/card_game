@@ -1,9 +1,13 @@
-from typing import *
-import enum
 import dataclasses
+import enum
 import hashlib
-from . import colors
 import pathlib
+from typing import Any, Dict, Optional, Tuple
+
+from . import colors
+
+#pylint: disable=too-many-return-statements
+#pylint: disable=too-many-instance-attributes
 
 PIXELS_PER_INCH = 300
 
@@ -85,6 +89,7 @@ class Element(enum.Enum):
       return colors.GREEN_500
     if self == Element.GENERIC:
       return colors.GREY_400
+    return colors.BLACK
 
   def get_light_color(self) -> colors.Color:
     if self == Element.FIRE:
@@ -99,6 +104,7 @@ class Element(enum.Enum):
       return colors.GREEN_200
     if self == Element.GENERIC:
       return colors.GREY_200
+    return colors.BLACK
 
   def get_dark_color(self) -> colors.Color:
     if self == Element.FIRE:
@@ -113,6 +119,7 @@ class Element(enum.Enum):
       return colors.GREEN_900
     if self == Element.GENERIC:
       return colors.GREY_600
+    return colors.BLACK
 
 
 @dataclasses.dataclass

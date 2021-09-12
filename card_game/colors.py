@@ -1,4 +1,4 @@
-from typing import *
+from typing import Tuple
 
 # Take a look here for all the colors:
 # https://material.io/resources/color/#!/

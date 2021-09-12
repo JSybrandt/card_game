@@ -1,19 +1,14 @@
 #!/usr/bin/env python3
 
-from PIL import Image
-from PIL import ImageDraw
-from PIL import ImageFont
-from typing import *
-import pathlib
-import shutil
-import csv
-import pprint
-from . import colors
-from . import util
-from . import card_art
-from . import icons
-from . import body_text
 import argparse
+import csv
+import pathlib
+import pprint
+import shutil
+
+from PIL import Image, ImageDraw, ImageFont
+
+from . import body_text, card_art, colors, icons, util
 
 # Constants
 
@@ -162,7 +157,7 @@ def generate_card(desc: util.CardDesc, output_path: pathlib.Path):
 
   render_attributes(draw, desc)
 
-  card_art.render_card_art(im, draw, desc, CARD_IMAGE_BB)
+  card_art.render_card_art(im, desc, CARD_IMAGE_BB)
 
   body_text.render_body_text(im, draw, desc.body_text, BODY_TEXT_BG_BB)
 
@@ -186,13 +181,13 @@ def generate_card(desc: util.CardDesc, output_path: pathlib.Path):
                                 LARGE_ICON_FONT_COLOR,
                                 desc.element.get_dark_color())
 
-  card_art.render_boarder(im, draw, desc, [0, 0, CARD_WIDTH, CARD_HEIGHT])
+  card_art.render_boarder(draw, desc, [0, 0, CARD_WIDTH, CARD_HEIGHT])
 
   print("Saving card:", output_path)
   im.save(output_path)
 
 
-if __name__ == "__main__":
+def main():
   parser = argparse.ArgumentParser()
   parser.add_argument("--output_dir",
                       type=pathlib.Path,
@@ -202,7 +197,7 @@ if __name__ == "__main__":
                       default=pathlib.Path("./cards.csv"))
   args = parser.parse_args()
 
-  if (args.output_dir.is_dir()):
+  if args.output_dir.is_dir():
     print("Deleting directory:", args.output_dir)
     shutil.rmtree(args.output_dir)
   print("Creating directory:", args.output_dir)
@@ -213,3 +208,7 @@ if __name__ == "__main__":
       card_desc = util.to_card_desc(row)
       pprint.pprint(card_desc)
       generate_card(card_desc, output_path)
+
+
+if __name__ == "__main__":
+  main()
