@@ -29,28 +29,19 @@ LARGE_ICON_FONT_COLOR = colors.WHITE
 
 TOP_ICON_Y = int(SMALL_ICON_HEIGHT / 2) + CARD_MARGIN
 
-TITLE_FONT = ImageFont.truetype(str(util.LEAGUE_GOTHIC_FONT_PATH),
-                                int(util.PIXELS_PER_INCH * 0.25))
-TITLE_ANCHOR = "mm"  # Middle Middle.
-TITLE_COORD = (int(CARD_WIDTH / 2), TOP_ICON_Y)
-TITLE_FONT_COLOR = colors.BLACK
-
 # Cost parameters
-COST_COORD = (CARD_MARGIN + int(SMALL_ICON_WIDTH / 2), TOP_ICON_Y)
+COST_COORD = (CARD_MARGIN + SMALL_ICON_WIDTH // 2, TOP_ICON_Y)
 
 # Describes the max width of card contents
-CONTENT_WIDTH = CARD_WIDTH - 4 * CARD_MARGIN
+CONTENT_WIDTH = CARD_WIDTH - 2 * CARD_MARGIN
 
 # Card image parameters
 # Width and height of card image
-CARD_IMAGE_WIDTH = CONTENT_WIDTH
-CARD_IMAGE_HEIGHT = int(CARD_HEIGHT * 0.5)
-CARD_IMAGE_TOP = TOP_ICON_Y
-CARD_IMAGE_BOTTOM = CARD_IMAGE_TOP + CARD_IMAGE_HEIGHT
+CARD_IMAGE_BOTTOM = int(1.5 * util.PIXELS_PER_INCH)
 CARD_IMAGE_BB = [
-    2 * CARD_MARGIN,
-    CARD_IMAGE_TOP,
-    CARD_MARGIN + CONTENT_WIDTH,
+    CARD_MARGIN,
+    CARD_MARGIN,
+    CARD_WIDTH - CARD_MARGIN,
     CARD_IMAGE_BOTTOM,
 ]
 
@@ -84,14 +75,6 @@ MANA_COORD = (CARD_WIDTH / 2, BOTTOM_ICON_Y)
 
 # Layout functions
 
-MAX_TITLE_WIDTH = int(CARD_WIDTH * 0.66)
-DEFAULT_TITLE_FONT = ImageFont.truetype(str(util.LEAGUE_GOTHIC_FONT_PATH),
-                                        int(util.PIXELS_PER_INCH * 0.25))
-TITLE_BG_COLOR = colors.GREY_50
-TITLE_BG_RADIUS = int(0.05 * util.PIXELS_PER_INCH)
-TITLE_BG_OUTLINE_COLOR = colors.BLACK
-TITLE_BG_OUTLINE_WIDTH = 8
-
 
 # We may need to shrink
 def _get_scaled_font(text: str, font: ImageFont.ImageFont, max_width: int):
@@ -100,24 +83,40 @@ def _get_scaled_font(text: str, font: ImageFont.ImageFont, max_width: int):
   return font
 
 
+MAX_TITLE_WIDTH = int(CARD_WIDTH * 0.6)
+DEFAULT_TITLE_FONT = ImageFont.truetype(str(util.LEAGUE_GOTHIC_FONT_PATH),
+                                        int(util.PIXELS_PER_INCH * 0.25))
+TITLE_BG_COLOR = colors.GREY_50
+TITLE_BG_RADIUS = int(0.05 * util.PIXELS_PER_INCH)
+TITLE_BG_OUTLINE_COLOR = colors.BLACK
+TITLE_BG_OUTLINE_WIDTH = 8
+TITLE_FONT_COLOR = colors.BLACK
+
+
 def render_title(draw: ImageDraw.Draw, desc: util.CardDesc):
-  font = _get_scaled_font(desc.title, DEFAULT_TITLE_FONT, MAX_TITLE_WIDTH)
-  width, height = font.getsize(desc.title)
-  width += 2 * CARD_MARGIN
-  height += CARD_MARGIN
-  bb = util.get_centered_bb(TITLE_COORD, width, height)
-  # Set the top to the top of the card
-  bb[1] = 0
-  draw.rounded_rectangle(bb,
+  scaled_font = _get_scaled_font(desc.title, DEFAULT_TITLE_FONT,
+                                 MAX_TITLE_WIDTH)
+  text_width, _ = scaled_font.getsize(desc.title)
+  bg_width = text_width + 2 * CARD_MARGIN
+  if desc.cost is not None:
+    bg_width += SMALL_ICON_WIDTH
+  bg_height = SMALL_ICON_HEIGHT
+  bg_bb = [
+      CARD_MARGIN, CARD_MARGIN, bg_width + CARD_MARGIN, bg_height + CARD_MARGIN
+  ]
+  draw.rounded_rectangle(bg_bb,
                          fill=TITLE_BG_COLOR,
-                         radius=TITLE_BG_RADIUS,
+                         radius=bg_height // 2,
                          width=TITLE_BG_OUTLINE_WIDTH,
                          outline=TITLE_BG_OUTLINE_COLOR)
-  draw.text(TITLE_COORD,
+  left_middle_coord = (2 *
+                       CARD_MARGIN if desc.cost is None else 2 * CARD_MARGIN +
+                       SMALL_ICON_WIDTH, TOP_ICON_Y)
+  draw.text(left_middle_coord,
             desc.title,
             TITLE_FONT_COLOR,
-            font=font,
-            anchor=TITLE_ANCHOR)
+            font=scaled_font,
+            anchor="lm")
 
 
 MAX_ATTRIBUTE_WIDTH = int(CARD_WIDTH * 0.9)
@@ -159,7 +158,7 @@ def generate_card(desc: util.CardDesc, output_path: pathlib.Path):
 
   render_attributes(draw, desc)
 
-  card_art.render_card_art(im, desc, CARD_IMAGE_BB)
+  card_art.render_card_art(im, desc, CARD_IMAGE_BB, SMALL_ICON_HEIGHT // 2)
 
   render_title(draw, desc)
 

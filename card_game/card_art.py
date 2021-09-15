@@ -109,11 +109,8 @@ def _crop_corners(im: Image, radius: int):
   im.putalpha(mask)
 
 
-CARD_ART_RADIUS = int(0.1 * util.PIXELS_PER_INCH)
-
-
-def render_card_art(im: Image, desc: util.CardDesc,
-                    image_bb: util.BoundingBox) -> Image:
+def render_card_art(im: Image, desc: util.CardDesc, image_bb: util.BoundingBox,
+                    radius: float) -> Image:
   # Seed random number gen with deterministic hash of card description. This
   # gives us the same image if we run the generation script twice.
   random.seed(desc.hash())
@@ -156,7 +153,7 @@ def render_card_art(im: Image, desc: util.CardDesc,
                               min_radius, max_radius),
                    fill=rand_color(color_palette.primary_hue, min_saturation,
                                    max_saturation, min_value, max_value))
-  _crop_corners(art_image, CARD_ART_RADIUS)
+  _crop_corners(art_image, radius)
   im.paste(art_image, image_bb, art_image)
 
 
