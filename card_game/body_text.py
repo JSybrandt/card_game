@@ -11,19 +11,19 @@ from . import colors, icons, util
 
 # Customizations of the body text area.
 
-FONT = ImageFont.truetype(str(util.EB_GARAMOND_FONT_PATH),
-                          int(util.PIXELS_PER_INCH * 0.1))
 FONT_COLOR = colors.BLACK
 BG_RADIUS = int(util.PIXELS_PER_INCH * 0.05)
 BG_COLOR = colors.GREY_50
 BODY_TEXT_MARGIN = int(util.PIXELS_PER_INCH * 0.05)
 
-TEXT_HEIGHT = int(util.PIXELS_PER_INCH * 0.1)
+TEXT_HEIGHT = int(util.PIXELS_PER_INCH * 0.16)
+FONT = ImageFont.truetype(str(util.EB_GARAMOND_FONT_PATH),
+                          TEXT_HEIGHT)
 TOKEN_PADDING_Y = int(util.PIXELS_PER_INCH * 0.01)
 TOKEN_PADDING_X = int(util.PIXELS_PER_INCH * 0.02)
 
 COST_BG_COLOR = colors.AMBER_200
-COST_PADDING_X = int(util.PIXELS_PER_INCH * 0.025)
+COST_PADDING_X = int(util.PIXELS_PER_INCH * 0.05)
 
 UNKNOWN_TEXT = "[?]"
 
@@ -89,7 +89,7 @@ ICON_WIDTH = TEXT_HEIGHT
 
 MANA_ICON_HEIGHT = ICON_WIDTH
 MANA_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
-                                    int(util.PIXELS_PER_INCH * 0.08))
+                                    int(TEXT_HEIGHT * 0.8))
 MANA_ICON_FONT_COLOR = colors.WHITE
 MANA_ICON_REGEX = "<(.+)([FWDLNG])>"
 
