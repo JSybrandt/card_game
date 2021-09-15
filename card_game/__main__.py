@@ -21,9 +21,9 @@ CARD_MARGIN = int(0.1 * util.PIXELS_PER_INCH)
 SMALL_ICON_HEIGHT = SMALL_ICON_WIDTH = int(0.35 * util.PIXELS_PER_INCH)
 LARGE_ICON_HEIGHT = LARGE_ICON_WIDTH = int(0.5 * util.PIXELS_PER_INCH)
 SMALL_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
-                                     int(SMALL_ICON_HEIGHT*0.8))
+                                     int(SMALL_ICON_HEIGHT * 0.8))
 LARGE_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
-                                     int(LARGE_ICON_HEIGHT*0.8))
+                                     int(LARGE_ICON_HEIGHT * 0.8))
 SMALL_ICON_FONT_COLOR = colors.WHITE
 LARGE_ICON_FONT_COLOR = colors.WHITE
 
