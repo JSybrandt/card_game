@@ -48,7 +48,7 @@ CARD_IMAGE_HEIGHT = int(CARD_HEIGHT * 0.5)
 CARD_IMAGE_TOP = TOP_ICON_Y
 CARD_IMAGE_BOTTOM = CARD_IMAGE_TOP + CARD_IMAGE_HEIGHT
 CARD_IMAGE_BB = [
-    2*CARD_MARGIN,
+    2 * CARD_MARGIN,
     CARD_IMAGE_TOP,
     CARD_MARGIN + CONTENT_WIDTH,
     CARD_IMAGE_BOTTOM,
@@ -104,11 +104,15 @@ def render_title(draw: ImageDraw.Draw, desc: util.CardDesc):
   font = _get_scaled_font(desc.title, DEFAULT_TITLE_FONT, MAX_TITLE_WIDTH)
   width, height = font.getsize(desc.title)
   width += 2 * CARD_MARGIN
-  height +=  CARD_MARGIN
+  height += CARD_MARGIN
   bb = util.get_centered_bb(TITLE_COORD, width, height)
   # Set the top to the top of the card
   bb[1] = 0
-  draw.rounded_rectangle(bb, fill=TITLE_BG_COLOR, radius=TITLE_BG_RADIUS, width=TITLE_BG_OUTLINE_WIDTH, outline=TITLE_BG_OUTLINE_COLOR)
+  draw.rounded_rectangle(bb,
+                         fill=TITLE_BG_COLOR,
+                         radius=TITLE_BG_RADIUS,
+                         width=TITLE_BG_OUTLINE_WIDTH,
+                         outline=TITLE_BG_OUTLINE_COLOR)
   draw.text(TITLE_COORD,
             desc.title,
             TITLE_FONT_COLOR,
@@ -130,7 +134,7 @@ def render_attributes(draw: ImageDraw.Draw, desc: util.CardDesc):
   font = _get_scaled_font(text, ATTRIBUTE_FONT, MAX_ATTRIBUTE_WIDTH)
   width, height = font.getsize(text)
   width += 2 * CARD_MARGIN
-  height +=  CARD_MARGIN
+  height += CARD_MARGIN
   bb = util.get_centered_bb(ATTRIBUTE_COORD, width, height)
   # Move top under image
   bb[1] -= 2 * ATTRIBUTE_BG_RADIUS

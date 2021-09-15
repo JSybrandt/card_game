@@ -17,8 +17,7 @@ BG_COLOR = colors.GREY_50
 BODY_TEXT_MARGIN = int(util.PIXELS_PER_INCH * 0.05)
 
 TEXT_HEIGHT = int(util.PIXELS_PER_INCH * 0.16)
-FONT = ImageFont.truetype(str(util.EB_GARAMOND_FONT_PATH),
-                          TEXT_HEIGHT)
+FONT = ImageFont.truetype(str(util.EB_GARAMOND_FONT_PATH), TEXT_HEIGHT)
 TOKEN_PADDING_Y = int(util.PIXELS_PER_INCH * 0.01)
 TOKEN_PADDING_X = int(util.PIXELS_PER_INCH * 0.02)
 
