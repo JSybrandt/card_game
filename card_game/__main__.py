@@ -21,9 +21,9 @@ CARD_MARGIN = int(0.1 * util.PIXELS_PER_INCH)
 SMALL_ICON_HEIGHT = SMALL_ICON_WIDTH = int(0.35 * util.PIXELS_PER_INCH)
 LARGE_ICON_HEIGHT = LARGE_ICON_WIDTH = int(0.5 * util.PIXELS_PER_INCH)
 SMALL_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
-                                     int(util.PIXELS_PER_INCH * 0.3))
+                                     int(SMALL_ICON_HEIGHT*0.8))
 LARGE_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
-                                     int(util.PIXELS_PER_INCH * 0.4))
+                                     int(LARGE_ICON_HEIGHT*0.8))
 SMALL_ICON_FONT_COLOR = colors.WHITE
 LARGE_ICON_FONT_COLOR = colors.WHITE
 
@@ -65,10 +65,10 @@ BODY_TEXT_BG_BB = [
 
 BOTTOM_ICON_Y = CARD_HEIGHT - int(LARGE_ICON_HEIGHT / 2) - CARD_MARGIN
 
-POWER_COORD = (CARD_WIDTH * 0.25, BOTTOM_ICON_Y)
+POWER_COORD = (CARD_WIDTH * 0.2, BOTTOM_ICON_Y)
 POWER_BG_COLOR = colors.BLUE_GREY_800
 
-HEALTH_COORD = (CARD_WIDTH * 0.75, BOTTOM_ICON_Y)
+HEALTH_COORD = (CARD_WIDTH * 0.8, BOTTOM_ICON_Y)
 HEALTH_BG_COLOR = colors.RED_A400
 
 MANA_COORD = (CARD_WIDTH / 2, BOTTOM_ICON_Y)
@@ -83,7 +83,7 @@ def _get_scaled_font(text: str, font: ImageFont.ImageFont, max_width: int):
   return font
 
 
-MAX_TITLE_WIDTH = int(CARD_WIDTH * 0.6)
+MAX_TITLE_WIDTH = int(CARD_WIDTH * 0.8)
 DEFAULT_TITLE_FONT = ImageFont.truetype(str(util.LEAGUE_GOTHIC_FONT_PATH),
                                         int(util.PIXELS_PER_INCH * 0.25))
 TITLE_BG_COLOR = colors.GREY_50

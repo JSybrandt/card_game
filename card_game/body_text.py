@@ -81,7 +81,7 @@ class TextToken(Token):
 
   @classmethod
   def is_token(cls, text: str) -> bool:
-    return text[0] != "<" and text[-1] != ">"
+    return text[0] != "<" or text[-1] != ">"
 
 
 ICON_WIDTH = TEXT_HEIGHT
@@ -128,6 +128,10 @@ ICONS = {
         _load_image(util.ICON_DIR.joinpath("exhaust.png")),
     "<READY>":
         _load_image(util.ICON_DIR.joinpath("ready.png")),
+    "<DRAW_CARD>":
+        _load_image(util.ICON_DIR.joinpath("draw_card.png")),
+    "<SACRIFICE>":
+        _load_image(util.ICON_DIR.joinpath("sacrifice.png")),
     "<HOLDING_ACTION>":
         _load_image(util.ICON_DIR.joinpath("holding_action.png")),
     "<RECRUIT_ACTION>":

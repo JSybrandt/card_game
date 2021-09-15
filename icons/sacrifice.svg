@@ -13,7 +13,7 @@
    version="1.1"
    id="svg8"
    inkscape:version="1.0.2 (e86c870879, 2021-01-15)"
-   sodipodi:docname="break_action.svg"
+   sodipodi:docname="sacrifice.svg"
    inkscape:export-filename="/home/jsybrandt/Projects/card_game/icons/draw_card.png"
    inkscape:export-xdpi="96"
    inkscape:export-ydpi="96">
@@ -309,9 +309,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.84695959"
-     inkscape:cx="422.92378"
-     inkscape:cy="132.85282"
+     inkscape:zoom="1.1035906"
+     inkscape:cx="339.20499"
+     inkscape:cy="334.69895"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -372,11 +372,17 @@
        y="-1e-06"
        ry="22.67857" />
     <path
-       style="fill:#ffff00;stroke:#000000;stroke-width:0.342899px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m -145.52083,0 52.916662,31.750001 -27.431912,17.144949 27.431912,17.144951 -27.431912,17.144949 20.573933,34.2899 L -109.74911,83.18485 -75.459203,66.039901 -92.604168,48.89495 -58.314267,31.750001 -95.25,0 Z"
-       id="path490"
-       sodipodi:nodetypes="cccccccccccc"
-       clip-path="url(#clipPath520)"
-       transform="translate(171.97916)" />
+       style="fill:#ff0000;stroke:#000000;stroke-width:0.292308px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="m 32.358255,103.36479 84.058415,-47.802291 5.29166,0 23.8125,-15.874999 5.29167,10.583333 -23.8125,15.875 v 5.291666 l -20.93891,13.726332 c 0,0 -62.103929,38.290849 -73.702835,18.200959 z"
+       id="path544"
+       sodipodi:nodetypes="ccccccccc" />
+    <rect
+       style="fill:#ff0000;stroke-width:0.264583"
+       id="rect546"
+       width="47.625"
+       height="10.583333"
+       x="95.682236"
+       y="-71.551544"
+       transform="rotate(57.333837)" />
   </g>
 </svg>

@@ -1,12 +1,12 @@
 Element,Card Type,Title,Cost,Attributes,Body Text,Power,Health
 D,Unit,Fallen Soldier,1,"Military, Dark",<RECRUIT_ACTION> You may recruit this unit from the discard pile.,2,1
-D,Unit,Necromancer,3,"Military, Dark","<ANY_ACTION> <1D> <END_COST> As an additional cost, sacrifice a friendly unit. Draw 1 card.",2,3
+D,Unit,Necromancer,3,"Military, Dark",<ANY_ACTION> <1D> <END_COST> You may <SACRIFICE> friendly unit and <DRAW_CARD>,2,3
 D,Unit,Cultist,1,"Military, Dark",You may have up to 6 copies of Cultist in your deck.,1,1
 D,Unit,Bone Reader,5,"Miliary, Dark",<ANY_ACTION> <EXHAUST> <END_COST> Return target card from your grave yard to your hand,2,3
 D,Spell,Invoke Evil,1,"Combat, Magic, Dark",<COMBAT_ACTION> Sacrifice a unit to destroy target unit,,
 D,Holding,Marsh,,Basic Resource,You may have more than 3 copies of Marsh in your holding deck.,,
 D,Spell,Strike to the heart,2,"Combat, Magic, Dark",<COMBAT_ACTION> Destroy target unit.,,
-D,Leader,"Head Priest, Shrine Dark Hearts",,Leader,"<ANY_ACTION> <EXHAUST> Sacrifice friendly unit <END_COST> Gain one soul <ANY_ACTION> <EXHAUST> Spend one soul <END_COST> Draw a card. <ANY_ACTION> Spend 6 souls <END_COST> Add an ""Ineffable Fathom"" token to your front line.",,
+D,Leader,"Head Priest, Shrine Dark Hearts",,Leader,"<ANY_ACTION> <EXHAUST> <SACRIFICE> <END_COST> Gain one soul <ANY_ACTION> <EXHAUST> Spend one soul <END_COST> <DRAW_CARD> <ANY_ACTION> Spend 6 souls <END_COST> Add an ""Ineffable Fathom"" token to your front line.",,
 D,Token,Ineffable Fathom,,Demon,<COMBAT_ACTION> <EXHAUST> <END_COST> Destroy target unit with power less than Uneffable Fathom. Gain 1 soul token.,6,8
 D,Spell,Drowning Muck,3,"Miliary, Dark",Reduce each enemy unit's power and health by one at the current battlefield,,
 D,Unit,Grave Dragger,4,"Military, dark",When grave dragger enters the battlfield each player sacrifices a unit,2,3
@@ -20,7 +20,7 @@ F,Unit,Horseman,2,"Military, Fire",You may recruit this unit as a Combat Action 
 F,Spell,Invoke Fervor,1,"Combat, Magic, Fire",<COMBAT_ACTION> Target unit gains +2 power.,,
 F,Unit,Deranged Prophet,3,"Military, Fire",<COMBAT_ACTION> <EXHAUST> Use an ability wirtten on a target unit.,1,3
 F,Spell,Precision Shots,1,"Combat, Magic, Fire",<COMBAT_ACTION> Deal 1 damage to up to two different targets.,,
-F,Unit,Pyro,2,"Military, Fire",<COMBAT_ACTION> <EXHAUST> Sacrifice <END_COST> Deal 3 damage to a target.,2,3
+F,Unit,Pyro,2,"Military, Fire",<COMBAT_ACTION> <EXHAUST> <SACRIFICE> <END_COST> Deal 3 damage to a target.,2,3
 F,Unit,Flame Wizard,4,"Military, Fire",<COMBAT_ACTION> <EXHAUST> <END_COST> Deal 2 damage to target.,1,3
 F,Unit,Channeler of Lightning,2,"Military, Fire",Deal 1 damage to target unit whenever you use a combat action on a spell.,2,1
 F,Spell,Time to Strike,1,"Buff, Fire",<ANY_ACTION> You may recruit your next unit directly to the battlefield,,
@@ -65,7 +65,7 @@ N,Holding,Woodlands,,Basic Resource,You may have more than 3 copies of Woodlands
 N,Spell,Discover Nature,2,"Combat, Magic, Nature",<ANY_ACTION> Search yuor Holding deck for a Basic Resource and play it. Shuffle your Holding deck.,,
 N,Unit,Sage of the Hills,3,"Military, Nature",<HOLDING_ACTION> Look at the top of the holding deck. You may place the top card of the holding deck on the bottom.,2,3
 N,Unit,Dire Wolf,5,"Military, Nature","When this unit enters a battlefield, deal 3 damage to target unit",5,3
-N,Leader,"Grimland, Insightful Scout",,Leader,<ANY_ACTION> <EXHAUST> <2N> Sacrifice 1 holding <END_ACTION> Search your holding deck for a generic holding and place it into play exhausted.,,
+N,Leader,"Grimland, Insightful Scout",,Leader,<ANY_ACTION> <EXHAUST> <2N> <SACRIFICE> holding <END_COST> Search your holding deck for a generic holding and place it into play exhausted.,,
 N,Holding,Vinetrap,,"Break Holding, Nature",<BREAK_ACTION> Return target card from your graveyard to your hand ,,
 N,Unit,Moma Bear,4,Animal,"When you recruit Moma Bear, add two Little Bear tokens.",2,4
 N,Token,Little Bear,,Animal,,1,1
@@ -77,9 +77,19 @@ W,Holding,Oceanside,,Basic Resource,You may have more than 3 copies of Oceanside
 W,Holding,Library of Crescent Hill,,Resource,<ANY_ACTION> <EXHAUST> <3W> <END_COST> Look at the top five cards of your library. You may reveal 1 spell and place it into your hand. Shuffle the remaining cards into your deck,,
 W,Unit,Greater Sea Serpent,5,"Military, Hydro",,5,8
 W,Spell,A Scholar's Insight,2,"Combat, Magic, Hydro",<ANY_ACTION> Look at the top 3 cards of your library. Place one into your hand and the remainder in your graveyard,,
-W,Unit,Sage of the Texts,3,"Military, Hydro",<ANY_ACTION> <EXHAUST> <1W> <END_COST> Draw 1 card.,2,3
+W,Unit,Sage of the Texts,3,"Military, Hydro",<ANY_ACTION> <EXHAUST> <1W> <END_COST> <DRAW_CARD>,2,3
 W,Unit,Turtle,1,"Defense, Hydro",This unit may not be assigned to attack.,1,3
-W,Spell,Deconstruct,2,"Magic, Hydro",<ANY_ACTION> Counter target spell or unit,,
-W,Unit,Great Ponderer,2,"Miltary, Hydro","When this unit enters a battlefield, draw one card",1,2
-W,Leader,"Sarea, Guide to Knowledge",,Leader,"<ANY_ACTION> <EXHAUST> + <EXHAUST> 3 Hydro units <END_COST> Draw a card, During the holding phase you may return one of your units to your hand",,
+W,Spell,Ponderings,1,"Magic, Hydro","<ANY_ACTION> Look at the top 3 cards of your deck. Draw 1, put 1 on the bottom, and 1 on the top.",,
+W,Unit,Great Ponderer,2,"Miltary, Hydro","After you play this unit, <DRAW_CARD>",1,2
+W,Leader,"Sarea, Guide to Knowledge",,Leader,<ANY_ACTION> <EXHAUST> + <EXHAUST> 3 Hydro units <END_COST> <DRAW_CARD> During the holding phase you may return one of your units to your hand,,
 W,Holding,Riptide,,"Break Holding, Hydro",<BREAK_ACTION> Draw 2 cards,,
+W,Unit,Expectant Dockhand,1,"Military, Hydro","When Expectant Dockhand enters the battlefield, look at the top 3 cards of your library. Place them back on the top of your library in any order",0,2
+W,Attachment,Spy Glass,2,Surge,"When this unit deals damage to a territory, <DRAW_CARD> or mill one card.",,
+W,Unit,Phantasm of the Night,3,"Military, Hydro","When Phantasm of the Night, enters the battlefield return one friendly unit and up to one of your opponents units",4,2
+W,Spell,Go on a journey,4,"Combat, Magic, Hydro",<COMBAT_ACTION> Place target unit on top of its owners library,,
+G,Holding,Prisim,,,"When tapped for resources, Prisim may produce any color.",,
+N,Unit,Elvish Runner,2,"Military, Nature",<ANY_ACTION> <3N> <END_COST> Give Elvish Runner +2/+2,2,2
+N,Unit,Forgotten Hydra,X,"Military, Nature","When Forgotten Hydra enters the battle field, place X +1/+1 Counters on it",1,1
+N,Spell,Back to the Brush,4,"Magic, Nature","<Any_ACTION> <SACRIFICE> <END_ACTION> <DRAW_CARD> equal to half of sacrified unit's power, rounded up.",,
+N,Unit,Greater Scaleback,5,"Military, Nature",You may recruit this unit as a Combat Action into the current Battlefield. Give up to 2 friendly units +2/+2 until end of turn.,4,4
+W,Spell,Turning the Tide,3,Status,"<ANY_ACTION> During your opponents next turn, whenever they <EXHAUST> a holding, you may deal one damage to a unit.",,
