@@ -13,7 +13,7 @@ D,Unit,Grave Dragger,4,"Military, dark",When grave dragger enters the battlfield
 D,Holding,Shallow Grave,,"Break Holding, Dark",<BREAK_ACTION> Target player discards 1 card from their hand at random,,
 D,Unit,Traitor to Darkness,1,"Underworld, Criminal",<RANGED_ACTION> <EXHAUST> <END_COST> <EXHAUST> target dark unit.,1,1
 F,Spell,Fireball,1,Magic,<COMBAT_ACTION> Target takes 2 damage.,,
-F,Holding,Desert,,Generic,<ANY_ACITON> <EXHAUST> <END_COST> Deal 1 damage.,,
+F,Holding,Desert,,Generic,<ANY_ACTION> <EXHAUST> <END_COST> Deal 1 damage.,,
 F,Unit,Armor Smith,3,"Military, Fire",<COMBAT_ACTION> <1F> <END_COST> Friendly units at the battlefield gain 1 heath.,2,3
 F,Holding,Cavalry Stables,,Resource,<COMBAT_ACTION> <EXHAUST> <1F> <END_COST> Recruit a Unit paying its cost.,,
 F,Unit,Infantry,1,"Military, Fire",,2,3
@@ -52,14 +52,14 @@ G,Spell,Bribe,X,Military,<COMBAT_ACTION> Move a Unit home with power <= X.,,
 G,Unit,Quartermaster,2,"Pirate, Banker",Quartermaster may not be assigned as an Attacker. <HOLDING_ACTION> <EXHAUST> <END_COST> <READY> a Holding.,1,3
 G,Holding,Prisim,,Gemstone,"When tapped for resources, Prisim may produce any color.",,
 G,Holding,Dark Money,,"Criminal, Political",<HOLDING_ACTION> <EXHAUST> <1G> <END_COST> <EXHAUST> one of your opponents holdings.,,
-G,Unit,Saboteur,2,"Criminal, Underworld","<COMBAT_ACTION> <EXHAUST> <END_COST> Until the combat phase ends or Saboteur leaves the battlefield, whenever your opponent exhausts a holding for mana, deal one damage to target unit.",2,3
+G,Unit,Saboteur,2,"Criminal, Underworld","<COMBAT_ACTION> <EXHAUST> <END_COST> While Sabateur is at this combat, when your opponent exausts a holding to generate mana, deal 1 damage to target unit.",2,3
 G,Unit,Body Guard,3,Criminal,"Protector. (When combat starts, select a friendly unit at the battlefield. That unit may not be targeted as long as this unit remains at the battlefield.)",3,5
 G,Holding,Stockpile,,Bank,"<HOLDING_ACTION> <EXHAUST> <END_COST> Put one counter on Stockpile. <HOLDING_ACTION> <EXHAUST> <END_COST> Remove all counters from Stockpile, generate <1G> for each removed.",,
-G,Unit,Gumshoe,3,"Detective, Underworld",<RANGED_ACTION> <1G> <EXHAUST> <END_COST> <EXAUST> target unit.,2,3
+G,Unit,Gumshoe,3,"Detective, Underworld",<RANGED_ACTION> <1G> <EXHAUST> <END_COST> <EXHAUST> target unit.,2,3
 G,Holding,Immaculate Black Opal,,"Unique, Gemstone","Instead of adding Immaculate Black Opal to your holding zone, replace one of your opponents remaining Territoties with it. Remove the replaced Territory from play.",,
 G,Spell,Payroll,X,Bribe,<COMBAT_ACTION> Target unit with power <= X joins your side of the combat until combat ends or it leaves the battlefield.,,
 G,Spell,Toll,3,Bribe,"<HOLDING_ACTION> This turn, it costs <1G> to assign a defender.",,
-G,Unit,Street Fighter,3,"Criminal, Brute",<COMBAT_ACITON> <2G> <END_COST> <READY> Street Fighter. You may perform this action even if Street Fighter is Exhausted.,4,3
+G,Unit,Street Fighter,3,"Criminal, Brute",<COMBAT_ACTION> <2G> <END_COST> <READY> Street Fighter. You may perform this action even if Street Fighter is Exhausted.,4,3
 G,Leader,Don Garamond,,Criminal,"<COMBAT_ACTION> <1G> <EXHAUST> <END_COST> If there are no ready defenders, deal 1 damage to the Territory for each friendly Criminal at the battlefield.",,
 G,Spell,Getaway,X,Criminal,<COMBAT_ACTION> Move friendly units home with total power <= X.,,
 L,Holding,Meadowlands,,Generic,<COMBAT_ACTION> <EXHAUST> <END_COST> Move friendly unit to the battlefield.,,
@@ -89,12 +89,12 @@ N,Spell,Entangling Vines,2,Snare,<ANY_ACTION> Target unit may not move or be ass
 N,Spell,Explosive Growth,2,Surge,<COMBAT_ACTION> All friendly units gain +1 strength and +1 health.,,
 N,Unit,Elvish Runner,2,"Military, Nature",<ANY_ACTION> <3N> <END_COST> Give Elvish Runner +2/+2,2,2
 N,Unit,Forgotten Hydra,X,"Military, Nature","When Forgotten Hydra enters the battle field, place X +1/+1 Counters on it",1,1
-N,Spell,Back to the Brush,4,"Magic, Nature","<Any_ACTION> <SACRIFICE> <END_ACTION> <DRAW_CARD> equal to half of sacrified unit's power, rounded up.",,
+N,Spell,Back to the Brush,4,"Magic, Nature","<ANY_ACTION> <SACRIFICE> <END_COST> <DRAW_CARD> equal to half of sacrified unit's power, rounded up.",,
 N,Unit,Greater Scaleback,5,"Military, Nature",You may recruit this unit as a Combat Action into the current Battlefield. Give up to 2 friendly units +2/+2 until end of turn.,4,4
 N,Unit,Traitor to Nature,1,"Underworld, Criminal",<RANGED_ACTION> <EXHAUST> <END_COST> <EXHAUST> target nature unit.,1,1
 N,Unit,Twin-Headed Snake,4,Beast,This unit may divide its power between two targets during a single attack.,4,4
 W,Spell,Revoke,1,"Combat, Magic, Hydro",<COMBAT_ACTION> Return target unit to its owners hand,,
-W,Holding,Oceanside,,Generic,<ANY_ACITON> <EXHAUST> <END_COST> You may look at the top card of your deck.,,
+W,Holding,Oceanside,,Generic,<ANY_ACTION> <EXHAUST> <END_COST> You may look at the top card of your deck.,,
 W,Holding,Library of Crescent Hill,,Resource,<ANY_ACTION> <EXHAUST> <3W> <END_COST> Look at the top five cards of your library. You may reveal 1 spell and place it into your hand. Shuffle the remaining cards into your deck,,
 W,Unit,Greater Sea Serpent,5,"Military, Hydro",,5,8
 W,Spell,A Scholar's Insight,2,"Combat, Magic, Hydro",<ANY_ACTION> Look at the top 3 cards of your library. Place one into your hand and the remainder in your graveyard,,
@@ -103,7 +103,7 @@ W,Unit,Turtle,1,"Defense, Hydro","Protector. (When combat starts, select a frien
 W,Spell,Ponderings,1,"Magic, Hydro","<ANY_ACTION> Look at the top 3 cards of your deck. Draw 1, put 1 on the bottom, and 1 on the top.",,
 W,Unit,Great Ponderer,2,"Miltary, Hydro","After you play this unit, <DRAW_CARD>",1,2
 W,Leader,"Sarea, Guide to Knowledge",,Leader,<ANY_ACTION> <EXHAUST> + <EXHAUST> 3 Hydro units <END_COST> <DRAW_CARD> During the holding phase you may return one of your units to your hand,,
-W,Holding,Riptide,,"Break Holding, Hydro",<BREAK_ACTION> Draw 2 cards,,
+W,Holding,Riptide,,"Break Holding, Hydro",<BREAK_ACTION> <DRAW_CARD> <DRAW_CARD>,,
 W,Unit,Expectant Dockhand,1,"Military, Hydro","When Expectant Dockhand enters the battlefield, look at the top 3 cards of your library. Place them back on the top of your library in any order",0,2
 W,Attachment,Spy Glass,2,Surge,"When this unit deals damage to a territory, <DRAW_CARD> or mill one card.",,
 W,Unit,Phantasm of the Night,3,"Military, Hydro","When Phantasm of the Night, enters the battlefield return one friendly unit and up to one of your opponents units",4,2
