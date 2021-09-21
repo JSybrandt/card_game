@@ -8,7 +8,7 @@ import shutil
 
 from PIL import Image, ImageDraw, ImageFont
 
-from . import body_text, card_art, colors, icons, util
+from . import body_text, card_art, colors, icons, util, gsheets
 
 # Constants
 
@@ -195,9 +195,8 @@ def main():
   parser.add_argument("--output_dir",
                       type=pathlib.Path,
                       default=pathlib.Path("./img"))
-  parser.add_argument("--cards_csv",
-                      type=pathlib.Path,
-                      default=pathlib.Path("./cards.csv"))
+  parser.add_argument("--card_database_gsheets_id",
+                      type=str, default="1x9sT5zJ-JZzshgyqEQ30OoTz0F2ZO0ZKSDe6aRMBD_4")
   args = parser.parse_args()
 
   if args.output_dir.is_dir():
@@ -205,12 +204,15 @@ def main():
     shutil.rmtree(args.output_dir)
   print("Creating directory:", args.output_dir)
   args.output_dir.mkdir(parents=True)
-  with args.cards_csv.open() as csv_file:
-    for card_idx, row in enumerate(csv.DictReader(csv_file)):
-      output_path = args.output_dir.joinpath(f"card_{card_idx:03d}.png")
-      card_desc = util.to_card_desc(row)
-      pprint.pprint(card_desc)
-      generate_card(card_desc, output_path)
+
+  db = gsheets.CardDatabase(args.card_database_gsheets_id)
+  db._download()
+
+  for card_ids, row in enumerate(db):
+    output_path = args.output_dir.joinpath(f"card_{card_idx:03d}.png")
+    card_desc = util.to_card_desc(row)
+    pprint.pprint(card_desc)
+    generate_card(card_desc, output_path)
 
 
 if __name__ == "__main__":
