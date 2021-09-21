@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Any, Optional
 from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
@@ -61,22 +61,32 @@ class CardDatabase():
     self.sheet_id = sheet_id
     self.creds = _get_credential()
     self.service = build('sheets', 'v4', credentials=self.creds)
-    self.card_data = None
+    self.cards = None
 
   def _download(self):
-    if self.card_data is None:
+    if self.cards is None:
+      print("Downloading cards from gSheets.")
       response = self.service.spreadsheets().values().get(spreadsheetId=self.sheet_id, range=CARD_RANGE).execute()
-      self.card_data = response.get("values", [])
-
-  def __iter__(self):
-    def _gen():
-      self._download()
-      for idx, row in enumerate(self.card_data):
-        # Skip the first header element.
+      self.cards = {}
+      for idx, row in enumerate(response.get("values", [])):
         if idx == 0:
           assert row == EXPECTED_COLUMN_HEADERS, "Invalid column headers."
           continue
-        yield _row_to_card_desc(row)
-    return _gen()
+        desc = _row_to_card_desc(row)
+        assert desc.title not in self.cards, f"Duplicate title: {desc.title}"
+        self.cards[desc.title] = desc
+
+  def __iter__(self):
+    self._download()
+    return iter(self.cards.values())
+
+  def __contains__(self, key:Any)->bool:
+    self._download()
+    return key in self.cards
+
+  def __getitem__(self, key:Any)->Optional[util.CardDesc]:
+    self._download()
+    return self.cards.get(key, None)
+
 
 

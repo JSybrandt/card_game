@@ -9,6 +9,7 @@ import shutil
 from PIL import Image, ImageDraw, ImageFont
 
 from . import body_text, card_art, colors, icons, util, gsheets
+from typing import Optional
 
 # Constants
 
@@ -190,8 +191,36 @@ def generate_card(desc: util.CardDesc, output_path: pathlib.Path):
   im.save(output_path)
 
 
+def _render_all_cards(db: gsheets.CardDatabase, output_dir:pathlib.Path):
+  for card_idx, card_desc in enumerate(db):
+    output_path = output_dir.joinpath(f"card_{card_idx:03d}.png")
+    pprint.pprint(card_desc)
+    generate_card(card_desc, output_path)
+
+def _render_deck(decklist:pathlib.Path, db:gsheets.CardDatabase, output_dir:pathlib.Path):
+  card_idx = 0
+  assert decklist.is_file(), f"File not found: {decklist}"
+  with decklist.open() as f:
+    for row in f:
+      row = row.strip()
+      if len(row) == 0 or row[0] == "#":
+        continue
+      count, title = row.split(" ", 1)
+      count = int(count)
+      assert count > 0
+      assert title in db, f"Card not found: {title}"
+      card_desc = db[title]
+      pprint.pprint(card_desc)
+      for _ in range(count):
+        output_path = output_dir.joinpath(f"card_{card_idx:03d}.png")
+        generate_card(card_desc, output_path)
+        card_idx += 1
+
 def main():
   parser = argparse.ArgumentParser()
+  parser.add_argument("--decklist",
+                      type=pathlib.Path,
+                      default=None)
   parser.add_argument("--output_dir",
                       type=pathlib.Path,
                       default=pathlib.Path("./img"))
@@ -206,10 +235,10 @@ def main():
   args.output_dir.mkdir(parents=True)
 
   db = gsheets.CardDatabase(args.card_database_gsheets_id)
-  for card_idx, card_desc in enumerate(db):
-    output_path = args.output_dir.joinpath(f"card_{card_idx:03d}.png")
-    pprint.pprint(card_desc)
-    generate_card(card_desc, output_path)
+  if args.decklist is not None:
+    _render_deck(args.decklist, db, args.output_dir)
+  else:
+    _render_all_cards(db, args.output_dir)
 
 
 if __name__ == "__main__":
