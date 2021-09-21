@@ -153,10 +153,16 @@ def assert_valid_card_desc(fields: Dict[str, Any]):
   assert len(missing_fields) == 0, f"Missing attributes: {missing_fields}"
 
 
-def to_card_desc(fields: Dict[str, Any]):
+def field_dict_to_card_desc(fields: Dict[str, Any]):
   assert_valid_card_desc(fields)
-  fields = {k: str(v).strip() for k, v in fields.items()}
-  fields = {k: v if len(v) > 0 else None for k, v in fields.items()}
+  def _clean_value(v:Any)->Optional[str]:
+    if v is None:
+      return v
+    v = str(v).strip()
+    if len(v) == 0:
+      return None
+    return v
+  fields = {k: _clean_value(v) for k, v in fields.items()}
   return CardDesc(
       element=Element(fields["Element"]),
       card_type=CardType(fields["Card Type"]),

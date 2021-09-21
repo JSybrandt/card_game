@@ -206,11 +206,8 @@ def main():
   args.output_dir.mkdir(parents=True)
 
   db = gsheets.CardDatabase(args.card_database_gsheets_id)
-  db._download()
-
-  for card_ids, row in enumerate(db):
+  for card_idx, card_desc in enumerate(db):
     output_path = args.output_dir.joinpath(f"card_{card_idx:03d}.png")
-    card_desc = util.to_card_desc(row)
     pprint.pprint(card_desc)
     generate_card(card_desc, output_path)
 
