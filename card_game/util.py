@@ -1,6 +1,7 @@
 import dataclasses
 import enum
 import hashlib
+import math
 import pathlib
 from typing import Any, Dict, Optional, Tuple
 
@@ -185,3 +186,8 @@ def field_dict_to_card_desc(fields: Dict[str, Any]):
       health=fields["Health"],
       power=fields["Power"],
   )
+
+
+def sigmoid(x):
+  sig = 1 / (1 + math.exp(-x))
+  return sig

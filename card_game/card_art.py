@@ -51,27 +51,38 @@ def rand_shape(
   return points
 
 
-def get_nearby_hue(color: colors.Color) -> float:
-  hue, _, _ = colorsys.rgb_to_hsv(*color)
-  hue += random.uniform(-0.1, 0.1)
+def get_nearby_hue(hue: float, closeness: float = 0.1) -> float:
+  hue += random.uniform(-closeness, closeness)
   hue %= 1
   return hue
 
 
-def rand_color_palette(element: util.Element) -> ColorPalette:
-  primary_hue = (random.uniform(0, 1) if element == util.Element.GENERIC else
-                 get_nearby_hue(element.get_primary_color()))
-  primary_hue = (primary_hue + random.uniform(-0.1, 0.1)) % 1
-  secondary_hue = (primary_hue + 0.5 + random.uniform(-0.4, 0.4)) % 1
-  alt_hues = [
-      ((primary_hue - secondary_hue) / 2) % 1,
-      ((secondary_hue - primary_hue) / 2) % 1,
-      get_nearby_hue(element.get_light_color()),
-      get_nearby_hue(element.get_dark_color()),
-      random.random(),
-      random.random(),
-  ]
-  return ColorPalette(primary_hue, secondary_hue, alt_hues)
+def get_nearby_complimentary_hue(hue: float) -> float:
+  return get_nearby_hue((hue + 0.5) % 1, closeness=0.4)
+
+
+def get_nearby_hue_from_color(color: colors.Color) -> float:
+  hue, _, _ = colorsys.rgb_to_hsv(*color)
+  return get_nearby_hue(hue)
+
+
+def get_nearby_hue_from_element(element: util.Element) -> float:
+  if element == util.Element.GENERIC:
+    return random.uniform(0, 1)
+  return get_nearby_hue_from_color(element.get_primary_color())
+
+
+def rand_color_palette(desc: util.CardDesc) -> ColorPalette:
+  primary_hue = get_nearby_hue_from_element(desc.primary_element)
+  secondary_hue = (get_nearby_complimentary_hue(primary_hue)
+                   if desc.secondary_element is None else
+                   get_nearby_hue_from_element(desc.secondary_element))
+  alts = [((primary_hue - secondary_hue) / 2) % 1,
+          ((secondary_hue - primary_hue) / 2) % 1,
+          get_nearby_hue(primary_hue, 0.2),
+          get_nearby_hue(secondary_hue, 0.2),
+          random.random()]
+  return ColorPalette(primary_hue, secondary_hue, alts)
 
 
 def rand_color(
@@ -122,7 +133,7 @@ def render_card_art(im: Image, desc: util.CardDesc, image_bb: util.BoundingBox,
   art_draw = ImageDraw.Draw(art_image)
   art_draw.rectangle([0, 0, width, height], fill=colors.BLACK)
   num_shapes = random.randint(RAND_MIN_SHAPES, RAND_MAX_SHAPES)
-  color_palette = rand_color_palette(desc.primary_element)
+  color_palette = rand_color_palette(desc)
   for _ in range(num_shapes):
     offset_x = random.uniform(0, width)
     offset_y = random.uniform(0, height)
@@ -159,20 +170,32 @@ def render_card_art(im: Image, desc: util.CardDesc, image_bb: util.BoundingBox,
 
 BORDER_WIDTH = int(0.05 * util.PIXELS_PER_INCH)
 BORDER_CORNER_RADIUS = int(0.2 * util.PIXELS_PER_INCH)
-BG_PATTERN_SIZE = int(0.5 * util.PIXELS_PER_INCH)
+BG_PATTERN_SIZE = int(0.2 * util.PIXELS_PER_INCH)
 
 
 def render_background(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
                       image_bb: util.BoundingBox):
   random.seed(desc.hash())
-  color_palette = rand_color_palette(desc.primary_element)
+  color_palette = rand_color_palette(desc)
   left, top, right, bottom = image_bb
+  image_width = right - left
 
   # Generate a triangle mesh
   bg_left = left - BG_PATTERN_SIZE
   bg_right = right + BG_PATTERN_SIZE
   bg_top = top - BG_PATTERN_SIZE
   bg_bottom = bottom + BG_PATTERN_SIZE
+  bg_ceter = (bg_left + bg_right) / 2
+
+  def _get_hue(x: float) -> float:
+    """Gets the hue based on the horizontal location."""
+    if desc.secondary_element is None:
+      return color_palette.primary_hue
+    # fuzzy the card in half, left side is primary.
+    color_frac = util.sigmoid((x - bg_ceter) / image_width * 100 +
+                              random.uniform(-20, 20))
+    return (color_frac * color_palette.secondary_hue +
+            (1 - color_frac) * color_palette.primary_hue)
 
   x_cords = _get_random_coords(bg_left, bg_right, BG_PATTERN_SIZE, 0.2)
   y_cords = _get_random_coords(bg_top, bg_bottom, BG_PATTERN_SIZE, 0.2)
@@ -190,8 +213,9 @@ def render_background(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
             (x_cords[x + 1], y_cords[y + 1] + next_offset),
             (x_cords[x], y_cords[y + 1] + this_offset),
         ]
+        square_center_x = (x_cords[x] + x_cords[x + 1]) / 2
         draw.polygon(square,
-                     fill=rand_color(color_palette.primary_hue,
+                     fill=rand_color(_get_hue(square_center_x),
                                      max_saturation=max_saturation,
                                      min_saturation=min_saturation,
                                      min_value=0.9))
