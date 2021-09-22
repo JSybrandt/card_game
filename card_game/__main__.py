@@ -14,19 +14,19 @@ from . import body_text, card_art, colors, gsheets, icons, util
 # Unless specified, all sizes are in pixels.
 CARD_WIDTH = int(2.5 * util.PIXELS_PER_INCH)
 CARD_HEIGHT = int(3.5 * util.PIXELS_PER_INCH)
-CARD_MARGIN = int(0.1 * util.PIXELS_PER_INCH)
+CARD_MARGIN = int(0.125 * util.PIXELS_PER_INCH)
 
 # Default icon params
 SMALL_ICON_HEIGHT = SMALL_ICON_WIDTH = int(0.35 * util.PIXELS_PER_INCH)
 LARGE_ICON_HEIGHT = LARGE_ICON_WIDTH = int(0.5 * util.PIXELS_PER_INCH)
 SMALL_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
-                                     int(SMALL_ICON_HEIGHT * 0.8))
+                                     int(SMALL_ICON_HEIGHT * 0.9))
 LARGE_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
                                      int(LARGE_ICON_HEIGHT * 0.8))
 SMALL_ICON_FONT_COLOR = colors.WHITE
 LARGE_ICON_FONT_COLOR = colors.WHITE
 
-TOP_ICON_Y = int(SMALL_ICON_HEIGHT / 2) + CARD_MARGIN
+TOP_ICON_Y = int(0.175 * util.PIXELS_PER_INCH) + CARD_MARGIN
 
 # Cost parameters
 COST_COORD = (CARD_MARGIN + SMALL_ICON_WIDTH // 2, TOP_ICON_Y)
@@ -82,6 +82,7 @@ def _get_scaled_font(text: str, font: ImageFont.ImageFont, max_width: int):
   return font
 
 
+TITLE_BG_HEIGHT = int(0.35 * util.PIXELS_PER_INCH)
 MAX_TITLE_WIDTH = int(CARD_WIDTH * 0.8)
 DEFAULT_TITLE_FONT = ImageFont.truetype(str(util.LEAGUE_GOTHIC_FONT_PATH),
                                         int(util.PIXELS_PER_INCH * 0.25))
@@ -99,7 +100,7 @@ def render_title(draw: ImageDraw.Draw, desc: util.CardDesc):
   bg_width = text_width + 2 * CARD_MARGIN
   if desc.cost is not None:
     bg_width += SMALL_ICON_WIDTH
-  bg_height = SMALL_ICON_HEIGHT
+  bg_height = TITLE_BG_HEIGHT 
   bg_bb = [
       CARD_MARGIN, CARD_MARGIN, bg_width + CARD_MARGIN, bg_height + CARD_MARGIN
   ]
@@ -165,8 +166,8 @@ def generate_card(desc: util.CardDesc, output_path: pathlib.Path):
 
   # Draw icons
   if desc.cost is not None:
-    icons.draw_cost_icon(im, draw, COST_COORD, SMALL_ICON_WIDTH,
-                         SMALL_ICON_HEIGHT, desc.cost, SMALL_ICON_FONT,
+    icons.draw_cost_icon(im, draw, COST_COORD, int(SMALL_ICON_WIDTH * 1.2),
+                         int(SMALL_ICON_HEIGHT * 1.2), desc.cost, SMALL_ICON_FONT,
                          SMALL_ICON_FONT_COLOR, desc.primary_element,
                          desc.secondary_element)
   if desc.health is not None:
