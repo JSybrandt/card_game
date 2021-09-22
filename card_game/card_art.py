@@ -231,20 +231,19 @@ def render_boarder(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
       radius=BORDER_CORNER_RADIUS,
   )
   if desc.secondary_element is not None:
-    right_border= Image.new("RGBA",
-                            (im.width, im.height),
-                            color=desc.secondary_element.get_dark_color())
+    right_border = Image.new("RGBA", (im.width, im.height),
+                             color=desc.secondary_element.get_dark_color())
     right_mask = Image.new("L", (im.width, im.height), color=0)
     right_mask_draw = ImageDraw.Draw(right_mask)
     # Cut out the border
     right_mask_draw.rounded_rectangle(
         image_bb,
-        fill = 0,
-        outline = 255,
+        fill=0,
+        outline=255,
         width=BORDER_WIDTH,
         radius=BORDER_CORNER_RADIUS,
     )
     # Mask out left side
-    right_mask_draw.rectangle([0,0,im.width//2, im.height], fill=0)
+    right_mask_draw.rectangle([0, 0, im.width // 2, im.height], fill=0)
     right_border.putalpha(right_mask)
     im.paste(right_border, image_bb, right_border)

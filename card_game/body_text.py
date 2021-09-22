@@ -102,13 +102,12 @@ class ManaToken(Token):
     self.icon_text = mana_match.group(1)
     self.element = util.Element(mana_match.group(2))
 
-  def render(self, _: Image, draw: ImageDraw.Draw, cursor_x: int,
+  def render(self, im: Image, draw: ImageDraw.Draw, cursor_x: int,
              cursor_y: int):
     center = cursor_x + int(ICON_WIDTH / 2), cursor_y
-    icons.draw_circle_with_text(draw, center, ICON_WIDTH, MANA_ICON_HEIGHT,
-                                self.icon_text, MANA_ICON_FONT,
-                                MANA_ICON_FONT_COLOR,
-                                self.element.get_dark_color())
+    icons.draw_cost_icon(im, draw, center, ICON_WIDTH, MANA_ICON_HEIGHT,
+                         self.icon_text, MANA_ICON_FONT, MANA_ICON_FONT_COLOR,
+                         self.element)
 
   def width(self):
     return ICON_WIDTH

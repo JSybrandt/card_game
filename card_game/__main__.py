@@ -165,10 +165,10 @@ def generate_card(desc: util.CardDesc, output_path: pathlib.Path):
 
   # Draw icons
   if desc.cost is not None:
-    icons.draw_circle_with_text(draw, COST_COORD, SMALL_ICON_WIDTH,
-                                SMALL_ICON_HEIGHT, desc.cost, SMALL_ICON_FONT,
-                                SMALL_ICON_FONT_COLOR,
-                                desc.primary_element.get_dark_color())
+    icons.draw_cost_icon(im, draw, COST_COORD, SMALL_ICON_WIDTH,
+                         SMALL_ICON_HEIGHT, desc.cost, SMALL_ICON_FONT,
+                         SMALL_ICON_FONT_COLOR, desc.primary_element,
+                         desc.secondary_element)
   if desc.health is not None:
     icons.draw_heart_with_text(draw, HEALTH_COORD, LARGE_ICON_WIDTH,
                                LARGE_ICON_HEIGHT, desc.health, LARGE_ICON_FONT,
@@ -178,10 +178,10 @@ def generate_card(desc: util.CardDesc, output_path: pathlib.Path):
                                  LARGE_ICON_HEIGHT, desc.power, LARGE_ICON_FONT,
                                  LARGE_ICON_FONT_COLOR, POWER_BG_COLOR)
   if desc.card_type == util.CardType.HOLDING:
-    icons.draw_circle_with_text(draw, MANA_COORD, LARGE_ICON_WIDTH,
-                                LARGE_ICON_HEIGHT, "1", LARGE_ICON_FONT,
-                                LARGE_ICON_FONT_COLOR,
-                                desc.primary_element.get_dark_color())
+    icons.draw_cost_icon(im, draw, MANA_COORD, LARGE_ICON_WIDTH,
+                         LARGE_ICON_HEIGHT, "1", LARGE_ICON_FONT,
+                         LARGE_ICON_FONT_COLOR, desc.primary_element,
+                         desc.secondary_element)
 
   card_art.render_boarder(im, draw, desc, [0, 0, CARD_WIDTH, CARD_HEIGHT])
 

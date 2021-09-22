@@ -1,8 +1,9 @@
 # This  module produces icons.
 
 import math
+from typing import Optional
 
-from PIL import ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont
 
 from . import colors, util
 
@@ -10,14 +11,22 @@ from . import colors, util
 #pylint: disable=too-many-locals
 
 
-def draw_circle_with_text(draw: ImageDraw.Draw, center: util.Coord,
-                          icon_width: int, icon_height: int, text: str,
-                          font: ImageFont.ImageFont, font_color: colors.Color,
-                          background_color: colors.Color):
+def draw_cost_icon(im: Image,
+                   draw: ImageDraw.Draw,
+                   center: util.Coord,
+                   icon_width: int,
+                   icon_height: int,
+                   text: str,
+                   font: ImageFont.ImageFont,
+                   font_color: colors.Color,
+                   primary_element: util.Element,
+                   secondary_element: Optional[util.Element] = None):
   side = min(icon_width, icon_height)
   icon_bb = util.get_centered_bb(center, side, side)
-  draw.ellipse(icon_bb, fill=background_color)
+  draw.ellipse(icon_bb, fill=primary_element.get_dark_color())
   draw.text(center, text, font_color, anchor="mm", font=font)
+  if secondary_element is not None:
+    pass
 
 
 def draw_diamond_with_text(draw: ImageDraw.Draw, center: util.Coord,
