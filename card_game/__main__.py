@@ -183,7 +183,7 @@ def generate_card(desc: util.CardDesc, output_path: pathlib.Path):
                                 LARGE_ICON_FONT_COLOR,
                                 desc.primary_element.get_dark_color())
 
-  card_art.render_boarder(draw, desc, [0, 0, CARD_WIDTH, CARD_HEIGHT])
+  card_art.render_boarder(im, draw, desc, [0, 0, CARD_WIDTH, CARD_HEIGHT])
 
   print("Saving card:", output_path)
   im.save(output_path)
