@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 
 import argparse
-import csv
 import pathlib
 import pprint
 import shutil
 
 from PIL import Image, ImageDraw, ImageFont
 
-from . import body_text, card_art, colors, icons, util, gsheets
-from typing import Optional
+from . import body_text, card_art, colors, gsheets, icons, util
 
 # Constants
 
@@ -191,13 +189,15 @@ def generate_card(desc: util.CardDesc, output_path: pathlib.Path):
   im.save(output_path)
 
 
-def _render_all_cards(db: gsheets.CardDatabase, output_dir:pathlib.Path):
+def _render_all_cards(db: gsheets.CardDatabase, output_dir: pathlib.Path):
   for card_idx, card_desc in enumerate(db):
     output_path = output_dir.joinpath(f"card_{card_idx:03d}.png")
     pprint.pprint(card_desc)
     generate_card(card_desc, output_path)
 
-def _render_deck(decklist:pathlib.Path, db:gsheets.CardDatabase, output_dir:pathlib.Path):
+
+def _render_deck(decklist: pathlib.Path, db: gsheets.CardDatabase,
+                 output_dir: pathlib.Path, ignore_decklist_counts: bool):
   card_idx = 0
   assert decklist.is_file(), f"File not found: {decklist}"
   with decklist.open() as f:
@@ -206,7 +206,7 @@ def _render_deck(decklist:pathlib.Path, db:gsheets.CardDatabase, output_dir:path
       if len(row) == 0 or row[0] == "#":
         continue
       count, title = row.split(" ", 1)
-      count = int(count)
+      count = 1 if ignore_decklist_counts else int(count)
       assert count > 0
       assert title in db, f"Card not found: {title}"
       card_desc = db[title]
@@ -216,16 +216,19 @@ def _render_deck(decklist:pathlib.Path, db:gsheets.CardDatabase, output_dir:path
         generate_card(card_desc, output_path)
         card_idx += 1
 
+
 def main():
   parser = argparse.ArgumentParser()
-  parser.add_argument("--decklist",
-                      type=pathlib.Path,
-                      default=None)
+  parser.add_argument("--decklist", type=pathlib.Path, default=None)
+  parser.add_argument("--ignore_decklist_counts",
+                      type=bool,
+                      action="store_true")
   parser.add_argument("--output_dir",
                       type=pathlib.Path,
                       default=pathlib.Path("./img"))
   parser.add_argument("--card_database_gsheets_id",
-                      type=str, default="1x9sT5zJ-JZzshgyqEQ30OoTz0F2ZO0ZKSDe6aRMBD_4")
+                      type=str,
+                      default="1x9sT5zJ-JZzshgyqEQ30OoTz0F2ZO0ZKSDe6aRMBD_4")
   args = parser.parse_args()
 
   if args.output_dir.is_dir():
@@ -236,7 +239,8 @@ def main():
 
   db = gsheets.CardDatabase(args.card_database_gsheets_id)
   if args.decklist is not None:
-    _render_deck(args.decklist, db, args.output_dir)
+    _render_deck(args.decklist, db, args.output_dir,
+                 args.ignore_decklist_counts)
   else:
     _render_all_cards(db, args.output_dir)
 

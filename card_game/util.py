@@ -137,31 +137,35 @@ class CardDesc:
     return hashlib.md5(self.title.encode("utf-8")).hexdigest()
 
 
+# The CSV headers in order.
+EXPECTED_COLUMN_HEADERS = [
+    "Element",
+    "Card Type",
+    "Title",
+    "Cost",
+    "Attributes",
+    "Body Text",
+    "Power",
+    "Health",
+]
+
+
 def assert_valid_card_desc(fields: Dict[str, Any]):
-  missing_fields = [
-      a for a in [
-          "Element",
-          "Card Type",
-          "Title",
-          "Cost",
-          "Attributes",
-          "Body Text",
-          "Power",
-          "Health",
-      ] if a not in fields
-  ]
+  missing_fields = [a for a in EXPECTED_COLUMN_HEADERS if a not in fields]
   assert len(missing_fields) == 0, f"Missing attributes: {missing_fields}"
 
 
 def field_dict_to_card_desc(fields: Dict[str, Any]):
   assert_valid_card_desc(fields)
-  def _clean_value(v:Any)->Optional[str]:
+
+  def _clean_value(v: Any) -> Optional[str]:
     if v is None:
       return v
     v = str(v).strip()
     if len(v) == 0:
       return None
     return v
+
   fields = {k: _clean_value(v) for k, v in fields.items()}
   return CardDesc(
       element=Element(fields["Element"]),
