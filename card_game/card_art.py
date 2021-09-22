@@ -167,14 +167,6 @@ def render_background(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
   random.seed(desc.hash())
   color_palette = rand_color_palette(desc.element)
   left, top, right, bottom = image_bb
-  # # Border + background
-  # draw.rounded_rectangle(
-  # image_bb,
-  # outline=desc.element.get_dark_color(),
-  # width=BORDER_WIDTH,
-  # radius=BORDER_CORNER_RADIUS,
-  # fill=desc.element.get_light_color(),
-  # )
 
   # Generate a triangle mesh
   bg_left = left - BG_PATTERN_SIZE
