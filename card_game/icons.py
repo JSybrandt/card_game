@@ -24,9 +24,18 @@ def draw_cost_icon(im: Image,
   side = min(icon_width, icon_height)
   icon_bb = util.get_centered_bb(center, side, side)
   draw.ellipse(icon_bb, fill=primary_element.get_dark_color())
-  draw.text(center, text, font_color, anchor="mm", font=font)
   if secondary_element is not None:
-    pass
+    secondary_im = Image.new("RGBA", (side, side),
+                             color=secondary_element.get_dark_color())
+    secondary_mask = Image.new("L", (side, side))
+    secondary_mask_draw = ImageDraw.Draw(secondary_mask)
+    # Fill in the center
+    secondary_mask_draw.ellipse([0, 0, side, side], fill=255)
+    # Delete the top/left
+    secondary_mask_draw.polygon([(0, 0), (side, 0), (0, side)], fill=0)
+    secondary_im.putalpha(secondary_mask)
+    im.paste(secondary_im, icon_bb, secondary_im)
+  draw.text(center, text, font_color, anchor="mm", font=font)
 
 
 def draw_diamond_with_text(draw: ImageDraw.Draw, center: util.Coord,
