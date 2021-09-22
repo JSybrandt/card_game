@@ -122,7 +122,7 @@ def render_card_art(im: Image, desc: util.CardDesc, image_bb: util.BoundingBox,
   art_draw = ImageDraw.Draw(art_image)
   art_draw.rectangle([0, 0, width, height], fill=colors.BLACK)
   num_shapes = random.randint(RAND_MIN_SHAPES, RAND_MAX_SHAPES)
-  color_palette = rand_color_palette(desc.element)
+  color_palette = rand_color_palette(desc.primary_element)
   for _ in range(num_shapes):
     offset_x = random.uniform(0, width)
     offset_y = random.uniform(0, height)
@@ -136,8 +136,8 @@ def render_card_art(im: Image, desc: util.CardDesc, image_bb: util.BoundingBox,
   x_max_offset = width * 0.9
   y_min_offset = height * 0.1
   y_max_offset = height * 0.9
-  min_saturation = 0.1 if desc.element == util.Element.GENERIC else 0.6
-  max_saturation = 0.5 if desc.element == util.Element.GENERIC else 1
+  min_saturation = 0.1 if desc.primary_element == util.Element.GENERIC else 0.6
+  max_saturation = 0.5 if desc.primary_element == util.Element.GENERIC else 1
   min_value = 0.6
   max_value = 1
   min_radius = min(width, height) * 0.3
@@ -165,7 +165,7 @@ BG_PATTERN_SIZE = int(0.5 * util.PIXELS_PER_INCH)
 def render_background(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
                       image_bb: util.BoundingBox):
   random.seed(desc.hash())
-  color_palette = rand_color_palette(desc.element)
+  color_palette = rand_color_palette(desc.primary_element)
   left, top, right, bottom = image_bb
 
   # Generate a triangle mesh
@@ -176,8 +176,8 @@ def render_background(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
 
   x_cords = _get_random_coords(bg_left, bg_right, BG_PATTERN_SIZE, 0.2)
   y_cords = _get_random_coords(bg_top, bg_bottom, BG_PATTERN_SIZE, 0.2)
-  min_saturation = 0 if desc.element == util.Element.GENERIC else 0.1
-  max_saturation = 0 if desc.element == util.Element.GENERIC else 0.3
+  min_saturation = 0 if desc.primary_element == util.Element.GENERIC else 0.1
+  max_saturation = 0 if desc.primary_element == util.Element.GENERIC else 0.3
 
   for x, _ in enumerate(x_cords):
     this_offset = 0 if x % 2 == 0 else int(BG_PATTERN_SIZE / 2)
@@ -202,7 +202,7 @@ def render_boarder(draw: ImageDraw.Draw, desc: util.CardDesc,
                    image_bb: util.BoundingBox):
   draw.rounded_rectangle(
       image_bb,
-      outline=desc.element.get_dark_color(),
+      outline=desc.primary_element.get_dark_color(),
       width=BORDER_WIDTH,
       radius=BORDER_CORNER_RADIUS,
   )

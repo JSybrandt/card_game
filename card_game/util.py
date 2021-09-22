@@ -124,7 +124,8 @@ class Element(enum.Enum):
 
 @dataclasses.dataclass
 class CardDesc:
-  element: Element
+  primary_element: Element
+  secondary_element: Optional[Element]
   card_type: CardType
   title: str
   cost: str
@@ -139,7 +140,8 @@ class CardDesc:
 
 # The CSV headers in order.
 EXPECTED_COLUMN_HEADERS = [
-    "Element",
+    "Primary Element",
+    "Secondary Element",
     "Card Type",
     "Title",
     "Cost",
@@ -167,9 +169,15 @@ def field_dict_to_card_desc(fields: Dict[str, Any]):
     return v
 
   fields = {k: _clean_value(v) for k, v in fields.items()}
+  fields["Primary Element"] = Element(fields["Primary Element"])
+  if fields["Secondary Element"] is not None:
+    fields["Secondary Element"] = Element(fields["Secondary Element"])
+  fields["Card Type"] = CardType(fields["Card Type"])
+
   return CardDesc(
-      element=Element(fields["Element"]),
-      card_type=CardType(fields["Card Type"]),
+      primary_element=fields["Primary Element"],
+      secondary_element=fields["Secondary Element"],
+      card_type=fields["Card Type"],
       title=fields["Title"],
       cost=fields["Cost"],
       attributes=fields["Attributes"],
