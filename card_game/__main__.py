@@ -221,7 +221,6 @@ def main():
   parser = argparse.ArgumentParser()
   parser.add_argument("--decklist", type=pathlib.Path, default=None)
   parser.add_argument("--ignore_decklist_counts",
-                      type=bool,
                       action="store_true")
   parser.add_argument("--output_dir",
                       type=pathlib.Path,
