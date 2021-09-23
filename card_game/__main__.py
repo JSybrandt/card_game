@@ -149,7 +149,7 @@ def render_attributes(draw: ImageDraw.Draw, desc: util.CardDesc):
             anchor=ATTRIBUTE_ANCHOR)
 
 
-def generate_card(desc: util.CardDesc, output_path: pathlib.Path):
+def render_card(desc: util.CardDesc, output_path: pathlib.Path):
   assert not output_path.exists(), f"{output_path} already exists"
   im = Image.new(mode="RGBA", size=(CARD_WIDTH, CARD_HEIGHT))
   draw = ImageDraw.Draw(im)
@@ -189,12 +189,11 @@ def generate_card(desc: util.CardDesc, output_path: pathlib.Path):
   print("Saving card:", output_path)
   im.save(output_path)
 
-
 def _render_all_cards(db: gsheets.CardDatabase, output_dir: pathlib.Path):
   for card_idx, card_desc in enumerate(db):
     output_path = output_dir.joinpath(f"card_{card_idx:03d}.png")
     pprint.pprint(card_desc)
-    generate_card(card_desc, output_path)
+    render_card(card_desc, output_path)
 
 
 def _render_deck(decklist: pathlib.Path, db: gsheets.CardDatabase,
@@ -214,12 +213,13 @@ def _render_deck(decklist: pathlib.Path, db: gsheets.CardDatabase,
       pprint.pprint(card_desc)
       for _ in range(count):
         output_path = output_dir.joinpath(f"card_{card_idx:03d}.png")
-        generate_card(card_desc, output_path)
+        render_card(card_desc, output_path)
         card_idx += 1
 
 
 def main():
   parser = argparse.ArgumentParser()
+  parser.add_argument("--title", type=str, default=None)
   parser.add_argument("--decklist", type=pathlib.Path, default=None)
   parser.add_argument("--ignore_decklist_counts", action="store_true")
   parser.add_argument("--output_dir",
@@ -237,7 +237,10 @@ def main():
   args.output_dir.mkdir(parents=True)
 
   db = gsheets.CardDatabase(args.card_database_gsheets_id)
-  if args.decklist is not None:
+  if args.title is not None:
+    assert args.title in db
+    render_card(db[args.title], args.output_dir.joinpath(f"{args.title}.png"))
+  elif args.decklist is not None:
     _render_deck(args.decklist, db, args.output_dir,
                  args.ignore_decklist_counts)
   else:

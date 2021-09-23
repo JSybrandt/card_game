@@ -51,7 +51,7 @@ def rand_shape(
   return points
 
 
-def get_nearby_hue(hue: float, closeness: float = 0.1) -> float:
+def get_nearby_hue(hue: float, closeness: float = 0.05) -> float:
   hue += random.uniform(-closeness, closeness)
   hue %= 1
   return hue
