@@ -10,6 +10,9 @@ fi
 rm -rf card_sheets
 mkdir -p card_sheets
 
-montage -tile 3x3 -mode concatenate img/*.png card_sheets/%d.png
+montage \
+  -geometry +10+10 \
+  -tile 3x3 \
+  img/*.png card_sheets/%d.png
 
 
