@@ -16,9 +16,9 @@ BG_RADIUS = int(util.PIXELS_PER_INCH * 0.05)
 BG_COLOR = colors.GREY_50
 BODY_TEXT_MARGIN = int(util.PIXELS_PER_INCH * 0.05)
 
-TEXT_HEIGHT = int(util.PIXELS_PER_INCH * 0.18)
+TEXT_HEIGHT = int(util.PIXELS_PER_INCH * 0.16)
 FONT = ImageFont.truetype(str(util.EB_GARAMOND_FONT_PATH), TEXT_HEIGHT)
-TOKEN_PADDING_Y = int(util.PIXELS_PER_INCH * 0.01)
+TOKEN_PADDING_Y = int(util.PIXELS_PER_INCH * 0.02)
 TOKEN_PADDING_X = int(util.PIXELS_PER_INCH * 0.02)
 
 COST_BG_COLOR = colors.AMBER_200
@@ -85,7 +85,6 @@ class TextToken(Token):
 
 
 ICON_WIDTH = TEXT_HEIGHT
-
 MANA_ICON_HEIGHT = ICON_WIDTH
 MANA_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
                                     int(TEXT_HEIGHT * 0.8))
@@ -123,6 +122,8 @@ def _load_image(img_path: pathlib.Path) -> Image:
 
 
 ICONS = {
+    "<REVEAL>":
+        _load_image(util.ICON_DIR.joinpath("reveal.png")),
     "<EXHAUST>":
         _load_image(util.ICON_DIR.joinpath("exhaust.png")),
     "<READY>":
@@ -155,8 +156,8 @@ class IconToken(Token):
   def render(self, im: Image, draw: ImageDraw.Draw, cursor_x: int,
              cursor_y: int):
     bb = [
-        cursor_x, cursor_y - int(TEXT_HEIGHT / 2), cursor_x + ICON_WIDTH,
-        cursor_y + int(TEXT_HEIGHT / 2)
+        cursor_x, cursor_y - TEXT_HEIGHT // 2, cursor_x + ICON_WIDTH,
+        cursor_y + TEXT_HEIGHT // 2
     ]
     im.paste(ICONS[self.text], bb, ICONS[self.text])
 
