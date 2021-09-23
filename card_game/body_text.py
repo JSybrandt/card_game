@@ -1,6 +1,6 @@
 import pathlib
 import re
-from typing import List, Optional
+from typing import List
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -271,11 +271,14 @@ class BodyTextWriter():
       self.cursor_x += token.width() + TOKEN_PADDING_X
 
 
-def render_body_text(im: Image, draw: ImageDraw.Draw, text: Optional[str],
+def render_body_text(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
                      body_text_bb: util.BoundingBox):
   util.assert_valid_bb(body_text_bb)
-  draw.rounded_rectangle(body_text_bb, radius=BG_RADIUS, fill=BG_COLOR)
-  if text is None:
+  if desc.card_type == util.CardType.HOLDING:
+    draw.rectangle(body_text_bb, fill=BG_COLOR)
+  else:
+    draw.rounded_rectangle(body_text_bb, radius=BG_RADIUS, fill=BG_COLOR)
+  if desc.body_text is None:
     return
 
   bg_x1, bg_y1, bg_x2, bg_y2 = body_text_bb
@@ -287,4 +290,4 @@ def render_body_text(im: Image, draw: ImageDraw.Draw, text: Optional[str],
   BodyTextWriter(
       im, draw,
       [text_area_left, text_area_top, text_area_right, text_area_bottom
-      ]).render_text(text)
+      ]).render_text(desc.body_text)

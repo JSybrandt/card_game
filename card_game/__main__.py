@@ -82,8 +82,8 @@ def _get_scaled_font(text: str, font: ImageFont.ImageFont, max_width: int):
   return font
 
 
-TITLE_BG_HEIGHT = int(0.35 * util.PIXELS_PER_INCH)
-MAX_TITLE_WIDTH = int(CARD_WIDTH * 0.8)
+TITLE_BG_HEIGHT = int(0.3 * util.PIXELS_PER_INCH)
+MAX_TITLE_WIDTH = int(CARD_WIDTH * 0.75)
 DEFAULT_TITLE_FONT = ImageFont.truetype(str(util.LEAGUE_GOTHIC_FONT_PATH),
                                         int(util.PIXELS_PER_INCH * 0.25))
 TITLE_BG_COLOR = colors.GREY_50
@@ -97,26 +97,36 @@ def render_title(draw: ImageDraw.Draw, desc: util.CardDesc):
   scaled_font = _get_scaled_font(desc.title, DEFAULT_TITLE_FONT,
                                  MAX_TITLE_WIDTH)
   text_width, _ = scaled_font.getsize(desc.title)
-  bg_width = text_width + 2 * CARD_MARGIN
-  if desc.cost is not None:
-    bg_width += SMALL_ICON_WIDTH
-  bg_height = TITLE_BG_HEIGHT 
-  bg_bb = [
-      CARD_MARGIN, CARD_MARGIN, bg_width + CARD_MARGIN, bg_height + CARD_MARGIN
-  ]
-  draw.rounded_rectangle(bg_bb,
-                         fill=TITLE_BG_COLOR,
-                         radius=bg_height // 2,
-                         width=TITLE_BG_OUTLINE_WIDTH,
-                         outline=TITLE_BG_OUTLINE_COLOR)
-  left_middle_coord = (2 *
-                       CARD_MARGIN if desc.cost is None else 2 * CARD_MARGIN +
-                       SMALL_ICON_WIDTH, TOP_ICON_Y)
-  draw.text(left_middle_coord,
+  if desc.cost is None:
+    text_coord = (CARD_WIDTH // 2, CARD_MARGIN + TITLE_BG_HEIGHT // 2)
+    bg_width = text_width + 2 * CARD_MARGIN
+    bg_bb = util.get_centered_bb(text_coord, bg_width, TITLE_BG_HEIGHT)
+    text_anchor = "mm"
+  else:
+    bg_width = text_width + 2 * CARD_MARGIN + SMALL_ICON_WIDTH
+    bg_bb = [
+        CARD_MARGIN, CARD_MARGIN, bg_width + CARD_MARGIN,
+        TITLE_BG_HEIGHT + CARD_MARGIN
+    ]
+    text_coord = (2 * CARD_MARGIN if desc.cost is None else 2 * CARD_MARGIN +
+                  SMALL_ICON_WIDTH, TOP_ICON_Y)
+    text_anchor = "lm"
+  if desc.card_type == util.CardType.HOLDING:
+    draw.rectangle(bg_bb,
+                   fill=TITLE_BG_COLOR,
+                   width=TITLE_BG_OUTLINE_WIDTH,
+                   outline=TITLE_BG_OUTLINE_COLOR)
+  else:
+    draw.rounded_rectangle(bg_bb,
+                           fill=TITLE_BG_COLOR,
+                           radius=TITLE_BG_HEIGHT // 2,
+                           width=TITLE_BG_OUTLINE_WIDTH,
+                           outline=TITLE_BG_OUTLINE_COLOR)
+  draw.text(text_coord,
             desc.title,
             TITLE_FONT_COLOR,
             font=scaled_font,
-            anchor="lm")
+            anchor=text_anchor)
 
 
 MAX_ATTRIBUTE_WIDTH = int(CARD_WIDTH * 0.9)
@@ -137,11 +147,17 @@ def render_attributes(draw: ImageDraw.Draw, desc: util.CardDesc):
   bb = util.get_centered_bb(ATTRIBUTE_COORD, width, height)
   # Move top under image
   bb[1] -= 2 * ATTRIBUTE_BG_RADIUS
-  draw.rounded_rectangle(bb,
-                         fill=ATTRIBUTE_BG_COLOR,
-                         radius=ATTRIBUTE_BG_RADIUS,
-                         width=ATTRIBUTE_BG_OUTLINE_WIDTH,
-                         outline=ATTRIBUTE_BG_OUTLINE_COLOR)
+  if desc.card_type == util.CardType.HOLDING:
+    draw.rectangle(bb,
+                   fill=ATTRIBUTE_BG_COLOR,
+                   width=ATTRIBUTE_BG_OUTLINE_WIDTH,
+                   outline=ATTRIBUTE_BG_OUTLINE_COLOR)
+  else:
+    draw.rounded_rectangle(bb,
+                           fill=ATTRIBUTE_BG_COLOR,
+                           radius=ATTRIBUTE_BG_RADIUS,
+                           width=ATTRIBUTE_BG_OUTLINE_WIDTH,
+                           outline=ATTRIBUTE_BG_OUTLINE_COLOR)
   draw.text(ATTRIBUTE_COORD,
             text,
             ATTRIBUTE_TEXT_COLOR,
@@ -162,14 +178,14 @@ def render_card(desc: util.CardDesc, output_path: pathlib.Path):
 
   render_title(draw, desc)
 
-  body_text.render_body_text(im, draw, desc.body_text, BODY_TEXT_BG_BB)
+  body_text.render_body_text(im, draw, desc, BODY_TEXT_BG_BB)
 
   # Draw icons
   if desc.cost is not None:
     icons.draw_cost_icon(im, draw, COST_COORD, int(SMALL_ICON_WIDTH * 1.2),
-                         int(SMALL_ICON_HEIGHT * 1.2), desc.cost, SMALL_ICON_FONT,
-                         SMALL_ICON_FONT_COLOR, desc.primary_element,
-                         desc.secondary_element)
+                         int(SMALL_ICON_HEIGHT * 1.2), desc.cost,
+                         SMALL_ICON_FONT, SMALL_ICON_FONT_COLOR,
+                         desc.primary_element, desc.secondary_element)
   if desc.health is not None:
     icons.draw_heart_with_text(draw, HEALTH_COORD, LARGE_ICON_WIDTH,
                                LARGE_ICON_HEIGHT, desc.health, LARGE_ICON_FONT,
@@ -188,6 +204,7 @@ def render_card(desc: util.CardDesc, output_path: pathlib.Path):
 
   print("Saving card:", output_path)
   im.save(output_path)
+
 
 def _render_all_cards(db: gsheets.CardDatabase, output_dir: pathlib.Path):
   for card_idx, card_desc in enumerate(db):

@@ -111,12 +111,24 @@ def _get_random_coords(low: int, high: int, avg_step: int,
   return cords
 
 
-def _crop_corners(im: Image, radius: int):
+def _round_corners(im: Image, radius: int):
   mask = Image.new("L", (im.width, im.height))
   mask_draw = ImageDraw.Draw(mask)
   mask_draw.rounded_rectangle([0, 0, im.width, im.height],
                               fill=255,
                               radius=radius)
+  im.putalpha(mask)
+
+
+def _cut_corners(im: Image, corner_size: int):
+  mask = Image.new("L", (im.width, im.height))
+  mask_draw = ImageDraw.Draw(mask)
+  mask_draw.polygon([(0, corner_size), (corner_size, 0),
+                     (im.width - corner_size, 0), (im.width, corner_size),
+                     (im.width, im.height - corner_size),
+                     (im.width - corner_size, im.height),
+                     (corner_size, im.height), (0, im.height - corner_size)],
+                    fill=255)
   im.putalpha(mask)
 
 
@@ -164,7 +176,10 @@ def render_card_art(im: Image, desc: util.CardDesc, image_bb: util.BoundingBox,
                               min_radius, max_radius),
                    fill=rand_color(color_palette.primary_hue, min_saturation,
                                    max_saturation, min_value, max_value))
-  _crop_corners(art_image, radius)
+  if desc.card_type == util.CardType.HOLDING:
+    _cut_corners(art_image, radius)
+  else:
+    _round_corners(art_image, radius)
   im.paste(art_image, image_bb, art_image)
 
 
@@ -219,7 +234,7 @@ def render_background(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
                                      max_saturation=max_saturation,
                                      min_saturation=min_saturation,
                                      min_value=0.9))
-  _crop_corners(im, BORDER_CORNER_RADIUS)
+  _round_corners(im, BORDER_CORNER_RADIUS)
 
 
 def render_boarder(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
