@@ -29,8 +29,9 @@ UNKNOWN_TEXT = "[?]"
 
 class Token():
 
-  def __init__(self, text: str):
+  def __init__(self, desc: util.CardDesc, text: str):
     self.text = text
+    self.desc = desc
 
   def render(self, _: Image, draw: ImageDraw.Draw, cursor_x: int,
              cursor_y: int):
@@ -84,6 +85,16 @@ class TextToken(Token):
     return text[0] != "<" or text[-1] != ">"
 
 
+class ThisToken(TextToken):
+
+  def __init__(self, desc: util.CardDesc, _: str):
+    super().__init__(desc, desc.title)
+
+  @classmethod
+  def is_token(cls, text: str) -> bool:
+    return text == "<THIS>"
+
+
 ICON_WIDTH = TEXT_HEIGHT
 MANA_ICON_HEIGHT = ICON_WIDTH
 MANA_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
@@ -94,8 +105,8 @@ MANA_ICON_REGEX = "<(.+)([FWDLNG])>"
 
 class ManaToken(Token):
 
-  def __init__(self, text: str):
-    super().__init__(text)
+  def __init__(self, desc: util.CardDesc, text: str):
+    super().__init__(desc, text)
     mana_match = re.match(MANA_ICON_REGEX, text)
     assert mana_match
     self.icon_text = mana_match.group(1)
@@ -149,8 +160,8 @@ ICONS = {
 
 class IconToken(Token):
 
-  def __init__(self, text: str):
-    super().__init__(text)
+  def __init__(self, desc: util.CardDesc, text: str):
+    super().__init__(desc, text)
     assert text in ICONS
 
   def render(self, im: Image, draw: ImageDraw.Draw, cursor_x: int,
@@ -176,19 +187,20 @@ class ActionToken(IconToken):
     return text in ICONS and re.match("<[A-Z]+_ACTION>", text)
 
 
-def _get_token(text: str) -> Token:
+def _get_token(desc: util.CardDesc, text: str) -> Token:
   for token_class in [
-      Newline, EndCost, ActionToken, IconToken, ManaToken, TextToken, Token
+      Newline, EndCost, ActionToken, IconToken, ManaToken, TextToken, ThisToken,
+      Token
   ]:
     if token_class.is_token(text):
-      return token_class(text)
-  return Token(text)
+      return token_class(desc, text)
+  return Token(desc, text)
 
 
-def _get_logical_lines(text: str) -> List[Token]:
+def _get_logical_lines(desc: util.CardDesc, text: str) -> List[Token]:
   lines = []
   current_line = []
-  for token in [_get_token(t) for t in text.split()]:
+  for token in [_get_token(desc, t) for t in text.split()]:
     # This should remove all the newlines from the tokens.
     if isinstance(token, (Newline, ActionToken)):
       lines.append(current_line)
@@ -211,8 +223,8 @@ class BodyTextWriter():
     self.cursor_x = self.left
     self.cursor_y = self.top + int(TEXT_HEIGHT / 2)
 
-  def render_text(self, text: str):
-    for line in _get_logical_lines(text):
+  def render_text(self, desc: util.CardDesc, text: str):
+    for line in _get_logical_lines(desc, text):
       self._render_line(line)
 
   def _render_line(self, tokens: List[Token]):
@@ -290,4 +302,4 @@ def render_body_text(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
   BodyTextWriter(
       im, draw,
       [text_area_left, text_area_top, text_area_right, text_area_bottom
-      ]).render_text(desc.body_text)
+      ]).render_text(desc, desc.body_text)
