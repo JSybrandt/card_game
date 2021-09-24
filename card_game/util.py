@@ -10,7 +10,7 @@ from . import colors
 #pylint: disable=too-many-return-statements
 #pylint: disable=too-many-instance-attributes
 
-PIXELS_PER_INCH = 100
+PIXELS_PER_INCH = 300
 
 FONT_DIR = pathlib.Path("./fonts")
 assert FONT_DIR.is_dir()

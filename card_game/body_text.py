@@ -8,6 +8,7 @@ from . import colors, icons, util
 
 #pylint: disable=too-few-public-methods
 #pylint: disable=too-many-instance-attributes
+#pylint: disable=too-many-locals
 
 # Customizations of the body text area.
 
@@ -35,6 +36,14 @@ class Token():
 
   def render(self, _: Image, draw: ImageDraw.Draw, cursor_x: int,
              cursor_y: int):
+    """Renders the token.
+
+    Assume that cursor_x is the left-hand side, while cursor_y is the
+    middle-line. Assume that you are allowed to render at most TEXT_HEIGHT tall
+    (centered at cursor_y), and self.width() wide. You can also assume that the
+    cursor location has been placed such that this rendering will stay within
+    the border of the card.
+    """
     print(f"Warning, unidentified token: {self.text}")
     draw.text((cursor_x, cursor_y),
               UNKNOWN_TEXT,
@@ -100,7 +109,7 @@ MANA_ICON_HEIGHT = ICON_WIDTH
 MANA_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
                                     int(TEXT_HEIGHT * 0.8))
 MANA_ICON_FONT_COLOR = colors.WHITE
-MANA_ICON_REGEX = "<(.+)([FWDLNG])>"
+MANA_ICON_REGEX = "<([0-9X]+)([FWDLNG])>"
 
 
 class ManaToken(Token):
@@ -125,6 +134,63 @@ class ManaToken(Token):
   @classmethod
   def is_token(cls, text: str) -> bool:
     return bool(re.match(MANA_ICON_REGEX, text))
+
+
+DAMAGE_ICON_REGEX = "<([0-9X]+)_DAMAGE>"
+DAMAGE_ICON_COLOR = colors.RED_A400
+DAMAGE_ICON_FONT_COLOR = colors.WHITE
+DAMAGE_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
+                                      int(TEXT_HEIGHT * 0.8))
+
+
+class DamageToken(Token):
+
+  def __init__(self, desc: util.CardDesc, text: str):
+    super().__init__(desc, text)
+    damage_match = re.match(DAMAGE_ICON_REGEX, text)
+    assert damage_match
+    self.icon_text = damage_match.group(1)
+
+  def render(self, _: Image, draw: ImageDraw.Draw, cursor_x: int,
+             cursor_y: int):
+    side = min(TEXT_HEIGHT, ICON_WIDTH)
+    circle_radius_ratio = 0.4
+    center_x = cursor_x + int(ICON_WIDTH / 2)
+    circle_left = center_x - int(side * circle_radius_ratio)
+    circle_right = center_x + int(side * circle_radius_ratio)
+    circle_top = cursor_y - int(side * circle_radius_ratio)
+    circle_bottom = cursor_y + int(side * circle_radius_ratio)
+
+    draw.ellipse([circle_left, circle_top, circle_right, circle_bottom],
+                 fill=DAMAGE_ICON_COLOR)
+
+    crosshair_width_ratio = 0.1
+    v_crosshair_left = center_x - int(side * crosshair_width_ratio)
+    v_crosshair_right = center_x + int(side * crosshair_width_ratio)
+    top = cursor_y - side // 2
+    bottom = cursor_y + side // 2
+    draw.rectangle([v_crosshair_left, top, v_crosshair_right, bottom],
+                   fill=DAMAGE_ICON_COLOR)
+
+    left = center_x - side // 2
+    right = center_x + side // 2
+    h_crosshair_top = cursor_y - int(side * crosshair_width_ratio)
+    h_crosshair_bottom = cursor_y + int(side * crosshair_width_ratio)
+    draw.rectangle([left, h_crosshair_top, right, h_crosshair_bottom],
+                   fill=DAMAGE_ICON_COLOR)
+
+    draw.text((center_x, cursor_y),
+              self.icon_text,
+              DAMAGE_ICON_FONT_COLOR,
+              anchor="mm",
+              font=DAMAGE_ICON_FONT)
+
+  def width(self):
+    return ICON_WIDTH
+
+  @classmethod
+  def is_token(cls, text: str) -> bool:
+    return bool(re.match(DAMAGE_ICON_REGEX, text))
 
 
 def _load_image(img_path: pathlib.Path) -> Image:
@@ -189,8 +255,8 @@ class ActionToken(IconToken):
 
 def _get_token(desc: util.CardDesc, text: str) -> Token:
   for token_class in [
-      Newline, EndCost, ActionToken, IconToken, ManaToken, TextToken, ThisToken,
-      Token
+      Newline, EndCost, ActionToken, IconToken, ManaToken, DamageToken,
+      TextToken, ThisToken, Token
   ]:
     if token_class.is_token(text):
       return token_class(desc, text)
