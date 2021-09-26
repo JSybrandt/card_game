@@ -2,3 +2,4 @@ __pycache__/
 img/
 card_sheets/
 *.egg-info/
+drivers/

@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 
 import argparse
+import datetime
 import pathlib
 import pprint
 import shutil
 
 from PIL import Image, ImageDraw, ImageFont
 
-from . import body_text, card_art, colors, gsheets, icons, util
+from . import body_text, card_art, colors, gsheets, icons, upload, util
+
+#pylint: disable=too-many-arguments
 
 # Constants
 
@@ -213,6 +216,27 @@ def _render_all_cards(db: gsheets.CardDatabase, output_dir: pathlib.Path):
     render_card(card_desc, output_path)
 
 
+def _render_and_upload_all_cards(db: gsheets.CardDatabase,
+                                 output_dir: pathlib.Path,
+                                 selenium_driver_path: pathlib.Path,
+                                 card_set_name: str, untap_username: str,
+                                 untap_password: str):
+
+  card_metadata = []
+  for card_idx, card_desc in enumerate(db):
+    output_path = output_dir.joinpath(f"card_{card_idx:03d}.png")
+    pprint.pprint(card_desc)
+    render_card(card_desc, output_path)
+    card_metadata.append(
+        upload.UploadCardMetadata(image_path=output_path,
+                                  title=card_desc.title))
+    if len(card_metadata) == 10:
+      break
+
+  upload.upload_cards(card_metadata, selenium_driver_path,
+                      card_set_name, untap_username, untap_password)
+
+
 def _render_deck(decklist: pathlib.Path, db: gsheets.CardDatabase,
                  output_dir: pathlib.Path, ignore_decklist_counts: bool):
   card_idx = 0
@@ -236,15 +260,27 @@ def _render_deck(decklist: pathlib.Path, db: gsheets.CardDatabase,
 
 def main():
   parser = argparse.ArgumentParser()
-  parser.add_argument("--title", type=str, default=None)
+  parser.add_argument("--card_title", type=str, default=None)
   parser.add_argument("--decklist", type=pathlib.Path, default=None)
   parser.add_argument("--ignore_decklist_counts", action="store_true")
+  parser.add_argument("--render_all", action="store_true")
   parser.add_argument("--output_dir",
                       type=pathlib.Path,
                       default=pathlib.Path("./img"))
   parser.add_argument("--card_database_gsheets_id",
                       type=str,
                       default="1x9sT5zJ-JZzshgyqEQ30OoTz0F2ZO0ZKSDe6aRMBD_4")
+  parser.add_argument("--selenium_driver_path",
+                      type=pathlib.Path,
+                      default="./drivers/chromedriver")
+  today_yyyymmdd = datetime.datetime.today().strftime("%Y%m%d")
+  parser.add_argument("--upload_card_set_name",
+                      type=str,
+                      default=f"JJ{today_yyyymmdd}")
+  # Specify these for imgur upload
+  parser.add_argument("--untap_username", type=str, default=None)
+  parser.add_argument("--untap_password", type=str, default=None)
+
   args = parser.parse_args()
 
   if args.output_dir.is_dir():
@@ -253,15 +289,34 @@ def main():
   print("Creating directory:", args.output_dir)
   args.output_dir.mkdir(parents=True)
 
+  assert (args.untap_username is None) == (args.untap_password is None), \
+    "Must specify untap username and password together."
+
+  num_behavior_options = sum([
+      args.card_title is not None,
+      args.decklist is not None,
+      args.render_all,
+      args.untap_username is not None,
+  ])
+  assert (num_behavior_options == 1), "Must specify exactly one behavior."
+
   db = gsheets.CardDatabase(args.card_database_gsheets_id)
-  if args.title is not None:
+
+  if args.card_title is not None:
     assert args.title in db
     render_card(db[args.title], args.output_dir.joinpath(f"{args.title}.png"))
-  elif args.decklist is not None:
+
+  if args.decklist is not None:
     _render_deck(args.decklist, db, args.output_dir,
                  args.ignore_decklist_counts)
-  else:
+
+  if args.render_all:
     _render_all_cards(db, args.output_dir)
+
+  if args.untap_username is not None and args.untap_password is not None:
+    _render_and_upload_all_cards(db, args.output_dir, args.selenium_driver_path,
+                                 args.upload_card_set_name,
+                                 args.untap_username, args.untap_password)
 
 
 if __name__ == "__main__":
