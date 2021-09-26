@@ -230,8 +230,6 @@ def _render_and_upload_all_cards(db: gsheets.CardDatabase,
     card_metadata.append(
         upload.UploadCardMetadata(image_path=output_path,
                                   title=card_desc.title))
-    if len(card_metadata) == 10:
-      break
 
   upload.upload_cards(card_metadata, selenium_driver_path,
                       card_set_name, untap_username, untap_password)
