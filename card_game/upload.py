@@ -2,8 +2,8 @@ import dataclasses
 import pathlib
 import time
 from typing import List
+import ftplib
 
-import pyimgur
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -14,11 +14,13 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 UNTAP_URL = "https://untap.in/"
 MAX_WAIT = 10
-IMGUR_CLIENT_ID_PATH=pathlib.Path.home().joinpath(".local/share/card_game/imgur_client_id")
+
+FTP_URL = "ftp.sybrandt.com"
+FTP_USER = "ftpuser"
+FTP_PASSWD_FILE = (pathlib.Path.home().joinpath(".local").joinpath("share")
+                   .joinpath("card_game").joinpath("ftp_password"))
 
 # Following the upload, you can search for our cards with the "set" search.
-
-
 
 @dataclasses.dataclass
 class UploadCardMetadata:
@@ -85,7 +87,7 @@ def _click_custom_deck(driver):
           found_create_deck_button).perform())
 
 
-def _open_add_missing_card(driver):
+def _open_submenu(driver):
   menu_icon = WebDriverWait(driver, MAX_WAIT).until(
       EC.presence_of_element_located((By.CLASS_NAME, "icon-menu")))
   (webdriver.ActionChains(driver).move_to_element(menu_icon).click().perform())
@@ -102,6 +104,7 @@ def _open_add_missing_card(driver):
   # Click and open "I understand"
   webdriver.ActionChains(driver).click(add_card_option).perform()
 
+def _click_i_understand(driver):
   i_understand_button = None
   for button in driver.find_elements_by_tag_name("button"):
     if button.text == "I Understand":
@@ -131,17 +134,41 @@ def _fill_card_contents(driver, title, set_name, image_url):
                   Keys.ENTER).double_click(add_card_button).perform())
 
 
+
+def _upload_image(ftp_session:ftplib.FTP, local_image_path:pathlib.Path)->str:
+  """Returns the remote URL where to find this file."""
+  with open(local_image_path, 'rb') as data_file:
+    ftp_session.storbinary(f"STOR {local_image_path.name}", data_file)
+  return f"http://{FTP_URL}/{local_image_path.name}"
+  return http_url
+
+
+def _attempt(fn, tries=3):
+  for i in range(tries):
+    try:
+      return fn()
+    except Exception as e:
+      print(e)
+      if i == tries - 1:
+        raise e
+      else:
+        print("Trying again...")
+
+
 def upload_cards(card_metadata: List[UploadCardMetadata],
                  selenium_driver_path: pathlib.Path,
                  card_set_name: str,
                  untap_username: str, untap_password: str):
   assert selenium_driver_path.is_file()
-  assert IMGUR_CLIENT_ID_PATH.is_file(), f"{IMGUR_CLIENT_ID_PATH}"
+  with open(FTP_PASSWD_FILE) as f:
+    ftp_pass = f.read().strip()
+  ftp_session = ftplib.FTP_TLS()
+  ftp_session.set_debuglevel(2)
+  ftp_session.connect(FTP_URL, 21)
+  ftp_session.sendcmd(f"USER {FTP_USER}")
+  ftp_session.sendcmd(f"PASS {ftp_pass}")
 
-  with IMGUR_CLIENT_ID_PATH.open() as f:
-    imgur_client_id = f.read().strip()
-  imgur_client = pyimgur.Imgur(imgur_client_id)
-
+  # If we go to sleep, the automated browser iterations may fail.
   driver = webdriver.Chrome(executable_path=selenium_driver_path)
   driver.get(UNTAP_URL)
   driver.set_window_position(0, 0)
@@ -155,10 +182,13 @@ def upload_cards(card_metadata: List[UploadCardMetadata],
   time.sleep(1)
   _click_custom_deck(driver)
   for card in card_metadata:
-    assert card.image_path.is_file()
-    card_link = imgur_client.upload_image(str(card.image_path)).link
+    time.sleep(1)
+    card_link = _attempt(lambda: _upload_image(ftp_session, card.image_path))
     print(f"Uploaded '{card.title}' to {card_link}")
+    _attempt(lambda: _open_submenu(driver))
     time.sleep(1)
-    _open_add_missing_card(driver)
+    _attempt(lambda: _click_i_understand(driver))
     time.sleep(1)
-    _fill_card_contents(driver, card.title, card_set_name, card_link)
+    _attempt(lambda: _fill_card_contents(driver, card.title, card_set_name, card_link))
+
+  ftp_session.close()
