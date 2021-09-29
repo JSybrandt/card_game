@@ -37,8 +37,8 @@ def _get_credential() -> Credentials:
     if creds is not None and creds.expired and creds.refresh_token:
       creds.refresh(Request())
       return _cache_credential(creds)
-  except:
-    pass
+  except Exception:
+    print("Cached cred failed. Attempting to get a fresh cred.")
 
   flow = InstalledAppFlow.from_client_secrets_file(SECRET_PATH, SCOPES)
   creds = flow.run_local_server(port=0)

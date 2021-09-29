@@ -1,3 +1,4 @@
+import enum
 import pathlib
 import re
 from typing import List
@@ -24,6 +25,14 @@ TOKEN_PADDING_X = int(util.PIXELS_PER_INCH * 0.02)
 
 COST_BG_COLOR = colors.AMBER_200
 COST_PADDING_X = int(util.PIXELS_PER_INCH * 0.05)
+
+TEXT_SEGMENT_PADDING_Y = int(0.03 * util.PIXELS_PER_INCH)
+TEXT_SEGMENT_BORDER_COLOR = colors.BLACK
+TEXT_SEGMENT_BORDER_WIDTH = int(0.01 * util.PIXELS_PER_INCH)
+TEXT_SEGMENT_FONT = ImageFont.truetype(str(util.EB_GARAMOND_FONT_PATH),
+                                       TEXT_HEIGHT // 2)
+TEXT_SEGMENT_FONT_COLOR = colors.BLACK
+TEXT_SEGMENT_FONT_PADDING_Y = int(1.2 * TEXT_SEGMENT_FONT.size)
 
 UNKNOWN_TEXT = "[?]"
 
@@ -66,6 +75,20 @@ class Newline(Token):
   @classmethod
   def is_token(cls, text: str) -> bool:
     return text == "<NEWLINE>"
+
+
+class StartTerritorySegmentToken(Token):
+
+  @classmethod
+  def is_token(cls, text: str) -> bool:
+    return text == "<START_TERRITORY_SEGMENT>"
+
+
+class EndTerritorySegmentToken(Token):
+
+  @classmethod
+  def is_token(cls, text: str) -> bool:
+    return text == "<END_TERRITORY_SEGMENT>"
 
 
 class EndCost(Token):
@@ -256,17 +279,51 @@ class ActionToken(IconToken):
 def _get_token(desc: util.CardDesc, text: str) -> Token:
   for token_class in [
       Newline, EndCost, ActionToken, IconToken, ManaToken, DamageToken,
-      TextToken, ThisToken, Token
+      TextToken, ThisToken, StartTerritorySegmentToken,
+      EndTerritorySegmentToken, Token
   ]:
     if token_class.is_token(text):
       return token_class(desc, text)
   return Token(desc, text)
 
 
-def _get_logical_lines(desc: util.CardDesc, text: str) -> List[Token]:
+class TextSegmentType(enum.Enum):
+  MAIN = "Main"
+  TERRITORY = "Territory"
+
+
+class TextSegment():
+
+  def __init__(self, segment_type: TextSegmentType = TextSegmentType.MAIN):
+    self.segment_type = segment_type
+    self.tokens = []
+
+
+def _get_logical_segments(desc: util.CardDesc, text: str) -> List[TextSegment]:
+  segments = []
+  current_segment = TextSegment()
+  for token in [_get_token(desc, t) for t in text.split()]:
+    if isinstance(token, StartTerritorySegmentToken):
+      assert current_segment.segment_type == TextSegmentType.MAIN, \
+        "Nested segments are not supported."
+      segments.append(current_segment)
+      current_segment = TextSegment(TextSegmentType.TERRITORY)
+    elif isinstance(token, EndTerritorySegmentToken):
+      assert current_segment.segment_type == TextSegmentType.TERRITORY, \
+        "EndTerritorySegmentToken must occur after StartTerritorySegmentToken"
+      segments.append(current_segment)
+      current_segment = TextSegment(TextSegmentType.MAIN)
+    else:
+      # This isn't a segment token.
+      current_segment.tokens.append(token)
+  segments.append(current_segment)
+  return segments
+
+
+def _get_logical_lines(text_segment: TextSegment) -> List[Token]:
   lines = []
   current_line = []
-  for token in [_get_token(desc, t) for t in text.split()]:
+  for token in text_segment.tokens:
     # This should remove all the newlines from the tokens.
     if isinstance(token, (Newline, ActionToken)):
       lines.append(current_line)
@@ -290,10 +347,59 @@ class BodyTextWriter():
     self.cursor_y = self.top + int(TEXT_HEIGHT / 2)
 
   def render_text(self, desc: util.CardDesc, text: str):
-    for line in _get_logical_lines(desc, text):
-      self._render_line(line)
+    for segment in _get_logical_segments(desc, text):
+      self._render_segment(segment)
 
-  def _render_line(self, tokens: List[Token]):
+  def _render_segment(self, text_segment: TextSegment):
+    lines = _get_logical_lines(text_segment)
+    if text_segment.segment_type == TextSegmentType.MAIN:
+      # Just print the contents and move on.
+      for line in lines:
+        self._render_line(line)
+    else:
+      # Add some vertical space for the segment header text.
+      self.cursor_y += TEXT_SEGMENT_FONT_PADDING_Y
+      # Measure how much vertical space this segment is going to take.
+      init_y_pos = self.cursor_y
+      segment_bb_top = self.cursor_y - TEXT_HEIGHT // 2
+      self.cursor_y += TEXT_SEGMENT_PADDING_Y
+      for line in lines:
+        self._render_line(line, dry_run=True)
+      segment_bb_bottom = (self.cursor_y - TEXT_HEIGHT // 2 +
+                           TEXT_SEGMENT_PADDING_Y)
+
+      # Draw the segment header text
+      self.draw.text((self.right, segment_bb_top),
+                     text_segment.segment_type.value,
+                     TEXT_SEGMENT_FONT_COLOR,
+                     font=TEXT_SEGMENT_FONT,
+                     anchor="rb")
+      text_width, _ = TEXT_SEGMENT_FONT.getsize(text_segment.segment_type.value)
+      # Draw the "tabbed box" around the segment
+      poly = [
+          (self.left - BODY_TEXT_MARGIN, segment_bb_top),
+          (self.right - text_width - BODY_TEXT_MARGIN, segment_bb_top),
+          (self.right - text_width - BODY_TEXT_MARGIN,
+           segment_bb_top - TEXT_SEGMENT_FONT_PADDING_Y),
+          (self.right + BODY_TEXT_MARGIN,
+           segment_bb_top - TEXT_SEGMENT_FONT_PADDING_Y),
+          (self.right + BODY_TEXT_MARGIN, segment_bb_bottom),
+          (self.left - BODY_TEXT_MARGIN, segment_bb_bottom),
+          (self.left - BODY_TEXT_MARGIN, segment_bb_top),
+      ]
+      self.draw.line(poly,
+                     fill=TEXT_SEGMENT_BORDER_COLOR,
+                     width=TEXT_SEGMENT_BORDER_WIDTH)
+
+      # Now, reset the cursor position at the top of the box.
+      self.cursor_y = init_y_pos + TEXT_SEGMENT_PADDING_Y
+      for line in lines:
+        self._render_line(line)
+      # Now, place the cursor position at the end of the box.
+      self.cursor_y = (segment_bb_bottom + TEXT_SEGMENT_PADDING_Y +
+                       TEXT_HEIGHT // 2)
+
+  def _render_line(self, tokens: List[Token], dry_run: bool = False):
     if isinstance(tokens[0], ActionToken):
       action = tokens[0]
       end_cost_idx = None
@@ -304,9 +410,9 @@ class BodyTextWriter():
       cost = [] if end_cost_idx is None else tokens[1:end_cost_idx]
       content = tokens[1:] if end_cost_idx is None else tokens[end_cost_idx +
                                                                1:]
-      self._render_action_line(action, cost, content)
+      self._render_action_line(action, cost, content, dry_run)
     else:
-      self._render_text_line(tokens)
+      self._render_text_line(tokens, dry_run)
     self._newline()
 
   def _newline(self, indent: int = 0):
@@ -324,28 +430,36 @@ class BodyTextWriter():
                                 radius=int(TEXT_HEIGHT / 2),
                                 fill=COST_BG_COLOR)
 
-  def _render_action_line(self, action: ActionToken, cost: List[Token],
-                          content: List[Token]):
-    action.render(self.im, self.draw, self.cursor_x, self.cursor_y)
+  def _render_action_line(self,
+                          action: ActionToken,
+                          cost: List[Token],
+                          content: List[Token],
+                          dry_run: bool = False):
+    if not dry_run:
+      action.render(self.im, self.draw, self.cursor_x, self.cursor_y)
     self.cursor_x += action.width() + TOKEN_PADDING_X
     if len(cost) > 0:
-      self._render_cost_background(cost)
+      if not dry_run:
+        self._render_cost_background(cost)
       self.cursor_x += COST_PADDING_X
       for c in cost:
-        c.render(self.im, self.draw, self.cursor_x, self.cursor_y)
+        if not dry_run:
+          c.render(self.im, self.draw, self.cursor_x, self.cursor_y)
         self.cursor_x += c.width() + TOKEN_PADDING_X
       self.cursor_x += COST_PADDING_X
     for c in content:
       if self.cursor_x + c.width() > self.right:
         self._newline(action.width())
-      c.render(self.im, self.draw, self.cursor_x, self.cursor_y)
+      if not dry_run:
+        c.render(self.im, self.draw, self.cursor_x, self.cursor_y)
       self.cursor_x += c.width() + TOKEN_PADDING_X
 
-  def _render_text_line(self, content: List[Token]):
+  def _render_text_line(self, content: List[Token], dry_run: bool = False):
     for token in content:
       if self.cursor_x + token.width() > self.right:
         self._newline()
-      token.render(self.im, self.draw, self.cursor_x, self.cursor_y)
+      if not dry_run:
+        token.render(self.im, self.draw, self.cursor_x, self.cursor_y)
       self.cursor_x += token.width() + TOKEN_PADDING_X
 
 

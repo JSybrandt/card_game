@@ -1,8 +1,8 @@
 import dataclasses
+import ftplib
 import pathlib
 import time
 from typing import List
-import ftplib
 
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -17,10 +17,11 @@ MAX_WAIT = 10
 
 FTP_URL = "ftp.sybrandt.com"
 FTP_USER = "ftpuser"
-FTP_PASSWD_FILE = (pathlib.Path.home().joinpath(".local").joinpath("share")
-                   .joinpath("card_game").joinpath("ftp_password"))
+FTP_PASSWD_FILE = (pathlib.Path.home().joinpath(".local").joinpath(
+    "share").joinpath("card_game").joinpath("ftp_password"))
 
 # Following the upload, you can search for our cards with the "set" search.
+
 
 @dataclasses.dataclass
 class UploadCardMetadata:
@@ -104,6 +105,7 @@ def _open_submenu(driver):
   # Click and open "I understand"
   webdriver.ActionChains(driver).click(add_card_option).perform()
 
+
 def _click_i_understand(driver):
   i_understand_button = None
   for button in driver.find_elements_by_tag_name("button"):
@@ -134,8 +136,8 @@ def _fill_card_contents(driver, title, set_name, image_url):
                   Keys.ENTER).double_click(add_card_button).perform())
 
 
-
-def _upload_image(ftp_session:ftplib.FTP, local_image_path:pathlib.Path)->str:
+def _upload_image(ftp_session: ftplib.FTP,
+                  local_image_path: pathlib.Path) -> str:
   """Returns the remote URL where to find this file."""
   with open(local_image_path, 'rb') as data_file:
     ftp_session.storbinary(f"STOR {local_image_path.name}", data_file)
@@ -156,8 +158,7 @@ def _attempt(fn, tries=3):
 
 
 def upload_cards(card_metadata: List[UploadCardMetadata],
-                 selenium_driver_path: pathlib.Path,
-                 card_set_name: str,
+                 selenium_driver_path: pathlib.Path, card_set_name: str,
                  untap_username: str, untap_password: str):
   assert selenium_driver_path.is_file()
   with open(FTP_PASSWD_FILE) as f:
@@ -189,6 +190,7 @@ def upload_cards(card_metadata: List[UploadCardMetadata],
     time.sleep(1)
     _attempt(lambda: _click_i_understand(driver))
     time.sleep(1)
-    _attempt(lambda: _fill_card_contents(driver, card.title, card_set_name, card_link))
+    _attempt(lambda: _fill_card_contents(driver, card.title, card_set_name,
+                                         card_link))
 
   ftp_session.close()

@@ -231,8 +231,8 @@ def _render_and_upload_all_cards(db: gsheets.CardDatabase,
         upload.UploadCardMetadata(image_path=output_path,
                                   title=card_desc.title))
 
-  upload.upload_cards(card_metadata, selenium_driver_path,
-                      card_set_name, untap_username, untap_password)
+  upload.upload_cards(card_metadata, selenium_driver_path, card_set_name,
+                      untap_username, untap_password)
 
 
 def _render_deck(decklist: pathlib.Path, db: gsheets.CardDatabase,
@@ -302,7 +302,8 @@ def main():
 
   if args.card_title is not None:
     assert args.card_title in db
-    render_card(db[args.card_title], args.output_dir.joinpath(f"{args.card_title}.png"))
+    render_card(db[args.card_title],
+                args.output_dir.joinpath(f"{args.card_title}.png"))
 
   if args.decklist is not None:
     _render_deck(args.decklist, db, args.output_dir,
@@ -313,8 +314,8 @@ def main():
 
   if args.untap_username is not None and args.untap_password is not None:
     _render_and_upload_all_cards(db, args.output_dir, args.selenium_driver_path,
-                                 args.upload_card_set_name,
-                                 args.untap_username, args.untap_password)
+                                 args.upload_card_set_name, args.untap_username,
+                                 args.untap_password)
 
 
 if __name__ == "__main__":
