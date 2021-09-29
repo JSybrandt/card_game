@@ -301,8 +301,8 @@ def main():
   db = gsheets.CardDatabase(args.card_database_gsheets_id)
 
   if args.card_title is not None:
-    assert args.title in db
-    render_card(db[args.title], args.output_dir.joinpath(f"{args.title}.png"))
+    assert args.card_title in db
+    render_card(db[args.card_title], args.output_dir.joinpath(f"{args.card_title}.png"))
 
   if args.decklist is not None:
     _render_deck(args.decklist, db, args.output_dir,
