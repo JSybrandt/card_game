@@ -33,9 +33,12 @@ def _get_credential() -> Credentials:
   if creds is not None and creds.valid:
     return creds
 
-  if creds is not None and creds.expired and creds.refresh_token:
-    creds.refresh(Request())
-    return _cache_credential(creds)
+  try:
+    if creds is not None and creds.expired and creds.refresh_token:
+      creds.refresh(Request())
+      return _cache_credential(creds)
+  except:
+    pass
 
   flow = InstalledAppFlow.from_client_secrets_file(SECRET_PATH, SCOPES)
   creds = flow.run_local_server(port=0)
