@@ -326,27 +326,33 @@ def main():
   ])
   assert (num_behavior_options == 1), "Must specify exactly one behavior."
 
+  if args.render_server:
+    _start_render_server(args.output_dir)
+    return
+
   db = gsheets.CardDatabase(args.card_database_gsheets_id)
 
   if args.card_title is not None:
     assert args.card_title in db
     render_card(db[args.card_title],
                 args.output_dir.joinpath(f"{args.card_title}.png"))
+    return
 
   if args.decklist is not None:
     _render_deck(args.decklist, db, args.output_dir,
                  args.ignore_decklist_counts)
+    return
 
   if args.render_all:
     _render_all_cards(db, args.output_dir)
+    return
 
   if args.untap_username is not None and args.untap_password is not None:
     _render_and_upload_all_cards(db, args.output_dir, args.selenium_driver_path,
                                  args.upload_card_set_name, args.untap_username,
                                  args.untap_password)
+    return
 
-  if args.render_server:
-    _start_render_server(args.output_dir)
 
 
 if __name__ == "__main__":
