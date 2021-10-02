@@ -135,8 +135,11 @@ class CardDesc:
   power: Optional[str]
   health: Optional[str]
 
-  def hash(self):
+  def hash_title(self):
     return hashlib.md5(self.title.encode("utf-8")).hexdigest()
+
+  def hash_all(self):
+    return hashlib.md5(str(self).encode("utf-8")).hexdigest()
 
 
 # The CSV headers in order.
@@ -191,3 +194,7 @@ def field_dict_to_card_desc(fields: Dict[str, Any]):
 def sigmoid(x):
   sig = 1 / (1 + math.exp(-x))
   return sig
+
+def get_output_path(output_dir:pathlib.Path, card_desc:CardDesc)->pathlib.Path:
+  assert output_dir.is_dir()
+  return output_dir.joinpath(f"{card_desc.hash_all()}.png")

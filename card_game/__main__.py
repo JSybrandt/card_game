@@ -169,7 +169,9 @@ def render_attributes(draw: ImageDraw.Draw, desc: util.CardDesc):
 
 
 def render_card(desc: util.CardDesc, output_path: pathlib.Path):
-  assert not output_path.exists(), f"{output_path} already exists"
+  if output_path.exists():
+    print(f"Image already exists: {output_path}")
+    return
   im = Image.new(mode="RGBA", size=(CARD_WIDTH, CARD_HEIGHT))
   draw = ImageDraw.Draw(im)
 
@@ -211,7 +213,7 @@ def render_card(desc: util.CardDesc, output_path: pathlib.Path):
 
 def _render_all_cards(db: gsheets.CardDatabase, output_dir: pathlib.Path):
   for card_idx, card_desc in enumerate(db):
-    output_path = output_dir.joinpath(f"card_{card_idx:03d}.png")
+    output_path = util.get_output_path(output_dir, card_desc)
     pprint.pprint(card_desc)
     render_card(card_desc, output_path)
 
@@ -224,7 +226,7 @@ def _render_and_upload_all_cards(db: gsheets.CardDatabase,
 
   card_metadata = []
   for card_idx, card_desc in enumerate(db):
-    output_path = output_dir.joinpath(f"card_{card_idx:03d}.png")
+    output_path = util.get_output_path(output_dir, card_desc)
     pprint.pprint(card_desc)
     render_card(card_desc, output_path)
     card_metadata.append(
@@ -251,7 +253,7 @@ def _render_deck(decklist: pathlib.Path, db: gsheets.CardDatabase,
       card_desc = db[title]
       pprint.pprint(card_desc)
       for _ in range(count):
-        output_path = output_dir.joinpath(f"card_{card_idx:03d}.png")
+        output_path = util.get_output_path(output_dir, card_desc)
         render_card(card_desc, output_path)
         card_idx += 1
 
@@ -260,6 +262,7 @@ def main():
   parser = argparse.ArgumentParser()
   parser.add_argument("--card_title", type=str, default=None)
   parser.add_argument("--decklist", type=pathlib.Path, default=None)
+  parser.add_argument("--remove_outdir", action="store_true")
   parser.add_argument("--ignore_decklist_counts", action="store_true")
   parser.add_argument("--render_all", action="store_true")
   parser.add_argument("--output_dir",
@@ -281,11 +284,11 @@ def main():
 
   args = parser.parse_args()
 
-  if args.output_dir.is_dir():
+  if args.output_dir.is_dir() and args.remove_outdir:
     print("Deleting directory:", args.output_dir)
     shutil.rmtree(args.output_dir)
   print("Creating directory:", args.output_dir)
-  args.output_dir.mkdir(parents=True)
+  args.output_dir.mkdir(parents=True, exist_ok=True)
 
   assert (args.untap_username is None) == (args.untap_password is None), \
     "Must specify untap username and password together."

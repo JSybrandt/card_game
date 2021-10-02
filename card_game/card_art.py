@@ -136,7 +136,7 @@ def render_card_art(im: Image, desc: util.CardDesc, image_bb: util.BoundingBox,
                     radius: float) -> Image:
   # Seed random number gen with deterministic hash of card description. This
   # gives us the same image if we run the generation script twice.
-  random.seed(desc.hash())
+  random.seed(desc.hash_title())
   left, top, right, bottom = image_bb
   width = right - left
   height = bottom - top
@@ -190,7 +190,7 @@ BG_PATTERN_SIZE = int(0.2 * util.PIXELS_PER_INCH)
 
 def render_background(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
                       image_bb: util.BoundingBox):
-  random.seed(desc.hash())
+  random.seed(desc.hash_title())
   color_palette = rand_color_palette(desc)
   left, top, right, bottom = image_bb
   image_width = right - left
