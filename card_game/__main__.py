@@ -5,6 +5,8 @@ import datetime
 import pathlib
 import pprint
 import shutil
+import flask
+import flask_jsonrpc
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -218,6 +220,27 @@ def _render_all_cards(db: gsheets.CardDatabase, output_dir: pathlib.Path):
     render_card(card_desc, output_path)
 
 
+def _start_render_server(output_dir: pathlib.Path):
+  app = flask.Flask(__name__)
+  rpc = flask_jsonrpc.JSONRPC(app, "/api", enable_web_browsable_api=True)
+
+  @rpc.method("App.index")
+  def _render_card(**kwargs:str)->str:
+    try:
+      fields = flask.request.get_json(silent=True)["params"]
+      print(fields)
+      util.assert_valid_card_desc(fields)
+      card_desc = util.field_dict_to_card_desc(fields)
+      output_path = util.get_output_path(output_dir, card_desc)
+      render_card(card_desc, output_path)
+      return output_path.name
+    except Exception as e:
+      print(e)
+      return ""
+
+  app.run(host='0.0.0.0', debug=True)
+
+
 def _render_and_upload_all_cards(db: gsheets.CardDatabase,
                                  output_dir: pathlib.Path,
                                  selenium_driver_path: pathlib.Path,
@@ -265,6 +288,7 @@ def main():
   parser.add_argument("--remove_outdir", action="store_true")
   parser.add_argument("--ignore_decklist_counts", action="store_true")
   parser.add_argument("--render_all", action="store_true")
+  parser.add_argument("--render_server", action="store_true")
   parser.add_argument("--output_dir",
                       type=pathlib.Path,
                       default=pathlib.Path("./img"))
@@ -298,6 +322,7 @@ def main():
       args.decklist is not None,
       args.render_all,
       args.untap_username is not None,
+      args.render_server
   ])
   assert (num_behavior_options == 1), "Must specify exactly one behavior."
 
@@ -319,6 +344,9 @@ def main():
     _render_and_upload_all_cards(db, args.output_dir, args.selenium_driver_path,
                                  args.upload_card_set_name, args.untap_username,
                                  args.untap_password)
+
+  if args.render_server:
+    _start_render_server(args.output_dir)
 
 
 if __name__ == "__main__":
