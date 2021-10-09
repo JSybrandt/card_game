@@ -220,7 +220,7 @@ def _render_all_cards(db: gsheets.CardDatabase, output_dir: pathlib.Path):
     render_card(card_desc, output_path)
 
 
-def _start_render_server(output_dir: pathlib.Path):
+def _start_render_server(output_dir: pathlib.Path, port:int, enable_debug:bool):
   app = flask.Flask(__name__)
   rpc = flask_jsonrpc.JSONRPC(app, "/api", enable_web_browsable_api=True)
 
@@ -238,7 +238,15 @@ def _start_render_server(output_dir: pathlib.Path):
       print(e)
       return ""
 
-  app.run(host='0.0.0.0', debug=True)
+  @app.route("/<img_filename>")
+  def _get_img(img_filename:str):
+    img_path = output_dir.joinpath(img_filename)
+    if img_path.is_file():
+      return flask.send_file(img_path)
+    else:
+      return f"Cannot find file: {img_filename}", 400
+
+  app.run(host='0.0.0.0', port=port, debug=enable_debug)
 
 
 def _render_and_upload_all_cards(db: gsheets.CardDatabase,
@@ -289,6 +297,8 @@ def main():
   parser.add_argument("--ignore_decklist_counts", action="store_true")
   parser.add_argument("--render_all", action="store_true")
   parser.add_argument("--render_server", action="store_true")
+  parser.add_argument("--render_server_port", type=int, default=5000)
+  parser.add_argument("--render_server_debug", action="store_true")
   parser.add_argument("--output_dir",
                       type=pathlib.Path,
                       default=pathlib.Path("./img"))
@@ -327,7 +337,7 @@ def main():
   assert (num_behavior_options == 1), "Must specify exactly one behavior."
 
   if args.render_server:
-    _start_render_server(args.output_dir)
+    _start_render_server(args.output_dir, args.render_server_port, args.render_server_debug)
     return
 
   db = gsheets.CardDatabase(args.card_database_gsheets_id)
