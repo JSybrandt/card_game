@@ -6,7 +6,6 @@ import pathlib
 import pprint
 import shutil
 import flask
-import flask_jsonrpc
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -222,29 +221,19 @@ def _render_all_cards(db: gsheets.CardDatabase, output_dir: pathlib.Path):
 
 def _start_render_server(output_dir: pathlib.Path, port:int, enable_debug:bool):
   app = flask.Flask(__name__)
-  rpc = flask_jsonrpc.JSONRPC(app, "/api", enable_web_browsable_api=True)
 
-  @rpc.method("App.index")
-  def _render_card(**kwargs:str)->str:
+  @app.route("/", methods=["POST"])
+  def _render_card():
     try:
-      fields = flask.request.get_json(silent=True)["params"]
+      fields = flask.request.get_json(silent=True)
       print(fields)
       util.assert_valid_card_desc(fields)
       card_desc = util.field_dict_to_card_desc(fields)
       output_path = util.get_output_path(output_dir, card_desc)
       render_card(card_desc, output_path)
-      return output_path.name
+      return flask.send_file(output_path.resolve(), as_attachment=True)
     except Exception as e:
-      print(e)
-      return ""
-
-  @app.route("/<img_filename>")
-  def _get_img(img_filename:str):
-    img_path = output_dir.joinpath(img_filename)
-    if img_path.is_file():
-      return flask.send_file(img_path)
-    else:
-      return f"Cannot find file: {img_filename}", 400
+      return str(e)
 
   app.run(host='0.0.0.0', port=port, debug=enable_debug)
 
