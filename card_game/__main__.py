@@ -230,11 +230,8 @@ def _start_render_server(image_dir:pathlib.Path, port:int, enable_debug:bool):
   @app.route("/<name>")
   def _retrieve_card(name:str):
     try:
-      print(name)
       img_path = image_dir.joinpath(name)
-      print(img_path)
       assert img_path.is_file()
-      print("its a file")
       return flask.send_file(img_path.resolve())
     except Exception as e:
       print(e)
