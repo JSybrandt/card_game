@@ -3,6 +3,7 @@ import enum
 import hashlib
 import math
 import pathlib
+import json
 from typing import Any, Dict, Optional, Tuple
 
 from . import colors
@@ -10,7 +11,15 @@ from . import colors
 #pylint: disable=too-many-return-statements
 #pylint: disable=too-many-instance-attributes
 
-PIXELS_PER_INCH = 300
+CONFIG_PATH = pathlib.Path("./config.json")
+if CONFIG_PATH.is_file():
+  with open(CONFIG_PATH, "r") as config_file:
+    GLOBAL_CONFIG = json.loads(config_file.read())
+  print("Loaded global config:", GLOBAL_CONFIG)
+else:
+  GLOBAL_CONFIG = {}
+
+PIXELS_PER_INCH = GLOBAL_CONFIG.get("pixels_per_inch", 100)
 
 FONT_DIR = pathlib.Path("./fonts")
 assert FONT_DIR.is_dir()

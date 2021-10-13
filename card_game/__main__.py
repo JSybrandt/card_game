@@ -2,10 +2,12 @@
 
 import argparse
 import datetime
+import flask
+import os
 import pathlib
 import pprint
 import shutil
-import flask
+import tempfile
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -219,21 +221,25 @@ def _render_all_cards(db: gsheets.CardDatabase, output_dir: pathlib.Path):
     render_card(card_desc, output_path)
 
 
-def _start_render_server(output_dir: pathlib.Path, port:int, enable_debug:bool):
+def _start_render_server(port:int, enable_debug:bool):
   app = flask.Flask(__name__)
+
+  # we want to disable caching for the render server. Its not worth it.
+  temp_dir = pathlib.Path(tempfile.mkdtemp())
 
   @app.route("/", methods=["POST"])
   def _render_card():
     try:
       fields = flask.request.get_json(silent=True)
-      print(fields)
       util.assert_valid_card_desc(fields)
       card_desc = util.field_dict_to_card_desc(fields)
-      output_path = util.get_output_path(output_dir, card_desc)
+      output_path = util.get_output_path(temp_dir, card_desc)
       render_card(card_desc, output_path)
-      return flask.send_file(output_path.resolve(), as_attachment=True)
+      response = flask.send_file(output_path.resolve(), as_attachment=True)
+      os.remove(output_path)
+      return response
     except Exception as e:
-      return str(e)
+      return str(e), 405
 
   app.run(host='0.0.0.0', port=port, debug=enable_debug)
 
@@ -326,7 +332,7 @@ def main():
   assert (num_behavior_options == 1), "Must specify exactly one behavior."
 
   if args.render_server:
-    _start_render_server(args.output_dir, args.render_server_port, args.render_server_debug)
+    _start_render_server(args.render_server_port, args.render_server_debug)
     return
 
   db = gsheets.CardDatabase(args.card_database_gsheets_id)

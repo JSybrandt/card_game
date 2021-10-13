@@ -51,6 +51,8 @@ def _row_to_card_desc(row: List[str]) -> util.CardDesc:
     fields[header] = row[idx] if idx < len(row) else None
   return util.field_dict_to_card_desc(fields)
 
+# Columns after the first few are left for comments.
+NUM_IMPORTANT_COLUMNS = 9
 
 class CardDatabase():
 
@@ -68,6 +70,7 @@ class CardDatabase():
           spreadsheetId=self.sheet_id, range=CARD_RANGE).execute()
       self.cards = {}
       for idx, row in enumerate(response.get("values", [])):
+        row = row[:NUM_IMPORTANT_COLUMNS]
         if idx == 0:
           assert row == util.EXPECTED_COLUMN_HEADERS, "Invalid column headers."
           continue
