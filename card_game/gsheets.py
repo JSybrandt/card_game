@@ -71,11 +71,21 @@ class CardDatabase():
       self.cards = {}
       for idx, row in enumerate(response.get("values", [])):
         row = row[:NUM_IMPORTANT_COLUMNS]
+
         if idx == 0:
           assert row == util.EXPECTED_COLUMN_HEADERS, "Invalid column headers."
           continue
-        desc = _row_to_card_desc(row)
-        assert desc.title not in self.cards, f"Duplicate title: {desc.title}"
+
+        try:
+          desc = _row_to_card_desc(row)
+        except:
+          print("Error:", row)
+          continue
+
+        if desc.title in self.cards:
+          print("Duplicate title:", desc.title)
+          continue
+
         self.cards[desc.title] = desc
 
   def __iter__(self):
