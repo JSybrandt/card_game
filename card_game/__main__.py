@@ -291,7 +291,7 @@ def _render_deck(decklist: pathlib.Path, db: gsheets.CardDatabase,
       card_desc = db[title]
       pprint.pprint(card_desc)
       for _ in range(count):
-        output_path = util.get_output_path(output_dir, card_desc)
+        output_path = output_dir.joinpath(f"card_{card_idx}.png")
         render_card(card_desc, output_path)
         card_idx += 1
 
