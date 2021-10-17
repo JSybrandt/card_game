@@ -171,7 +171,8 @@ def render_attributes(draw: ImageDraw.Draw, desc: util.CardDesc):
             anchor=ATTRIBUTE_ANCHOR)
 
 
-def render_card(desc: util.CardDesc, output_path: pathlib.Path):
+def render_card(desc: util.CardDesc, output_dir:pathlib.Path):
+  output_path = util.get_output_path(output_dir, desc)
   if output_path.exists():
     print(f"Image already exists: {output_path}")
     return
@@ -298,8 +299,8 @@ def _render_deck(decklist: pathlib.Path, db: gsheets.CardDatabase,
 
 def main():
   parser = argparse.ArgumentParser()
-  parser.add_argument("--card_title", type=str, default=None)
-  parser.add_argument("--decklist", type=pathlib.Path, default=None)
+  parser.add_argument("--render_card", type=str, default=None)
+  parser.add_argument("--render_decklist", type=pathlib.Path, default=None)
   parser.add_argument("--remove_outdir", action="store_true")
   parser.add_argument("--ignore_decklist_counts", action="store_true")
   parser.add_argument("--render_all", action="store_true")
@@ -335,8 +336,8 @@ def main():
     "Must specify untap username and password together."
 
   num_behavior_options = sum([
-      args.card_title is not None,
-      args.decklist is not None,
+      args.render_card is not None,
+      args.render_decklist is not None,
       args.render_all,
       args.untap_username is not None,
       args.render_server
@@ -349,14 +350,13 @@ def main():
 
   db = gsheets.CardDatabase(args.card_database_gsheets_id)
 
-  if args.card_title is not None:
-    assert args.card_title in db
-    render_card(db[args.card_title],
-                args.output_dir.joinpath(f"{args.card_title}.png"))
+  if args.render_card is not None:
+    assert args.render_card in db
+    render_card(db[args.render_card], args.output_dir)
     return
 
-  if args.decklist is not None:
-    _render_deck(args.decklist, db, args.output_dir,
+  if args.render_decklist is not None:
+    _render_deck(args.render_decklist, db, args.output_dir,
                  args.ignore_decklist_counts)
     return
 
