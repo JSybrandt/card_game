@@ -118,13 +118,12 @@ class TextToken(Token):
 
 
 ICON_WIDTH = TEXT_HEIGHT
-MANA_ICON_HEIGHT = ICON_WIDTH
-MANA_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
+ICON_HEIGHT = ICON_WIDTH
+ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
                                     int(TEXT_HEIGHT * 0.8))
-MANA_ICON_FONT_COLOR = colors.WHITE
+ICON_FONT_COLOR = colors.WHITE
+
 MANA_ICON_REGEX = "<([0-9X]+)([FWDLNG])>"
-
-
 class ManaToken(Token):
 
   def __init__(self, desc: util.CardDesc, text: str):
@@ -137,8 +136,8 @@ class ManaToken(Token):
   def render(self, im: Image, draw: ImageDraw.Draw, cursor_x: int,
              cursor_y: int):
     center = cursor_x + int(ICON_WIDTH / 2), cursor_y
-    icons.draw_cost_icon(im, draw, center, ICON_WIDTH, MANA_ICON_HEIGHT,
-                         self.icon_text, MANA_ICON_FONT, MANA_ICON_FONT_COLOR,
+    icons.draw_cost_icon(im, draw, center, ICON_WIDTH, ICON_HEIGHT,
+                         self.icon_text, ICON_FONT, ICON_FONT_COLOR,
                          self.element)
 
   def width(self):
@@ -147,6 +146,50 @@ class ManaToken(Token):
   @classmethod
   def is_token(cls, text: str) -> bool:
     return bool(re.match(MANA_ICON_REGEX, text))
+
+HEALTH_ICON_REGEX = "<([0-9X]+)_HEALTH>"
+class HealthToken(Token):
+
+  def __init__(self, desc: util.CardDesc, text: str):
+    super().__init__(desc, text)
+    mana_match = re.match(HEALTH_ICON_REGEX, text)
+    assert mana_match
+    self.icon_text = mana_match.group(1)
+
+  def render(self, im: Image, draw: ImageDraw.Draw, cursor_x: int,
+             cursor_y: int):
+    center = cursor_x + int(ICON_WIDTH / 2), cursor_y
+    icons.draw_heart_with_text(draw, center, ICON_WIDTH, ICON_HEIGHT,
+                         self.icon_text, ICON_FONT, ICON_FONT_COLOR)
+
+  def width(self):
+    return ICON_WIDTH
+
+  @classmethod
+  def is_token(cls, text: str) -> bool:
+    return bool(re.match(HEALTH_ICON_REGEX, text))
+
+STRENGTH_REGEX = "<([0-9X]+)_STRENGTH>"
+class StrengthToken(Token):
+
+  def __init__(self, desc: util.CardDesc, text: str):
+    super().__init__(desc, text)
+    mana_match = re.match(STRENGTH_REGEX, text)
+    assert mana_match
+    self.icon_text = mana_match.group(1)
+
+  def render(self, im: Image, draw: ImageDraw.Draw, cursor_x: int,
+             cursor_y: int):
+    center = cursor_x + int(ICON_WIDTH / 2), cursor_y
+    icons.draw_diamond_with_text(draw, center, ICON_WIDTH, ICON_HEIGHT,
+                         self.icon_text, ICON_FONT, ICON_FONT_COLOR)
+
+  def width(self):
+    return ICON_WIDTH
+
+  @classmethod
+  def is_token(cls, text: str) -> bool:
+    return bool(re.match(STRENGTH_REGEX, text))
 
 
 DAMAGE_ICON_REGEX = "<([0-9X]+)_DAMAGE>"
@@ -268,7 +311,7 @@ class ActionToken(IconToken):
 
 def _get_token(desc: util.CardDesc, text: str) -> Token:
   for token_class in [
-      Newline, EndCost, ActionToken, IconToken, ManaToken, DamageToken,
+      Newline, EndCost, ActionToken, IconToken, ManaToken, DamageToken, HealthToken, StrengthToken,
       TextToken, StartTerritorySegmentToken,
       EndTerritorySegmentToken, Token
   ]:

@@ -41,7 +41,7 @@ def draw_cost_icon(im: Image,
 def draw_diamond_with_text(draw: ImageDraw.Draw, center: util.Coord,
                            icon_width: int, icon_height: int, text: str,
                            font: ImageFont.ImageFont, font_color: colors.Color,
-                           background_color: colors.Color):
+                           background_color: colors.Color=colors.BLUE_GREY_800):
   diamon = [
       (center[0], center[1] - int(icon_height / 2)),
       (center[0] - int(icon_width / 2), center[1]),
@@ -55,7 +55,7 @@ def draw_diamond_with_text(draw: ImageDraw.Draw, center: util.Coord,
 def draw_heart_with_text(draw: ImageDraw.Draw, center: util.Coord,
                          icon_width: int, icon_height: int, text: str,
                          font: ImageFont.ImageFont, font_color: colors.Color,
-                         background_color: colors.Color):
+                         background_color: colors.Color=colors.RED_A400):
   center_x, center_y = center
   left, top, right, bottom = util.get_centered_bb(center, icon_width,
                                                   icon_height)
