@@ -117,16 +117,6 @@ class TextToken(Token):
     return text[0] != "<" or text[-1] != ">"
 
 
-class ThisToken(TextToken):
-
-  def __init__(self, desc: util.CardDesc, _: str):
-    super().__init__(desc, desc.title)
-
-  @classmethod
-  def is_token(cls, text: str) -> bool:
-    return text == "<THIS>"
-
-
 ICON_WIDTH = TEXT_HEIGHT
 MANA_ICON_HEIGHT = ICON_WIDTH
 MANA_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
@@ -279,7 +269,7 @@ class ActionToken(IconToken):
 def _get_token(desc: util.CardDesc, text: str) -> Token:
   for token_class in [
       Newline, EndCost, ActionToken, IconToken, ManaToken, DamageToken,
-      TextToken, ThisToken, StartTerritorySegmentToken,
+      TextToken, StartTerritorySegmentToken,
       EndTerritorySegmentToken, Token
   ]:
     if token_class.is_token(text):
@@ -347,6 +337,7 @@ class BodyTextWriter():
     self.cursor_y = self.top + int(TEXT_HEIGHT / 2)
 
   def render_text(self, desc: util.CardDesc, text: str):
+    text = text.replace("<THIS>", desc.title)
     for segment in _get_logical_segments(desc, text):
       self._render_segment(segment)
 
