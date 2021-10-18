@@ -9,6 +9,8 @@ import pprint
 import shutil
 import tempfile
 
+from typing import Optional
+
 from PIL import Image, ImageDraw, ImageFont
 
 from . import body_text, card_art, colors, gsheets, icons, upload, util
@@ -169,8 +171,10 @@ def render_attributes(draw: ImageDraw.Draw, desc: util.CardDesc):
             anchor=ATTRIBUTE_ANCHOR)
 
 
-def render_card(desc: util.CardDesc, output_dir:pathlib.Path):
-  output_path = util.get_output_path(output_dir, desc)
+def render_card(desc: util.CardDesc, output_dir:Optional[pathlib.Path]=None, output_path:Optional[pathlib.Path]=None):
+  if output_path is None:
+    assert output_dir is not None
+    output_path = util.get_output_path(output_dir, desc)
   if output_path.exists():
     print(f"Image already exists: {output_path}")
     return
@@ -243,7 +247,7 @@ def _start_render_server(image_dir:pathlib.Path, port:int, enable_debug:bool):
       util.assert_valid_card_desc(fields)
       card_desc = util.field_dict_to_card_desc(fields)
       output_path = util.get_output_path(temp_dir, card_desc)
-      render_card(card_desc, output_path)
+      render_card(card_desc, output_path=output_path)
       response = flask.send_file(output_path.resolve(), as_attachment=True)
       os.remove(output_path)
       return response
