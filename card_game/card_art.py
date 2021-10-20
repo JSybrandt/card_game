@@ -1,10 +1,11 @@
 import colorsys
 import dataclasses
+import hashlib
 import math
 import random
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 from . import colors, util
 
@@ -57,19 +58,19 @@ def get_nearby_hue(hue: float, closeness: float = 0.05) -> float:
   return hue
 
 
-def get_nearby_complimentary_hue(hue: float) -> float:
-  return get_nearby_hue((hue + 0.5) % 1, closeness=0.4)
+def get_nearby_complimentary_hue(hue: float, closeness:float=0.4) -> float:
+  return get_nearby_hue((hue + 0.5) % 1, closeness)
 
 
-def get_nearby_hue_from_color(color: colors.Color) -> float:
+def get_nearby_hue_from_color(color: colors.Color, closeness:float=0.05) -> float:
   hue, _, _ = colorsys.rgb_to_hsv(*color)
-  return get_nearby_hue(hue)
+  return get_nearby_hue(hue, closeness)
 
 
-def get_nearby_hue_from_element(element: util.Element) -> float:
+def get_nearby_hue_from_element(element: util.Element, closeness:float=0.05) -> float:
   if element == util.Element.GENERIC:
     return random.uniform(0, 1)
-  return get_nearby_hue_from_color(element.get_primary_color())
+  return get_nearby_hue_from_color(element.get_primary_color(), closeness)
 
 
 def rand_color_palette(desc: util.CardDesc) -> ColorPalette:
@@ -262,3 +263,61 @@ def render_boarder(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
     right_mask_draw.rectangle([0, 0, im.width // 2, im.height], fill=0)
     right_border.putalpha(right_mask)
     im.paste(right_border, image_bb, right_border)
+
+
+def render_card_back(im:Image, draw:ImageDraw.Draw):
+  random.seed(hashlib.md5("TEMP".encode("utf-8")).hexdigest())
+
+  edge_size = min(im.width, im.height)
+  image_bb = [0, 0, im.width, im.height]
+  extended_bb = [-im.width//4, -im.height//4, im.width + im.width//4, im.height+im.height//4]
+
+  elements = [util.Element.WATER, util.Element.LIGHT, util.Element.DARK,
+              util.Element.NATURE, util.Element.FIRE, util.Element.GENERIC]
+
+
+  num_shapes = len(elements) * 15
+  num_bg_shapes = len(elements) * 3
+  num_fg_shapes = len(elements) * 3
+  for idx in range(num_shapes):
+    frac = idx / num_shapes
+    element = elements[idx % len(elements)]
+    base_color = random.choice([element.get_dark_color(),
+                                element.get_primary_color(),
+                                element.get_light_color()])
+
+    hue = get_nearby_hue_from_color(base_color, 0.1)
+    if idx < num_bg_shapes:
+      shape_radius = edge_size * random.uniform(0.6, 1)
+      saturation = random.uniform(0.4, 0.6)
+      value = random.uniform(0.25, 0.5)
+    elif idx > num_shapes - num_fg_shapes:
+      shape_radius = edge_size * random.uniform(0.1, 0.3)
+      saturation = random.uniform(0.9, 1)
+      value = 1
+    else:
+      shape_radius = edge_size * random.uniform(0.4, 0.6)
+      saturation = random.uniform(0.6, 0.9)
+      value = random.uniform(0.25, 0.75)
+
+    value *= 0.3
+
+    color = tuple(int(255 * c) for c in colorsys.hsv_to_rgb(hue, saturation, value))
+
+    shape = rand_shape(random.uniform(extended_bb[0], extended_bb[2]),
+                       random.uniform(extended_bb[1], extended_bb[3]),
+                       shape_radius, shape_radius)
+    draw.polygon(shape, fill=color)
+
+  title_font = ImageFont.truetype(str(util.LEAGUE_GOTHIC_FONT_PATH),
+                                  int(util.PIXELS_PER_INCH * 0.75))
+  draw.text((im.width//2, int(im.height * 0.4)),
+            "Hawken", colors.WHITE, font=title_font, anchor="mm")
+
+  draw.rounded_rectangle(
+      image_bb,
+      outline=colors.BLACK,
+      width=BORDER_WIDTH,
+      radius=BORDER_CORNER_RADIUS,
+  )
+  _round_corners(im, BORDER_CORNER_RADIUS)

@@ -170,6 +170,14 @@ def render_attributes(draw: ImageDraw.Draw, desc: util.CardDesc):
             font=font,
             anchor=ATTRIBUTE_ANCHOR)
 
+def render_card_back(output_dir:pathlib.Path):
+  output_path = output_dir.joinpath("card_back.png")
+  im = Image.new(mode="RGBA", size=(CARD_WIDTH, CARD_HEIGHT))
+  draw = ImageDraw.Draw(im)
+  card_art.render_card_back(im, draw)
+  print("Saving card:", output_path)
+  im.save(output_path)
+
 
 def render_card(desc: util.CardDesc, output_dir:Optional[pathlib.Path]=None, output_path:Optional[pathlib.Path]=None):
   if output_path is None:
@@ -306,6 +314,7 @@ def main():
   parser.add_argument("--remove_outdir", action="store_true")
   parser.add_argument("--ignore_decklist_counts", action="store_true")
   parser.add_argument("--render_all", action="store_true")
+  parser.add_argument("--render_card_back", action="store_true")
   parser.add_argument("--render_server", action="store_true")
   parser.add_argument("--render_server_port", type=int, default=5000)
   parser.add_argument("--render_server_debug", action="store_true")
@@ -342,7 +351,8 @@ def main():
       args.render_decklist is not None,
       args.render_all,
       args.untap_username is not None,
-      args.render_server
+      args.render_server,
+      args.render_card_back
   ])
   assert (num_behavior_options == 1), "Must specify exactly one behavior."
 
@@ -370,6 +380,10 @@ def main():
     _render_and_upload_all_cards(db, args.output_dir, args.selenium_driver_path,
                                  args.upload_card_set_name, args.untap_username,
                                  args.untap_password)
+    return
+
+  if args.render_card_back:
+    render_card_back(args.output_dir)
     return
 
 
