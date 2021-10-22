@@ -393,7 +393,7 @@ def _parse_text(desc: util.CardDesc, text:str)->List[Token]:
   text = re.sub("\s+", " ", text)
   token_texts = [""]
   for c in text:
-    if c == " ":
+    if c in " <":
       token_texts.append("")
     token_texts[-1] += c
     if c in " >":
