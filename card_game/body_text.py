@@ -77,18 +77,18 @@ class Newline(Token):
     return text == "<NEWLINE>"
 
 
-class StartTerritorySegmentToken(Token):
+class StartTetherSegmentToken(Token):
 
   @classmethod
   def is_token(cls, text: str) -> bool:
-    return text == "<START_TERRITORY_SEGMENT>"
+    return text == "<TETHER>"
 
 
-class EndTerritorySegmentToken(Token):
+class EndTetherSegmentToken(Token):
 
   @classmethod
   def is_token(cls, text: str) -> bool:
-    return text == "<END_TERRITORY_SEGMENT>"
+    return text == "</TETHER>"
 
 
 class EndCost(Token):
@@ -312,8 +312,8 @@ class ActionToken(IconToken):
 def _get_token(desc: util.CardDesc, text: str) -> Token:
   for token_class in [
       Newline, EndCost, ActionToken, IconToken, ManaToken, DamageToken, HealthToken, StrengthToken,
-      TextToken, StartTerritorySegmentToken,
-      EndTerritorySegmentToken, Token
+      TextToken, StartTetherSegmentToken,
+      EndTetherSegmentToken, Token
   ]:
     if token_class.is_token(text):
       return token_class(desc, text)
@@ -322,7 +322,7 @@ def _get_token(desc: util.CardDesc, text: str) -> Token:
 
 class TextSegmentType(enum.Enum):
   MAIN = "Main"
-  TERRITORY = "Territory"
+  TETHER = "Tether"
 
 
 class TextSegment():
@@ -336,14 +336,14 @@ def _get_logical_segments(desc: util.CardDesc, text: str) -> List[TextSegment]:
   segments = []
   current_segment = TextSegment()
   for token in [_get_token(desc, t) for t in text.split()]:
-    if isinstance(token, StartTerritorySegmentToken):
+    if isinstance(token, StartTetherSegmentToken):
       assert current_segment.segment_type == TextSegmentType.MAIN, \
         "Nested segments are not supported."
       segments.append(current_segment)
-      current_segment = TextSegment(TextSegmentType.TERRITORY)
-    elif isinstance(token, EndTerritorySegmentToken):
-      assert current_segment.segment_type == TextSegmentType.TERRITORY, \
-        "EndTerritorySegmentToken must occur after StartTerritorySegmentToken"
+      current_segment = TextSegment(TextSegmentType.TETHER)
+    elif isinstance(token, EndTetherSegmentToken):
+      assert current_segment.segment_type == TextSegmentType.TETHER, \
+        "EndTetherSegmentToken must occur after StartTetherSegmentToken"
       segments.append(current_segment)
       current_segment = TextSegment(TextSegmentType.MAIN)
     else:
