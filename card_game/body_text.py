@@ -266,7 +266,7 @@ ICONS = {
     "<SACRIFICE>":
         _load_image(util.ICON_DIR.joinpath("sacrifice.png")),
     "<MEMORY_ACTION>":
-        _load_image(util.ICON_DIR.joinpath("holding_action.png")),
+        _load_image(util.ICON_DIR.joinpath("memory_action.png")),
     "<RECRUIT_ACTION>":
         _load_image(util.ICON_DIR.joinpath("recruit_action.png")),
     "<COMBAT_ACTION>":
