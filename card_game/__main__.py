@@ -72,7 +72,7 @@ BODY_TEXT_BG_BB = [
 
 BOTTOM_ICON_Y = CARD_HEIGHT - int(LARGE_ICON_HEIGHT / 2) - CARD_MARGIN
 
-POWER_COORD = (CARD_WIDTH * 0.2, BOTTOM_ICON_Y)
+STRENGTH_COORD = (CARD_WIDTH * 0.2, BOTTOM_ICON_Y)
 
 HEALTH_COORD = (CARD_WIDTH * 0.8, BOTTOM_ICON_Y)
 
@@ -210,9 +210,9 @@ def render_card(desc: util.CardDesc, output_dir:Optional[pathlib.Path]=None, out
     icons.draw_heart_with_text(draw, HEALTH_COORD, LARGE_ICON_WIDTH,
                                LARGE_ICON_HEIGHT, desc.health, LARGE_ICON_FONT,
                                LARGE_ICON_FONT_COLOR)
-  if desc.power is not None:
-    icons.draw_diamond_with_text(draw, POWER_COORD, LARGE_ICON_WIDTH,
-                                 LARGE_ICON_HEIGHT, desc.power, LARGE_ICON_FONT,
+  if desc.strength is not None:
+    icons.draw_diamond_with_text(draw, STRENGTH_COORD, LARGE_ICON_WIDTH,
+                                 LARGE_ICON_HEIGHT, desc.strength, LARGE_ICON_FONT,
                                  LARGE_ICON_FONT_COLOR)
   if desc.card_type == util.CardType.MEMORY:
     icons.draw_cost_icon(im, draw, MANA_COORD, LARGE_ICON_WIDTH,

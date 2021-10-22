@@ -141,7 +141,7 @@ class CardDesc:
   cost: str
   attributes: str
   body_text: str
-  power: Optional[str]
+  strength: Optional[str]
   health: Optional[str]
 
   def hash_title(self):
@@ -160,7 +160,7 @@ EXPECTED_COLUMN_HEADERS = [
     "Cost",
     "Attributes",
     "Body Text",
-    "Power",
+    "Strength",
     "Health",
 ]
 
@@ -196,7 +196,7 @@ def field_dict_to_card_desc(fields: Dict[str, Any]):
       attributes=fields["Attributes"],
       body_text=fields["Body Text"],
       health=fields["Health"],
-      power=fields["Power"],
+      strength=fields["Strength"],
   )
 
 
