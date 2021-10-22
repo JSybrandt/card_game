@@ -72,7 +72,7 @@ def get_centered_bb(center: Coord, width: int, height: int) -> BoundingBox:
 class CardType(enum.Enum):
   ATTACHMENT = "Attachment"
   SPELL = "Spell"
-  HOLDING = "Holding"
+  MEMORY = "Memory"
   UNIT = "Unit"
   LEADER = "Leader"
   TOKEN = "Token"

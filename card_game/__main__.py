@@ -117,7 +117,7 @@ def render_title(draw: ImageDraw.Draw, desc: util.CardDesc):
     text_coord = (2 * CARD_MARGIN if desc.cost is None else 2 * CARD_MARGIN +
                   SMALL_ICON_WIDTH, TOP_ICON_Y)
     text_anchor = "lm"
-  if desc.card_type == util.CardType.HOLDING:
+  if desc.card_type == util.CardType.MEMORY:
     draw.rectangle(bg_bb,
                    fill=TITLE_BG_COLOR,
                    width=TITLE_BG_OUTLINE_WIDTH,
@@ -153,7 +153,7 @@ def render_attributes(draw: ImageDraw.Draw, desc: util.CardDesc):
   bb = util.get_centered_bb(ATTRIBUTE_COORD, width, height)
   # Move top under image
   bb[1] -= 2 * ATTRIBUTE_BG_RADIUS
-  if desc.card_type == util.CardType.HOLDING:
+  if desc.card_type == util.CardType.MEMORY:
     draw.rectangle(bb,
                    fill=ATTRIBUTE_BG_COLOR,
                    width=ATTRIBUTE_BG_OUTLINE_WIDTH,
@@ -180,6 +180,7 @@ def render_card_back(output_dir:pathlib.Path):
 
 
 def render_card(desc: util.CardDesc, output_dir:Optional[pathlib.Path]=None, output_path:Optional[pathlib.Path]=None):
+  assert (output_path is None) != (output_dir is None), "Must call render_card with only output_dir or output_path."
   if output_path is None:
     assert output_dir is not None
     output_path = util.get_output_path(output_dir, desc)
@@ -213,7 +214,7 @@ def render_card(desc: util.CardDesc, output_dir:Optional[pathlib.Path]=None, out
     icons.draw_diamond_with_text(draw, POWER_COORD, LARGE_ICON_WIDTH,
                                  LARGE_ICON_HEIGHT, desc.power, LARGE_ICON_FONT,
                                  LARGE_ICON_FONT_COLOR)
-  if desc.card_type == util.CardType.HOLDING:
+  if desc.card_type == util.CardType.MEMORY:
     icons.draw_cost_icon(im, draw, MANA_COORD, LARGE_ICON_WIDTH,
                          LARGE_ICON_HEIGHT, "1", LARGE_ICON_FONT,
                          LARGE_ICON_FONT_COLOR, desc.primary_element,
@@ -227,9 +228,8 @@ def render_card(desc: util.CardDesc, output_dir:Optional[pathlib.Path]=None, out
 
 def _render_all_cards(db: gsheets.CardDatabase, output_dir: pathlib.Path):
   for card_idx, card_desc in enumerate(db):
-    output_path = util.get_output_path(output_dir, card_desc)
     pprint.pprint(card_desc)
-    render_card(card_desc, output_path)
+    render_card(card_desc, output_dir)
 
 
 def _start_render_server(image_dir:pathlib.Path, port:int, enable_debug:bool):

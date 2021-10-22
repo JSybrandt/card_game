@@ -265,7 +265,7 @@ ICONS = {
         _load_image(util.ICON_DIR.joinpath("draw_card.png")),
     "<SACRIFICE>":
         _load_image(util.ICON_DIR.joinpath("sacrifice.png")),
-    "<HOLDING_ACTION>":
+    "<MEMORY_ACTION>":
         _load_image(util.ICON_DIR.joinpath("holding_action.png")),
     "<RECRUIT_ACTION>":
         _load_image(util.ICON_DIR.joinpath("recruit_action.png")),
@@ -500,7 +500,7 @@ class BodyTextWriter():
 def render_body_text(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
                      body_text_bb: util.BoundingBox):
   util.assert_valid_bb(body_text_bb)
-  if desc.card_type == util.CardType.HOLDING:
+  if desc.card_type == util.CardType.MEMORY:
     draw.rectangle(body_text_bb, fill=BG_COLOR)
   else:
     draw.rounded_rectangle(body_text_bb, radius=BG_RADIUS, fill=BG_COLOR)

@@ -177,7 +177,7 @@ def render_card_art(im: Image, desc: util.CardDesc, image_bb: util.BoundingBox,
                               min_radius, max_radius),
                    fill=rand_color(color_palette.primary_hue, min_saturation,
                                    max_saturation, min_value, max_value))
-  if desc.card_type == util.CardType.HOLDING:
+  if desc.card_type == util.CardType.MEMORY:
     _cut_corners(art_image, radius)
   else:
     _round_corners(art_image, radius)
