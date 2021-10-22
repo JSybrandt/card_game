@@ -159,7 +159,7 @@ class HealthToken(Token):
   def render(self, im: Image, draw: ImageDraw.Draw, cursor_x: int,
              cursor_y: int):
     center = cursor_x + int(ICON_WIDTH / 2), cursor_y
-    icons.draw_heart_with_text(draw, center, ICON_WIDTH, ICON_HEIGHT,
+    icons.draw_heart_with_text(im, draw, center, ICON_WIDTH, ICON_HEIGHT,
                          self.icon_text, ICON_FONT, ICON_FONT_COLOR)
 
   def width(self):

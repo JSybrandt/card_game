@@ -207,7 +207,7 @@ def render_card(desc: util.CardDesc, output_dir:Optional[pathlib.Path]=None, out
                          SMALL_ICON_FONT, SMALL_ICON_FONT_COLOR,
                          desc.primary_element, desc.secondary_element)
   if desc.health is not None:
-    icons.draw_heart_with_text(draw, HEALTH_COORD, LARGE_ICON_WIDTH,
+    icons.draw_heart_with_text(im, draw, HEALTH_COORD, LARGE_ICON_WIDTH,
                                LARGE_ICON_HEIGHT, desc.health, LARGE_ICON_FONT,
                                LARGE_ICON_FONT_COLOR)
   if desc.strength is not None:
