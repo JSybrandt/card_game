@@ -297,9 +297,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.44075231"
-     inkscape:cx="-214.19718"
-     inkscape:cy="401.51983"
+     inkscape:zoom="0.31165895"
+     inkscape:cx="-827.90264"
+     inkscape:cy="-616.46216"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -307,20 +307,22 @@
      units="px"
      showguides="false"
      inkscape:guide-bbox="true"
-     inkscape:window-width="1920"
-     inkscape:window-height="1016"
-     inkscape:window-x="0"
-     inkscape:window-y="27"
+     inkscape:window-width="2560"
+     inkscape:window-height="1376"
+     inkscape:window-x="1440"
+     inkscape:window-y="683"
      inkscape:window-maximized="1"
      inkscape:snap-bbox="true"
      inkscape:snap-intersection-paths="false"
      inkscape:snap-smooth-nodes="false"
-     inkscape:snap-bbox-edge-midpoints="false"
+     inkscape:snap-bbox-edge-midpoints="true"
      inkscape:bbox-nodes="true"
      inkscape:snap-object-midpoints="true"
      inkscape:object-nodes="false"
      inkscape:snap-nodes="true"
-     inkscape:snap-bbox-midpoints="true">
+     inkscape:snap-bbox-midpoints="true"
+     inkscape:snap-grids="false"
+     inkscape:bbox-paths="true">
     <inkscape:grid
        type="xygrid"
        id="grid18"
@@ -343,7 +345,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -360,19 +362,19 @@
        y="-1e-06"
        ry="22.67857" />
     <rect
-       style="fill:#00ff00;stroke-width:0.264583"
+       style="fill:#00ff00;stroke-width:0.40989"
        id="rect265"
        width="26.458332"
-       height="66.145836"
-       x="100.54166"
-       y="47.624996" />
+       height="158.75"
+       x="66.145836"
+       y="-1e-06" />
     <rect
-       style="fill:#00ff00;stroke-width:0.264583"
+       style="fill:#00ff00;stroke-width:0.34642"
        id="rect265-3"
        width="26.458332"
-       height="66.145836"
+       height="113.39285"
        x="66.145836"
-       y="-146.84375"
+       y="-136.07143"
        transform="rotate(90)" />
   </g>
 </svg>
