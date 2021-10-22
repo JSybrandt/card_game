@@ -70,6 +70,7 @@ class Token():
     return True
 
 
+
 class Newline(Token):
 
   @classmethod
@@ -115,6 +116,14 @@ class TextToken(Token):
   @classmethod
   def is_token(cls, text: str) -> bool:
     return text[0] != "<" or text[-1] != ">"
+
+class SpaceToken(TextToken):
+  def __init__(self, desc:util.CardDesc, _:str):
+    super().__init__(desc, " ")
+
+  @classmethod
+  def is_token(cls, text: str) -> bool:
+    return text == " " or text == ""
 
 
 ICON_WIDTH = TEXT_HEIGHT
@@ -311,7 +320,8 @@ class ActionToken(IconToken):
 
 def _get_token(desc: util.CardDesc, text: str) -> Token:
   for token_class in [
-      Newline, EndCost, ActionToken, IconToken, ManaToken, DamageToken, HealthToken, StrengthToken,
+      SpaceToken, Newline, EndCost, ActionToken, IconToken, ManaToken,
+      DamageToken, HealthToken, StrengthToken,
       TextToken, StartTetherSegmentToken,
       EndTetherSegmentToken, Token
   ]:
@@ -332,10 +342,10 @@ class TextSegment():
     self.tokens = []
 
 
-def _get_logical_segments(desc: util.CardDesc, text: str) -> List[TextSegment]:
+def _get_logical_segments(tokens:List[Token]) -> List[TextSegment]:
   segments = []
   current_segment = TextSegment()
-  for token in [_get_token(desc, t) for t in text.split()]:
+  for token in tokens:
     if isinstance(token, StartTetherSegmentToken):
       assert current_segment.segment_type == TextSegmentType.MAIN, \
         "Nested segments are not supported."
@@ -352,6 +362,14 @@ def _get_logical_segments(desc: util.CardDesc, text: str) -> List[TextSegment]:
   segments.append(current_segment)
   return segments
 
+def _strip_tokens(tokens:List[Token])->List[Token]:
+  t = tokens[:]
+  while len(t) > 0 and isinstance(t[0], SpaceToken):
+    t.pop(0)
+  while len(t) > 0 and isinstance(t[-1], SpaceToken):
+    t.pop(-1)
+  return t
+
 
 def _get_logical_lines(text_segment: TextSegment) -> List[Token]:
   lines = []
@@ -365,7 +383,22 @@ def _get_logical_lines(text_segment: TextSegment) -> List[Token]:
       current_line.append(token)
   lines.append(current_line)
   # check all our lines
-  return [l for l in lines if len(l) > 0]
+  lines = [_strip_tokens(l) for l in lines]
+  lines = [l for l in lines if len(l) > 0]
+  return lines
+
+def _parse_text(desc: util.CardDesc, text:str)->List[Token]:
+  text = text.replace("<THIS>", desc.title)
+  text = text.strip()
+  text = re.sub("\s+", " ", text)
+  token_texts = [""]
+  for c in text:
+    if c == " ":
+      token_texts.append("")
+    token_texts[-1] += c
+    if c in " >":
+      token_texts.append("")
+  return  [_get_token(desc, t) for t in token_texts]
 
 
 class BodyTextWriter():
@@ -380,9 +413,9 @@ class BodyTextWriter():
     self.cursor_y = self.top + int(TEXT_HEIGHT / 2)
 
   def render_text(self, desc: util.CardDesc, text: str):
-    text = text.replace("<THIS>", desc.title)
-    for segment in _get_logical_segments(desc, text):
+    for segment in _get_logical_segments(_parse_text(desc, text)):
       self._render_segment(segment)
+
 
   def _render_segment(self, text_segment: TextSegment):
     lines = _get_logical_lines(text_segment)
@@ -442,8 +475,10 @@ class BodyTextWriter():
           end_cost_idx = idx
       # This should remove cost_end from the tokens.
       cost = [] if end_cost_idx is None else tokens[1:end_cost_idx]
-      content = tokens[1:] if end_cost_idx is None else tokens[end_cost_idx +
-                                                               1:]
+      cost = [c for c in cost if not isinstance(c, SpaceToken)]
+      content = (tokens[1:] if end_cost_idx is None
+                 else tokens[end_cost_idx + 1:])
+      content = _strip_tokens(content)
       self._render_action_line(action, cost, content, dry_run)
     else:
       self._render_text_line(tokens, dry_run)
@@ -456,7 +491,7 @@ class BodyTextWriter():
   def _render_cost_background(self, cost: List[Token]):
     cost_width = sum(
         c.width()
-        for c in cost) + TOKEN_PADDING_X * (len(cost) - 1) + 2 * COST_PADDING_X
+        for c in cost) + 2 * COST_PADDING_X
     bb = self.cursor_x, self.cursor_y - int(
         TEXT_HEIGHT / 2), self.cursor_x + cost_width, self.cursor_y + int(
             TEXT_HEIGHT / 2)
@@ -479,22 +514,30 @@ class BodyTextWriter():
       for c in cost:
         if not dry_run:
           c.render(self.im, self.draw, self.cursor_x, self.cursor_y)
-        self.cursor_x += c.width() + TOKEN_PADDING_X
+        self.cursor_x += c.width()
       self.cursor_x += COST_PADDING_X
-    for c in content:
-      if self.cursor_x + c.width() > self.right:
+    self.cursor_x += TOKEN_PADDING_X
+    for token in content:
+      if self.cursor_x + token.width() > self.right:
         self._newline(action.width())
+        if isinstance(token, SpaceToken):
+          # Don't render a space if we've just started a new line.
+          continue
       if not dry_run:
-        c.render(self.im, self.draw, self.cursor_x, self.cursor_y)
-      self.cursor_x += c.width() + TOKEN_PADDING_X
+        token.render(self.im, self.draw, self.cursor_x, self.cursor_y)
+      self.cursor_x += token.width()
 
   def _render_text_line(self, content: List[Token], dry_run: bool = False):
     for token in content:
       if self.cursor_x + token.width() > self.right:
         self._newline()
+
+        if isinstance(token, SpaceToken):
+          # Don't render a space if we've just started a new line.
+          continue
       if not dry_run:
         token.render(self.im, self.draw, self.cursor_x, self.cursor_y)
-      self.cursor_x += token.width() + TOKEN_PADDING_X
+      self.cursor_x += token.width()
 
 
 def render_body_text(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
