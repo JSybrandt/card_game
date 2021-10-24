@@ -10,6 +10,8 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
+from . import util
+
 #pylint: disable=too-many-arguments
 
 UNTAP_URL = "https://untap.in/"
@@ -20,13 +22,15 @@ FTP_USER = "ftpuser"
 FTP_PASSWD_FILE = (pathlib.Path.home().joinpath(".local").joinpath(
     "share").joinpath("card_game").joinpath("ftp_password"))
 
+SLEEP_TIME=0.5
+
 # Following the upload, you can search for our cards with the "set" search.
 
 
 @dataclasses.dataclass
 class UploadCardMetadata:
   image_path: pathlib.Path
-  title: str
+  desc: util.CardDesc
 
 
 def _login(driver, username, password):
@@ -51,7 +55,7 @@ def _dismiss_notifications(driver):
   modal_element = WebDriverWait(driver, MAX_WAIT).until(
       EC.presence_of_element_located((By.CLASS_NAME, "input-style")))
   dissmiss_link = modal_element.find_element_by_tag_name("a")
-  time.sleep(1)
+  time.sleep(SLEEP_TIME)
   # Need to click dismiss and somewhere in the background.
   (webdriver.ActionChains(driver).click(dissmiss_link).perform())
 
@@ -115,11 +119,10 @@ def _click_i_understand(driver):
   webdriver.ActionChains(driver).click(i_understand_button).perform()
 
 
-def _fill_card_contents(driver, title, set_name, image_url):
+def _fill_card_contents(driver, title, set_name, image_url, card_back_url):
   form = WebDriverWait(driver, MAX_WAIT).until(
       EC.presence_of_element_located((By.ID, "add-card")))
-  card_title_input, card_set_input, card_img_url_input, _ = \
-    form.find_elements_by_tag_name("input")
+  card_title_input, card_set_input, card_img_url_input, card_back_img_url_input = form.find_elements_by_tag_name("input")
   _, card_type_select, _, _, _ = form.find_elements_by_tag_name("select")
 
   add_card_button = None
@@ -129,11 +132,20 @@ def _fill_card_contents(driver, title, set_name, image_url):
       break
   assert add_card_button is not None
 
-  (webdriver.ActionChains(driver).double_click(card_title_input).send_keys(
-      title).double_click(card_set_input).send_keys(set_name).double_click(
-          card_img_url_input).send_keys(image_url).double_click(
-              card_type_select).send_keys("c").send_keys(
-                  Keys.ENTER).double_click(add_card_button).perform())
+  (webdriver.ActionChains(driver)
+   .double_click(card_title_input)
+   .send_keys(title)
+   .double_click(card_set_input)
+   .send_keys(set_name)
+   .double_click(card_img_url_input)
+   .send_keys(image_url)
+   .double_click(card_back_img_url_input)
+   .send_keys(card_back_url)
+   .double_click(card_type_select)
+   .send_keys("c")
+   .send_keys(Keys.ENTER)
+   .double_click(add_card_button)
+   .perform())
 
 
 def _upload_image(ftp_session: ftplib.FTP,
@@ -169,6 +181,9 @@ def upload_cards(card_metadata: List[UploadCardMetadata],
   ftp_session.sendcmd(f"USER {FTP_USER}")
   ftp_session.sendcmd(f"PASS {ftp_pass}")
 
+  main_deck_back_link = _attempt(lambda: _upload_image(ftp_session, util.MAIN_CARD_BACK_IMG_PATH))
+  memory_deck_back_link = _attempt(lambda: _upload_image(ftp_session, util.MEMORY_CARD_BACK_IMG_PATH))
+
   # If we go to sleep, the automated browser iterations may fail.
   driver = webdriver.Chrome(executable_path=selenium_driver_path)
   driver.get(UNTAP_URL)
@@ -176,21 +191,24 @@ def upload_cards(card_metadata: List[UploadCardMetadata],
   # The damn icons on the left hand side can cover up the buttons we need.
   driver.set_window_size(1920, 1080)
   _login(driver, untap_username, untap_password)
-  time.sleep(1)
+  time.sleep(SLEEP_TIME)
   _dismiss_notifications(driver)
-  time.sleep(1)
+  time.sleep(SLEEP_TIME)
   _click_new_deck(driver)
-  time.sleep(1)
+  time.sleep(SLEEP_TIME)
   _click_custom_deck(driver)
   for card in card_metadata:
-    time.sleep(1)
+    time.sleep(SLEEP_TIME)
     card_link = _attempt(lambda: _upload_image(ftp_session, card.image_path))
-    print(f"Uploaded '{card.title}' to {card_link}")
+    print(f"Uploaded '{card.desc.title}' to {card_link}")
     _attempt(lambda: _open_submenu(driver))
-    time.sleep(1)
+    time.sleep(SLEEP_TIME)
     _attempt(lambda: _click_i_understand(driver))
-    time.sleep(1)
-    _attempt(lambda: _fill_card_contents(driver, card.title, card_set_name,
-                                         card_link))
+    time.sleep(SLEEP_TIME)
+    card_back = (memory_deck_back_link
+                 if card.desc.card_type == util.CardType.MEMORY
+                 else main_deck_back_link)
+    _attempt(lambda: _fill_card_contents(driver, card.desc.title, card_set_name,
+                                         card_link, card_back))
 
   ftp_session.close()

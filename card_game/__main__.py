@@ -182,7 +182,6 @@ def render_card_back(output_dir:pathlib.Path):
 def render_card(desc: util.CardDesc, output_dir:Optional[pathlib.Path]=None, output_path:Optional[pathlib.Path]=None):
   assert (output_path is None) != (output_dir is None), "Must call render_card with only output_dir or output_path."
   if output_path is None:
-    assert output_dir is not None
     output_path = util.get_output_path(output_dir, desc)
   if output_path.exists():
     print(f"Image already exists: {output_path}")
@@ -274,13 +273,13 @@ def _render_and_upload_all_cards(db: gsheets.CardDatabase,
                                  untap_password: str):
 
   card_metadata = []
-  for card_idx, card_desc in enumerate(db):
-    output_path = util.get_output_path(output_dir, card_desc)
-    pprint.pprint(card_desc)
-    render_card(card_desc, output_path)
+  for card_idx, desc in enumerate(db):
+    output_path = util.get_output_path(output_dir, desc)
+    pprint.pprint(desc)
+    render_card(desc, output_path=output_path)
     card_metadata.append(
         upload.UploadCardMetadata(image_path=output_path,
-                                  title=card_desc.title))
+                                  desc=desc))
 
   upload.upload_cards(card_metadata, selenium_driver_path, card_set_name,
                       untap_username, untap_password)
@@ -330,7 +329,7 @@ def main():
   today_yyyymmdd = datetime.datetime.today().strftime("%Y%m%d")
   parser.add_argument("--upload_card_set_name",
                       type=str,
-                      default=f"JJ{today_yyyymmdd}")
+                      default=f"HRK-{today_yyyymmdd}")
   # Specify these for imgur upload
   parser.add_argument("--untap_username", type=str, default=None)
   parser.add_argument("--untap_password", type=str, default=None)

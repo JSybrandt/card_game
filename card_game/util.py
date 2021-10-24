@@ -39,6 +39,14 @@ assert GARAMOND_MATH_FONT_PATH.is_file()
 ICON_DIR = pathlib.Path("./icons")
 assert ICON_DIR.is_dir()
 
+RESOURCE_DIR = pathlib.Path("./resources")
+assert RESOURCE_DIR.is_dir()
+
+MAIN_CARD_BACK_IMG_PATH = RESOURCE_DIR.joinpath("card_back.png")
+assert MAIN_CARD_BACK_IMG_PATH.is_file()
+MEMORY_CARD_BACK_IMG_PATH = RESOURCE_DIR.joinpath("card_back_pentagon.png")
+assert MEMORY_CARD_BACK_IMG_PATH.is_file()
+
 Coord = Tuple[int, int]
 
 
