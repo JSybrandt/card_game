@@ -31,6 +31,8 @@ COLWELLA_FONT_PATH = FONT_DIR.joinpath("Colwella.ttf")
 assert COLWELLA_FONT_PATH.is_file()
 EB_GARAMOND_FONT_PATH = FONT_DIR.joinpath("EBGaramond-VariableFont_wght.ttf")
 assert EB_GARAMOND_FONT_PATH.is_file()
+GARAMOND_ITALIC_FONT_PATH = FONT_DIR.joinpath("Garamond Italic.ttf")
+assert GARAMOND_ITALIC_FONT_PATH.is_file()
 GARAMOND_MATH_FONT_PATH = FONT_DIR.joinpath("Garamond-Math.otf")
 assert GARAMOND_MATH_FONT_PATH.is_file()
 
@@ -143,6 +145,7 @@ class CardDesc:
   body_text: str
   strength: Optional[str]
   health: Optional[str]
+  flavor_text: Optional[str]
 
   def hash_title(self):
     return hashlib.md5(self.title.encode("utf-8")).hexdigest()
@@ -162,6 +165,7 @@ EXPECTED_COLUMN_HEADERS = [
     "Body Text",
     "Strength",
     "Health",
+    "Flavor Text",
 ]
 
 
@@ -197,6 +201,7 @@ def field_dict_to_card_desc(fields: Dict[str, Any]):
       body_text=fields["Body Text"],
       health=fields["Health"],
       strength=fields["Strength"],
+      flavor_text=fields["Flavor Text"],
   )
 
 

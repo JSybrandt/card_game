@@ -52,7 +52,7 @@ def _row_to_card_desc(row: List[str]) -> util.CardDesc:
   return util.field_dict_to_card_desc(fields)
 
 # Columns after the first few are left for comments.
-NUM_IMPORTANT_COLUMNS = 9
+NUM_IMPORTANT_COLUMNS = 10
 
 class CardDatabase():
 
@@ -78,8 +78,8 @@ class CardDatabase():
 
         try:
           desc = _row_to_card_desc(row)
-        except:
-          print("Error:", row)
+        except Exception as e:
+          print("Error:", row, e)
           continue
 
         if desc.title in self.cards:

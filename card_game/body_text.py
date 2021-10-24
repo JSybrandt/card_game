@@ -17,9 +17,12 @@ FONT_COLOR = colors.BLACK
 BG_RADIUS = int(util.PIXELS_PER_INCH * 0.05)
 BG_COLOR = colors.GREY_50
 BODY_TEXT_MARGIN = int(util.PIXELS_PER_INCH * 0.05)
+FLAVOR_TEXT_MARGIN = int(util.PIXELS_PER_INCH * 0.25)
 
-TEXT_HEIGHT = int(util.PIXELS_PER_INCH * 0.16)
+TEXT_HEIGHT = int(util.PIXELS_PER_INCH * 0.14)
 FONT = ImageFont.truetype(str(util.EB_GARAMOND_FONT_PATH), TEXT_HEIGHT)
+FLAVOR_TEXT_HEIGHT = int(util.PIXELS_PER_INCH * 0.08)
+FLAVOR_TEXT_FONT = ImageFont.truetype(str(util.GARAMOND_ITALIC_FONT_PATH), FLAVOR_TEXT_HEIGHT)
 TOKEN_PADDING_Y = int(util.PIXELS_PER_INCH * 0.02)
 TOKEN_PADDING_X = int(util.PIXELS_PER_INCH * 0.02)
 
@@ -39,9 +42,10 @@ UNKNOWN_TEXT = "[?]"
 
 class Token():
 
-  def __init__(self, desc: util.CardDesc, text: str):
+  def __init__(self, desc: util.CardDesc, text: str, font: ImageFont.ImageFont):
     self.text = text
     self.desc = desc
+    self.font = font
 
   def render(self, _: Image, draw: ImageDraw.Draw, cursor_x: int,
              cursor_y: int):
@@ -57,12 +61,12 @@ class Token():
     draw.text((cursor_x, cursor_y),
               UNKNOWN_TEXT,
               FONT_COLOR,
-              font=FONT,
+              font=self.font,
               anchor="lm")
 
   def width(self):
     #pylint: disable=no-self-use
-    return FONT.getsize(UNKNOWN_TEXT)[0]
+    return self.font.getsize(UNKNOWN_TEXT)[0]
 
   @classmethod
   def is_token(cls, text: str) -> bool:
@@ -107,19 +111,19 @@ class TextToken(Token):
     draw.text((cursor_x, cursor_y),
               self.text,
               FONT_COLOR,
-              font=FONT,
+              font=self.font,
               anchor="lm")
 
   def width(self):
-    return FONT.getsize(self.text)[0]
+    return self.font.getsize(self.text)[0]
 
   @classmethod
   def is_token(cls, text: str) -> bool:
     return text[0] != "<" or text[-1] != ">"
 
 class SpaceToken(TextToken):
-  def __init__(self, desc:util.CardDesc, _:str):
-    super().__init__(desc, " ")
+  def __init__(self, desc:util.CardDesc, *args, **kwargs):
+    super().__init__(desc, *args, **kwargs)
 
   @classmethod
   def is_token(cls, text: str) -> bool:
@@ -135,8 +139,8 @@ ICON_FONT_COLOR = colors.WHITE
 MANA_ICON_REGEX = "<([0-9X]+)([FWDLNG])>"
 class ManaToken(Token):
 
-  def __init__(self, desc: util.CardDesc, text: str):
-    super().__init__(desc, text)
+  def __init__(self, desc: util.CardDesc, text: str, *args, **kwargs,):
+    super().__init__(desc, text, *args, **kwargs)
     mana_match = re.match(MANA_ICON_REGEX, text)
     assert mana_match
     self.icon_text = mana_match.group(1)
@@ -159,8 +163,8 @@ class ManaToken(Token):
 HEALTH_ICON_REGEX = "<([0-9X]+)_HEALTH>"
 class HealthToken(Token):
 
-  def __init__(self, desc: util.CardDesc, text: str):
-    super().__init__(desc, text)
+  def __init__(self, desc: util.CardDesc, text: str, *args, **kwargs):
+    super().__init__(desc, text, *args, **kwargs)
     mana_match = re.match(HEALTH_ICON_REGEX, text)
     assert mana_match
     self.icon_text = mana_match.group(1)
@@ -181,8 +185,8 @@ class HealthToken(Token):
 STRENGTH_REGEX = "<([0-9X]+)_STRENGTH>"
 class StrengthToken(Token):
 
-  def __init__(self, desc: util.CardDesc, text: str):
-    super().__init__(desc, text)
+  def __init__(self, desc: util.CardDesc, text: str, *args, **kwargs):
+    super().__init__(desc, text, *args, **kwargs)
     mana_match = re.match(STRENGTH_REGEX, text)
     assert mana_match
     self.icon_text = mana_match.group(1)
@@ -210,8 +214,8 @@ DAMAGE_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
 
 class DamageToken(Token):
 
-  def __init__(self, desc: util.CardDesc, text: str):
-    super().__init__(desc, text)
+  def __init__(self, desc: util.CardDesc, text: str, *args, **kwargs):
+    super().__init__(desc, text, *args, **kwargs)
     damage_match = re.match(DAMAGE_ICON_REGEX, text)
     assert damage_match
     self.icon_text = damage_match.group(1)
@@ -291,8 +295,8 @@ ICONS = {
 
 class IconToken(Token):
 
-  def __init__(self, desc: util.CardDesc, text: str):
-    super().__init__(desc, text)
+  def __init__(self, desc: util.CardDesc, text: str, *args, **kwargs):
+    super().__init__(desc, text, *args, **kwargs)
     assert text in ICONS
 
   def render(self, im: Image, draw: ImageDraw.Draw, cursor_x: int,
@@ -318,7 +322,7 @@ class ActionToken(IconToken):
     return text in ICONS and re.match("<[A-Z]+_ACTION>", text)
 
 
-def _get_token(desc: util.CardDesc, text: str) -> Token:
+def _get_token(desc: util.CardDesc, text: str, font:ImageFont.ImageFont) -> Token:
   for token_class in [
       SpaceToken, Newline, EndCost, ActionToken, IconToken, ManaToken,
       DamageToken, HealthToken, StrengthToken,
@@ -326,8 +330,8 @@ def _get_token(desc: util.CardDesc, text: str) -> Token:
       EndTetherSegmentToken, Token
   ]:
     if token_class.is_token(text):
-      return token_class(desc, text)
-  return Token(desc, text)
+      return token_class(desc, text, font)
+  return Token(desc, text, font)
 
 
 class TextSegmentType(enum.Enum):
@@ -387,7 +391,7 @@ def _get_logical_lines(text_segment: TextSegment) -> List[Token]:
   lines = [l for l in lines if len(l) > 0]
   return lines
 
-def _parse_text(desc: util.CardDesc, text:str)->List[Token]:
+def _parse_text(desc: util.CardDesc, text:str, font:ImageFont.ImageFont)->List[Token]:
   text = text.replace("<THIS>", desc.title)
   text = text.strip()
   text = re.sub("\s+", " ", text)
@@ -398,24 +402,24 @@ def _parse_text(desc: util.CardDesc, text:str)->List[Token]:
     token_texts[-1] += c
     if c in " >":
       token_texts.append("")
-  return  [_get_token(desc, t) for t in token_texts]
+  return  [_get_token(desc, t, font) for t in token_texts]
 
 
 class BodyTextWriter():
 
   def __init__(self, im: Image, draw: ImageDraw.Draw,
-               body_text_bb: util.BoundingBox):
+               body_text_bb: util.BoundingBox, font:ImageFont.ImageFont):
     util.assert_valid_bb(body_text_bb)
     self.im = im
     self.draw = draw
     self.left, self.top, self.right, self.bottom = body_text_bb
     self.cursor_x = self.left
     self.cursor_y = self.top + int(TEXT_HEIGHT / 2)
+    self.font=font
 
   def render_text(self, desc: util.CardDesc, text: str):
-    for segment in _get_logical_segments(_parse_text(desc, text)):
+    for segment in _get_logical_segments(_parse_text(desc, text, self.font)):
       self._render_segment(segment)
-
 
   def _render_segment(self, text_segment: TextSegment):
     lines = _get_logical_lines(text_segment)
@@ -486,7 +490,7 @@ class BodyTextWriter():
 
   def _newline(self, indent: int = 0):
     self.cursor_x = self.left + indent
-    self.cursor_y += TEXT_HEIGHT + TOKEN_PADDING_Y
+    self.cursor_y += self.font.size + TOKEN_PADDING_Y
 
   def _render_cost_background(self, cost: List[Token]):
     cost_width = sum(
@@ -556,7 +560,20 @@ def render_body_text(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
   text_area_top = bg_y1 + BODY_TEXT_MARGIN
   text_area_bottom = bg_y2 - BODY_TEXT_MARGIN
 
-  BodyTextWriter(
+  writer = BodyTextWriter(
       im, draw,
-      [text_area_left, text_area_top, text_area_right, text_area_bottom
-      ]).render_text(desc, desc.body_text)
+      [text_area_left, text_area_top, text_area_right, text_area_bottom],
+      FONT)
+  writer.render_text(desc, desc.body_text)
+
+  if desc.flavor_text is not None:
+    flavor_text_top = max(writer.cursor_y + TEXT_HEIGHT,
+                          (0.35*text_area_top + 0.65*text_area_bottom))
+    flavor_text_left = text_area_left + FLAVOR_TEXT_MARGIN
+    flavor_text_right = text_area_right - FLAVOR_TEXT_MARGIN
+    writer = BodyTextWriter(
+        im, draw,
+        [flavor_text_left, flavor_text_top, flavor_text_right, text_area_bottom],
+        FLAVOR_TEXT_FONT)
+    writer.render_text(desc, desc.flavor_text)
+
