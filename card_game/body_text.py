@@ -17,7 +17,7 @@ FONT_COLOR = colors.BLACK
 BG_RADIUS = int(util.PIXELS_PER_INCH * 0.05)
 BG_COLOR = colors.GREY_50
 BODY_TEXT_MARGIN = int(util.PIXELS_PER_INCH * 0.05)
-FLAVOR_TEXT_MARGIN = int(util.PIXELS_PER_INCH * 0.25)
+FLAVOR_TEXT_MARGIN = int(util.PIXELS_PER_INCH * 0.3)
 
 TEXT_HEIGHT = int(util.PIXELS_PER_INCH * 0.14)
 FONT = ImageFont.truetype(str(util.EB_GARAMOND_FONT_PATH), TEXT_HEIGHT)
@@ -567,7 +567,7 @@ def render_body_text(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
   writer.render_text(desc, desc.body_text)
 
   if desc.flavor_text is not None:
-    flavor_text_top = max(writer.cursor_y + TEXT_HEIGHT,
+    flavor_text_top = max(writer.cursor_y,
                           (0.35*text_area_top + 0.65*text_area_bottom))
     flavor_text_left = text_area_left + FLAVOR_TEXT_MARGIN
     flavor_text_right = text_area_right - FLAVOR_TEXT_MARGIN
