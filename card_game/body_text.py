@@ -194,8 +194,8 @@ class StrengthToken(Token):
   def render(self, im: Image, draw: ImageDraw.Draw, cursor_x: int,
              cursor_y: int):
     center = cursor_x + int(ICON_WIDTH / 2), cursor_y
-    icons.draw_diamond_with_text(draw, center, ICON_WIDTH, ICON_HEIGHT,
-                         self.icon_text, ICON_FONT, ICON_FONT_COLOR)
+    icons.draw_strength_with_text(im, draw, center, ICON_WIDTH, ICON_HEIGHT,
+                                  self.icon_text, ICON_FONT, ICON_FONT_COLOR)
 
   def width(self):
     return ICON_WIDTH
@@ -220,39 +220,11 @@ class DamageToken(Token):
     assert damage_match
     self.icon_text = damage_match.group(1)
 
-  def render(self, _: Image, draw: ImageDraw.Draw, cursor_x: int,
+  def render(self, im: Image, draw: ImageDraw.Draw, cursor_x: int,
              cursor_y: int):
-    side = min(TEXT_HEIGHT, ICON_WIDTH)
-    circle_radius_ratio = 0.4
-    center_x = cursor_x + int(ICON_WIDTH / 2)
-    circle_left = center_x - int(side * circle_radius_ratio)
-    circle_right = center_x + int(side * circle_radius_ratio)
-    circle_top = cursor_y - int(side * circle_radius_ratio)
-    circle_bottom = cursor_y + int(side * circle_radius_ratio)
-
-    draw.ellipse([circle_left, circle_top, circle_right, circle_bottom],
-                 fill=DAMAGE_ICON_COLOR)
-
-    crosshair_width_ratio = 0.1
-    v_crosshair_left = center_x - int(side * crosshair_width_ratio)
-    v_crosshair_right = center_x + int(side * crosshair_width_ratio)
-    top = cursor_y - side // 2
-    bottom = cursor_y + side // 2
-    draw.rectangle([v_crosshair_left, top, v_crosshair_right, bottom],
-                   fill=DAMAGE_ICON_COLOR)
-
-    left = center_x - side // 2
-    right = center_x + side // 2
-    h_crosshair_top = cursor_y - int(side * crosshair_width_ratio)
-    h_crosshair_bottom = cursor_y + int(side * crosshair_width_ratio)
-    draw.rectangle([left, h_crosshair_top, right, h_crosshair_bottom],
-                   fill=DAMAGE_ICON_COLOR)
-
-    draw.text((center_x, cursor_y),
-              self.icon_text,
-              DAMAGE_ICON_FONT_COLOR,
-              anchor="mm",
-              font=DAMAGE_ICON_FONT)
+    center = cursor_x + int(ICON_WIDTH / 2), cursor_y
+    icons.draw_target_with_text(im, draw, center, ICON_WIDTH, ICON_HEIGHT,
+                                self.icon_text, ICON_FONT, ICON_FONT_COLOR)
 
   def width(self):
     return ICON_WIDTH
@@ -268,8 +240,6 @@ def _load_image(img_path: pathlib.Path) -> Image:
 
 
 ICONS = {
-    "<REVEAL>":
-        _load_image(util.ICON_DIR.joinpath("reveal.png")),
     "<EXHAUST>":
         _load_image(util.ICON_DIR.joinpath("exhaust.png")),
     "<READY>":
@@ -290,6 +260,8 @@ ICONS = {
         _load_image(util.ICON_DIR.joinpath("any_action.png")),
     "<BREAK_ACTION>":
         _load_image(util.ICON_DIR.joinpath("break_action.png")),
+    "<REVEAL_ACTION>":
+        _load_image(util.ICON_DIR.joinpath("reveal.png")),
 }
 
 

@@ -298,8 +298,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.7"
-     inkscape:cx="406.64322"
-     inkscape:cy="301.3809"
+     inkscape:cx="108.78608"
+     inkscape:cy="441.14735"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
@@ -307,11 +307,11 @@
      units="px"
      showguides="false"
      inkscape:guide-bbox="true"
-     inkscape:window-width="960"
+     inkscape:window-width="1920"
      inkscape:window-height="1016"
      inkscape:window-x="0"
      inkscape:window-y="27"
-     inkscape:window-maximized="0"
+     inkscape:window-maximized="1"
      inkscape:snap-bbox="true"
      inkscape:snap-intersection-paths="false"
      inkscape:snap-smooth-nodes="false"
@@ -363,12 +363,12 @@
     <g
        id="g1391"
        transform="matrix(0,-1.8000005,-1.7999997,0,246.06246,242.0938)"
-       style="fill:#00ff00"
+       style="fill:#76ff03;fill-opacity:1"
        inkscape:export-xdpi="96"
        inkscape:export-ydpi="96">
       <path
          sodipodi:type="star"
-         style="fill:#00ff00;stroke-width:0.264583"
+         style="fill:#76ff03;stroke-width:0.264583;fill-opacity:1"
          id="path1302"
          sodipodi:sides="3"
          sodipodi:cx="112.81082"
@@ -384,7 +384,7 @@
          inkscape:transform-center-y="4.4097218"
          transform="matrix(0.89682458,0,0,0.69037584,11.276397,32.768557)" />
       <path
-         style="fill:#00ff00;stroke-width:0.31034"
+         style="fill:#76ff03;stroke-width:0.31034;fill-opacity:1"
          id="path1306"
          mask="url(#mask-powermask-path-effect1316)"
          inkscape:path-effect="#path-effect1316"
@@ -396,6 +396,26 @@
          d="M -13.229168,39.199501 A 39.199497,39.199501 0 0 1 -52.428665,78.399002 39.199497,39.199501 0 0 1 -91.628162,39.199501 39.199497,39.199501 0 0 1 -52.428665,0 39.199497,39.199501 0 0 1 -13.229168,39.199501 Z"
          clip-path="url(#clipPath1379)"
          transform="translate(132.29167,66.145833)" />
+    </g>
+    <g
+       id="g891"
+       style="fill:#76ff03;fill-opacity:1"
+       transform="translate(-198.4375,171.97916)">
+      <rect
+         style="fill:#76ff03;fill-opacity:1;stroke-width:0.388856"
+         id="rect265"
+         width="26.458332"
+         height="142.875"
+         x="66.145836"
+         y="7.9375" />
+      <rect
+         style="fill:#76ff03;fill-opacity:1;stroke-width:0.321878"
+         id="rect265-3"
+         width="26.458332"
+         height="97.895836"
+         x="66.145836"
+         y="-127"
+         transform="rotate(90)" />
     </g>
   </g>
 </svg>

@@ -210,7 +210,7 @@ def render_card(desc: util.CardDesc, output_dir:Optional[pathlib.Path]=None, out
                                LARGE_ICON_HEIGHT, desc.health, LARGE_ICON_FONT,
                                LARGE_ICON_FONT_COLOR)
   if desc.strength is not None:
-    icons.draw_diamond_with_text(draw, STRENGTH_COORD, LARGE_ICON_WIDTH,
+    icons.draw_strength_with_text(im, draw, STRENGTH_COORD, LARGE_ICON_WIDTH,
                                  LARGE_ICON_HEIGHT, desc.strength, LARGE_ICON_FONT,
                                  LARGE_ICON_FONT_COLOR)
   if desc.card_type == util.CardType.MEMORY:
