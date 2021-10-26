@@ -26,7 +26,7 @@ FLAVOR_TEXT_FONT = ImageFont.truetype(str(util.GARAMOND_ITALIC_FONT_PATH), FLAVO
 TOKEN_PADDING_Y = int(util.PIXELS_PER_INCH * 0.02)
 TOKEN_PADDING_X = int(util.PIXELS_PER_INCH * 0.02)
 
-COST_BG_COLOR = colors.AMBER_200
+COST_BG_COLOR = colors.AMBER_400
 COST_PADDING_X = int(util.PIXELS_PER_INCH * 0.05)
 
 TEXT_SEGMENT_PADDING_Y = int(0.03 * util.PIXELS_PER_INCH)
@@ -96,11 +96,6 @@ class EndTetherSegmentToken(Token):
     return text == "</TETHER>"
 
 
-class EndCost(Token):
-
-  @classmethod
-  def is_token(cls, text: str) -> bool:
-    return text == "<END_COST>"
 
 
 class TextToken(Token):
@@ -240,6 +235,8 @@ def _load_image(img_path: pathlib.Path) -> Image:
 
 
 ICONS = {
+    "<END_COST>":
+        _load_image(util.ICON_DIR.joinpath("end_cost.png")),
     "<EXHAUST>":
         _load_image(util.ICON_DIR.joinpath("exhaust.png")),
     "<READY>":
@@ -286,6 +283,14 @@ class IconToken(Token):
   def is_token(cls, text: str) -> bool:
     return text in ICONS
 
+class EndCostToken(IconToken):
+  def width(self):
+    return ICON_WIDTH//2
+
+  @classmethod
+  def is_token(cls, text: str) -> bool:
+    return text == "<END_COST>"
+
 
 class ActionToken(IconToken):
 
@@ -296,7 +301,7 @@ class ActionToken(IconToken):
 
 def _get_token(desc: util.CardDesc, text: str, font:ImageFont.ImageFont) -> Token:
   for token_class in [
-      SpaceToken, Newline, EndCost, ActionToken, IconToken, ManaToken,
+      SpaceToken, Newline, EndCostToken, ActionToken, IconToken, ManaToken,
       DamageToken, HealthToken, StrengthToken,
       TextToken, StartTetherSegmentToken,
       EndTetherSegmentToken, Token
@@ -447,10 +452,10 @@ class BodyTextWriter():
       action = tokens[0]
       end_cost_idx = None
       for idx, t in enumerate(tokens):
-        if isinstance(t, EndCost):
+        if isinstance(t, EndCostToken):
           end_cost_idx = idx
       # This should remove cost_end from the tokens.
-      cost = [] if end_cost_idx is None else tokens[1:end_cost_idx]
+      cost = [] if end_cost_idx is None else tokens[1:end_cost_idx+1]
       cost = [c for c in cost if not isinstance(c, SpaceToken)]
       content = (tokens[1:] if end_cost_idx is None
                  else tokens[end_cost_idx + 1:])
@@ -465,14 +470,16 @@ class BodyTextWriter():
     self.cursor_y += self.font.size + TOKEN_PADDING_Y
 
   def _render_cost_background(self, cost: List[Token]):
+    assert isinstance(cost[-1], EndCostToken)
     cost_width = sum(
         c.width()
-        for c in cost) + 2 * COST_PADDING_X
-    bb = self.cursor_x, self.cursor_y - int(
-        TEXT_HEIGHT / 2), self.cursor_x + cost_width, self.cursor_y + int(
-            TEXT_HEIGHT / 2)
+      for c in cost[:-1]) + COST_PADDING_X + ICON_WIDTH/2
+    bb = [self.cursor_x,
+          self.cursor_y - TEXT_HEIGHT//2 - 1,
+          self.cursor_x + cost_width,
+          self.cursor_y + TEXT_HEIGHT//2]
     self.draw.rounded_rectangle(bb,
-                                radius=int(TEXT_HEIGHT / 2),
+                                radius=TEXT_HEIGHT//2,
                                 fill=COST_BG_COLOR)
 
   def _render_action_line(self,
