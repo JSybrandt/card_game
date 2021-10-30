@@ -184,8 +184,8 @@ def render_card_art(im: Image, desc: util.CardDesc, image_bb: util.BoundingBox,
   im.paste(art_image, image_bb, art_image)
 
 
-BORDER_WIDTH = int(0.05 * util.PIXELS_PER_INCH)
-BORDER_CORNER_RADIUS = int(0.2 * util.PIXELS_PER_INCH)
+BORDER_WIDTH = int(0.2 * util.PIXELS_PER_INCH)
+BORDER_CORNER_RADIUS = int(0.25 * util.PIXELS_PER_INCH)
 BG_PATTERN_SIZE = int(0.2 * util.PIXELS_PER_INCH)
 
 

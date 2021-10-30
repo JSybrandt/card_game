@@ -20,24 +20,23 @@ from . import body_text, card_art, colors, gsheets, icons, upload, util
 # Constants
 
 # Unless specified, all sizes are in pixels.
-CARD_WIDTH = int(2.5 * util.PIXELS_PER_INCH)
-CARD_HEIGHT = int(3.5 * util.PIXELS_PER_INCH)
-CARD_MARGIN = int(0.125 * util.PIXELS_PER_INCH)
+CARD_WIDTH = int(2.7 * util.PIXELS_PER_INCH)
+CARD_HEIGHT = int(3.7 * util.PIXELS_PER_INCH)
+CARD_MARGIN = int(0.275 * util.PIXELS_PER_INCH)
+CARD_PADDING = int(0.15* util.PIXELS_PER_INCH)
 
 # Default icon params
-SMALL_ICON_HEIGHT = SMALL_ICON_WIDTH = int(0.35 * util.PIXELS_PER_INCH)
-LARGE_ICON_HEIGHT = LARGE_ICON_WIDTH = int(0.4 * util.PIXELS_PER_INCH)
-SMALL_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
-                                     int(SMALL_ICON_HEIGHT * 0.9))
-LARGE_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
-                                     int(LARGE_ICON_HEIGHT * 0.8))
-SMALL_ICON_FONT_COLOR = colors.WHITE
-LARGE_ICON_FONT_COLOR = colors.WHITE
+ICON_HEIGHT = ICON_WIDTH = int(0.35 * util.PIXELS_PER_INCH)
+ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
+                                     int(ICON_WIDTH * 0.75))
+COST_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
+                                     int(ICON_WIDTH * 0.9))
+ICON_FONT_COLOR = colors.WHITE
 
 TOP_ICON_Y = int(0.175 * util.PIXELS_PER_INCH) + CARD_MARGIN
 
 # Cost parameters
-COST_COORD = (CARD_MARGIN + SMALL_ICON_WIDTH // 2, TOP_ICON_Y)
+COST_COORD = (CARD_MARGIN + ICON_WIDTH // 2, TOP_ICON_Y)
 
 # Describes the max width of card contents
 CONTENT_WIDTH = CARD_WIDTH - 2 * CARD_MARGIN
@@ -65,16 +64,16 @@ ATTRIBUTE_TEXT_COLOR = colors.BLACK
 # Body text
 BODY_TEXT_BG_BB = [
     CARD_MARGIN,
-    ATTRIBUTE_BOTTOM + CARD_MARGIN,
+    ATTRIBUTE_BOTTOM + CARD_PADDING,
     CARD_MARGIN + CONTENT_WIDTH,
-    CARD_HEIGHT - int(LARGE_ICON_HEIGHT / 2) - CARD_MARGIN,
+    CARD_HEIGHT - int(ICON_WIDTH / 2) - CARD_MARGIN,
 ]
 
-BOTTOM_ICON_Y = CARD_HEIGHT - int(LARGE_ICON_HEIGHT / 2) - CARD_MARGIN
+BOTTOM_ICON_Y = CARD_HEIGHT - int(ICON_WIDTH / 2) - CARD_MARGIN
 
-STRENGTH_COORD = (CARD_WIDTH * 0.15, BOTTOM_ICON_Y)
+STRENGTH_COORD = (CARD_WIDTH * 0.2, BOTTOM_ICON_Y)
 
-HEALTH_COORD = (CARD_WIDTH * 0.85, BOTTOM_ICON_Y)
+HEALTH_COORD = (CARD_WIDTH * 0.8, BOTTOM_ICON_Y)
 
 MANA_COORD = (CARD_WIDTH / 2, BOTTOM_ICON_Y)
 
@@ -105,17 +104,17 @@ def render_title(draw: ImageDraw.Draw, desc: util.CardDesc):
   text_width, _ = scaled_font.getsize(desc.title)
   if desc.cost is None:
     text_coord = (CARD_WIDTH // 2, CARD_MARGIN + TITLE_BG_HEIGHT // 2)
-    bg_width = text_width + 2 * CARD_MARGIN
+    bg_width = text_width + 2 *CARD_PADDING 
     bg_bb = util.get_centered_bb(text_coord, bg_width, TITLE_BG_HEIGHT)
     text_anchor = "mm"
   else:
-    bg_width = text_width + 2 * CARD_MARGIN + SMALL_ICON_WIDTH
+    bg_width = text_width + 2 * CARD_PADDING+ ICON_WIDTH
     bg_bb = [
         CARD_MARGIN, CARD_MARGIN, bg_width + CARD_MARGIN,
         TITLE_BG_HEIGHT + CARD_MARGIN
     ]
-    text_coord = (2 * CARD_MARGIN if desc.cost is None else 2 * CARD_MARGIN +
-                  SMALL_ICON_WIDTH, TOP_ICON_Y)
+    text_coord = (CARD_MARGIN + CARD_PADDING if desc.cost is None else CARD_MARGIN + CARD_PADDING +
+                  ICON_WIDTH, TOP_ICON_Y)
     text_anchor = "lm"
   if desc.card_type == util.CardType.MEMORY:
     draw.rectangle(bg_bb,
@@ -148,8 +147,8 @@ def render_attributes(draw: ImageDraw.Draw, desc: util.CardDesc):
     text += f"— {desc.attributes}"
   font = _get_scaled_font(text, ATTRIBUTE_FONT, MAX_ATTRIBUTE_WIDTH)
   width, height = font.getsize(text)
-  width += 2 * CARD_MARGIN
-  height += CARD_MARGIN
+  width += 2 *CARD_PADDING 
+  height +=CARD_PADDING 
   bb = util.get_centered_bb(ATTRIBUTE_COORD, width, height)
   # Move top under image
   bb[1] -= 2 * ATTRIBUTE_BG_RADIUS
@@ -179,7 +178,8 @@ def render_card_back(output_dir:pathlib.Path):
   im.save(output_path)
 
 
-def render_card(desc: util.CardDesc, output_dir:Optional[pathlib.Path]=None, output_path:Optional[pathlib.Path]=None):
+def render_card(desc: util.CardDesc, output_dir:Optional[pathlib.Path]=None,
+                output_path:Optional[pathlib.Path]=None):
   assert (output_path is None) != (output_dir is None), "Must call render_card with only output_dir or output_path."
   if output_path is None:
     output_path = util.get_output_path(output_dir, desc)
@@ -193,7 +193,7 @@ def render_card(desc: util.CardDesc, output_dir:Optional[pathlib.Path]=None, out
 
   render_attributes(draw, desc)
 
-  card_art.render_card_art(im, desc, CARD_IMAGE_BB, SMALL_ICON_HEIGHT // 2)
+  card_art.render_card_art(im, desc, CARD_IMAGE_BB, ICON_HEIGHT // 2)
 
   render_title(draw, desc)
 
@@ -201,22 +201,22 @@ def render_card(desc: util.CardDesc, output_dir:Optional[pathlib.Path]=None, out
 
   # Draw icons
   if desc.cost is not None:
-    icons.draw_cost_icon(im, draw, COST_COORD, int(SMALL_ICON_WIDTH * 1.2),
-                         int(SMALL_ICON_HEIGHT * 1.2), desc.cost,
-                         SMALL_ICON_FONT, SMALL_ICON_FONT_COLOR,
+    icons.draw_cost_icon(im, draw, COST_COORD, int(ICON_WIDTH * 1.2),
+                         int(ICON_HEIGHT * 1.2), desc.cost,
+                         COST_ICON_FONT, ICON_FONT_COLOR,
                          desc.primary_element, desc.secondary_element)
   if desc.health is not None:
-    icons.draw_heart_with_text(im, draw, HEALTH_COORD, LARGE_ICON_WIDTH,
-                               LARGE_ICON_HEIGHT, desc.health, LARGE_ICON_FONT,
-                               LARGE_ICON_FONT_COLOR)
+    icons.draw_heart_with_text(im, draw, HEALTH_COORD, ICON_HEIGHT,
+                               ICON_WIDTH, desc.health, ICON_FONT,
+                               ICON_FONT_COLOR)
   if desc.strength is not None:
-    icons.draw_strength_with_text(im, draw, STRENGTH_COORD, LARGE_ICON_WIDTH,
-                                 LARGE_ICON_HEIGHT, desc.strength, LARGE_ICON_FONT,
-                                 LARGE_ICON_FONT_COLOR)
+    icons.draw_strength_with_text(im, draw, STRENGTH_COORD, ICON_HEIGHT,
+                                 ICON_WIDTH, desc.strength, ICON_FONT,
+                                 ICON_FONT_COLOR)
   if desc.card_type == util.CardType.MEMORY:
-    icons.draw_cost_icon(im, draw, MANA_COORD, LARGE_ICON_WIDTH,
-                         LARGE_ICON_HEIGHT, "1", LARGE_ICON_FONT,
-                         LARGE_ICON_FONT_COLOR, desc.primary_element,
+    icons.draw_cost_icon(im, draw, MANA_COORD, ICON_HEIGHT,
+                         ICON_WIDTH, "1", ICON_FONT,
+                         ICON_FONT_COLOR, desc.primary_element,
                          desc.secondary_element)
 
   card_art.render_boarder(im, draw, desc, [0, 0, CARD_WIDTH, CARD_HEIGHT])
