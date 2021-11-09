@@ -332,3 +332,13 @@ def render_card_back(im: Image, draw: ImageDraw.Draw):
       radius=BORDER_CORNER_RADIUS,
   )
   _round_corners(im, BORDER_CORNER_RADIUS)
+
+
+def crop_image_border(im: Image, border_width: float,
+                      corner_radius: float) -> Image:
+  cropped_im = im.crop([
+      border_width, border_width, im.width - border_width,
+      im.height - border_width
+  ])
+  _round_corners(cropped_im, corner_radius)
+  return cropped_im

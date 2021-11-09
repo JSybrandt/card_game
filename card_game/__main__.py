@@ -23,6 +23,8 @@ CARD_WIDTH = int(2.7 * util.PIXELS_PER_INCH)
 CARD_HEIGHT = int(3.7 * util.PIXELS_PER_INCH)
 CARD_MARGIN = int(0.275 * util.PIXELS_PER_INCH)
 CARD_PADDING = int(0.15 * util.PIXELS_PER_INCH)
+BORDER_WIDTH = int(0.1 * util.PIXELS_PER_INCH)
+CORNDER_RADIUS = int(1 / 8 * util.PIXELS_PER_INCH)
 
 # Default icon params
 ICON_HEIGHT = ICON_WIDTH = int(0.35 * util.PIXELS_PER_INCH)
@@ -180,7 +182,8 @@ def render_card_back(output_dir: pathlib.Path):
 
 def render_card(desc: util.CardDesc,
                 output_dir: Optional[pathlib.Path] = None,
-                output_path: Optional[pathlib.Path] = None):
+                output_path: Optional[pathlib.Path] = None,
+                crop_border: bool = True):
   assert (output_path is None) != (
       output_dir is
       None), "Must call render_card with only output_dir or output_path."
@@ -223,6 +226,8 @@ def render_card(desc: util.CardDesc,
   card_art.render_boarder(im, draw, desc, [0, 0, CARD_WIDTH, CARD_HEIGHT])
 
   print("Saving card:", output_path)
+  if crop_border:
+    im = card_art.crop_image_border(im, BORDER_WIDTH, CORNDER_RADIUS)
   im.save(output_path)
 
 
