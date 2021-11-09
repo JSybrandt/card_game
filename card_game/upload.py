@@ -22,7 +22,7 @@ FTP_USER = "ftpuser"
 FTP_PASSWD_FILE = (pathlib.Path.home().joinpath(".local").joinpath(
     "share").joinpath("card_game").joinpath("ftp_password"))
 
-SLEEP_TIME=0.5
+SLEEP_TIME = 0.5
 
 # Following the upload, you can search for our cards with the "set" search.
 
@@ -122,7 +122,8 @@ def _click_i_understand(driver):
 def _fill_card_contents(driver, title, set_name, image_url, card_back_url):
   form = WebDriverWait(driver, MAX_WAIT).until(
       EC.presence_of_element_located((By.ID, "add-card")))
-  card_title_input, card_set_input, card_img_url_input, card_back_img_url_input = form.find_elements_by_tag_name("input")
+  title_input, set_input, img_url_input, back_img_url_input = \
+    form.find_elements_by_tag_name("input")
   _, card_type_select, _, _, _ = form.find_elements_by_tag_name("select")
 
   add_card_button = None
@@ -132,20 +133,11 @@ def _fill_card_contents(driver, title, set_name, image_url, card_back_url):
       break
   assert add_card_button is not None
 
-  (webdriver.ActionChains(driver)
-   .double_click(card_title_input)
-   .send_keys(title)
-   .double_click(card_set_input)
-   .send_keys(set_name)
-   .double_click(card_img_url_input)
-   .send_keys(image_url)
-   .double_click(card_back_img_url_input)
-   .send_keys(card_back_url)
-   .double_click(card_type_select)
-   .send_keys("c")
-   .send_keys(Keys.ENTER)
-   .double_click(add_card_button)
-   .perform())
+  (webdriver.ActionChains(driver).double_click(title_input).send_keys(title).
+   double_click(set_input).send_keys(set_name).double_click(img_url_input).
+   send_keys(image_url).double_click(back_img_url_input).send_keys(
+       card_back_url).double_click(card_type_select).send_keys("c").send_keys(
+           Keys.ENTER).double_click(add_card_button).perform())
 
 
 def _upload_image(ftp_session: ftplib.FTP,
@@ -154,26 +146,25 @@ def _upload_image(ftp_session: ftplib.FTP,
   with open(local_image_path, 'rb') as data_file:
     ftp_session.storbinary(f"STOR {local_image_path.name}", data_file)
   return f"http://{FTP_URL}/{local_image_path.name}"
-  return http_url
 
 
-def _attempt(fn, tries=3):
+def _attempt(function, tries=3):
   for i in range(tries):
     try:
-      return fn()
+      return function()
     except Exception as e:
       print(e)
       if i == tries - 1:
         raise e
-      else:
-        print("Trying again...")
+      print("Trying again...")
+  return None
 
 
 def upload_cards(card_metadata: List[UploadCardMetadata],
                  selenium_driver_path: pathlib.Path, card_set_name: str,
                  untap_username: str, untap_password: str):
   assert selenium_driver_path.is_file()
-  with open(FTP_PASSWD_FILE) as f:
+  with open(FTP_PASSWD_FILE, "r", encoding="utf=8") as f:
     ftp_pass = f.read().strip()
   ftp_session = ftplib.FTP_TLS()
   ftp_session.set_debuglevel(2)
@@ -181,8 +172,10 @@ def upload_cards(card_metadata: List[UploadCardMetadata],
   ftp_session.sendcmd(f"USER {FTP_USER}")
   ftp_session.sendcmd(f"PASS {ftp_pass}")
 
-  main_deck_back_link = _attempt(lambda: _upload_image(ftp_session, util.MAIN_CARD_BACK_IMG_PATH))
-  memory_deck_back_link = _attempt(lambda: _upload_image(ftp_session, util.MEMORY_CARD_BACK_IMG_PATH))
+  main_deck_back_link = _attempt(
+      lambda: _upload_image(ftp_session, util.MAIN_CARD_BACK_IMG_PATH))
+  memory_deck_back_link = _attempt(
+      lambda: _upload_image(ftp_session, util.MEMORY_CARD_BACK_IMG_PATH))
 
   # If we go to sleep, the automated browser iterations may fail.
   driver = webdriver.Chrome(executable_path=selenium_driver_path)
@@ -197,6 +190,7 @@ def upload_cards(card_metadata: List[UploadCardMetadata],
   _click_new_deck(driver)
   time.sleep(SLEEP_TIME)
   _click_custom_deck(driver)
+  #pylint: disable=cell-var-from-loop
   for card in card_metadata:
     time.sleep(SLEEP_TIME)
     card_link = _attempt(lambda: _upload_image(ftp_session, card.image_path))
@@ -205,9 +199,8 @@ def upload_cards(card_metadata: List[UploadCardMetadata],
     time.sleep(SLEEP_TIME)
     _attempt(lambda: _click_i_understand(driver))
     time.sleep(SLEEP_TIME)
-    card_back = (memory_deck_back_link
-                 if card.desc.card_type == util.CardType.MEMORY
-                 else main_deck_back_link)
+    card_back = (memory_deck_back_link if card.desc.card_type
+                 == util.CardType.MEMORY else main_deck_back_link)
     _attempt(lambda: _fill_card_contents(driver, card.desc.title, card_set_name,
                                          card_link, card_back))
 

@@ -22,7 +22,8 @@ FLAVOR_TEXT_MARGIN = int(util.PIXELS_PER_INCH * 0.42)
 TEXT_HEIGHT = int(util.PIXELS_PER_INCH * 0.14)
 FONT = ImageFont.truetype(str(util.EB_GARAMOND_FONT_PATH), TEXT_HEIGHT)
 FLAVOR_TEXT_HEIGHT = int(util.PIXELS_PER_INCH * 0.12)
-FLAVOR_TEXT_FONT = ImageFont.truetype(str(util.GARAMOND_ITALIC_FONT_PATH), FLAVOR_TEXT_HEIGHT)
+FLAVOR_TEXT_FONT = ImageFont.truetype(str(util.GARAMOND_ITALIC_FONT_PATH),
+                                      FLAVOR_TEXT_HEIGHT)
 TOKEN_PADDING_Y = int(util.PIXELS_PER_INCH * 0.02)
 TOKEN_PADDING_X = int(util.PIXELS_PER_INCH * 0.02)
 
@@ -74,7 +75,6 @@ class Token():
     return True
 
 
-
 class Newline(Token):
 
   @classmethod
@@ -96,8 +96,6 @@ class EndTetherSegmentToken(Token):
     return text == "</TETHER>"
 
 
-
-
 class TextToken(Token):
 
   def render(self, _: Image, draw: ImageDraw.Draw, cursor_x: int,
@@ -116,25 +114,34 @@ class TextToken(Token):
   def is_token(cls, text: str) -> bool:
     return text[0] != "<" or text[-1] != ">"
 
+
 class SpaceToken(TextToken):
-  def __init__(self, desc:util.CardDesc, *args, **kwargs):
+
+  def __init__(self, desc: util.CardDesc, *args, **kwargs):
     super().__init__(desc, *args, **kwargs)
 
   @classmethod
   def is_token(cls, text: str) -> bool:
-    return text == " " or text == ""
+    return text in [" ", ""]
 
 
 ICON_WIDTH = TEXT_HEIGHT
 ICON_HEIGHT = ICON_WIDTH
-ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
-                                    int(TEXT_HEIGHT * 0.8))
+ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH), int(TEXT_HEIGHT * 0.8))
 ICON_FONT_COLOR = colors.WHITE
 
 MANA_ICON_REGEX = "<([0-9X]+)([FWDLNG])>"
+
+
 class ManaToken(Token):
 
-  def __init__(self, desc: util.CardDesc, text: str, *args, **kwargs,):
+  def __init__(
+      self,
+      desc: util.CardDesc,
+      text: str,
+      *args,
+      **kwargs,
+  ):
     super().__init__(desc, text, *args, **kwargs)
     mana_match = re.match(MANA_ICON_REGEX, text)
     assert mana_match
@@ -155,7 +162,10 @@ class ManaToken(Token):
   def is_token(cls, text: str) -> bool:
     return bool(re.match(MANA_ICON_REGEX, text))
 
+
 HEALTH_ICON_REGEX = "<([0-9X]+)_HEALTH>"
+
+
 class HealthToken(Token):
 
   def __init__(self, desc: util.CardDesc, text: str, *args, **kwargs):
@@ -168,7 +178,7 @@ class HealthToken(Token):
              cursor_y: int):
     center = cursor_x + int(ICON_WIDTH / 2), cursor_y
     icons.draw_heart_with_text(im, draw, center, ICON_WIDTH, ICON_HEIGHT,
-                         self.icon_text, ICON_FONT, ICON_FONT_COLOR)
+                               self.icon_text, ICON_FONT, ICON_FONT_COLOR)
 
   def width(self):
     return ICON_WIDTH
@@ -177,7 +187,10 @@ class HealthToken(Token):
   def is_token(cls, text: str) -> bool:
     return bool(re.match(HEALTH_ICON_REGEX, text))
 
+
 STRENGTH_REGEX = "<([0-9X]+)_STRENGTH>"
+
+
 class StrengthToken(Token):
 
   def __init__(self, desc: util.CardDesc, text: str, *args, **kwargs):
@@ -235,30 +248,18 @@ def _load_image(img_path: pathlib.Path) -> Image:
 
 
 ICONS = {
-    "<END_COST>":
-        _load_image(util.ICON_DIR.joinpath("end_cost.png")),
-    "<EXHAUST>":
-        _load_image(util.ICON_DIR.joinpath("exhaust.png")),
-    "<READY>":
-        _load_image(util.ICON_DIR.joinpath("ready.png")),
-    "<DRAW_CARD>":
-        _load_image(util.ICON_DIR.joinpath("draw_card.png")),
-    "<SACRIFICE>":
-        _load_image(util.ICON_DIR.joinpath("sacrifice.png")),
-    "<MEMORY_ACTION>":
-        _load_image(util.ICON_DIR.joinpath("memory_action.png")),
-    "<SUMMON_ACTION>":
-        _load_image(util.ICON_DIR.joinpath("summon_action.png")),
-    "<COMBAT_ACTION>":
-        _load_image(util.ICON_DIR.joinpath("combat_action.png")),
-    "<RANGED_ACTION>":
-        _load_image(util.ICON_DIR.joinpath("ranged_action.png")),
-    "<ANY_ACTION>":
-        _load_image(util.ICON_DIR.joinpath("any_action.png")),
-    "<BREAK_ACTION>":
-        _load_image(util.ICON_DIR.joinpath("break_action.png")),
-    "<REVEAL_ACTION>":
-        _load_image(util.ICON_DIR.joinpath("reveal.png")),
+    "<END_COST>": _load_image(util.ICON_DIR.joinpath("end_cost.png")),
+    "<EXHAUST>": _load_image(util.ICON_DIR.joinpath("exhaust.png")),
+    "<READY>": _load_image(util.ICON_DIR.joinpath("ready.png")),
+    "<DRAW_CARD>": _load_image(util.ICON_DIR.joinpath("draw_card.png")),
+    "<SACRIFICE>": _load_image(util.ICON_DIR.joinpath("sacrifice.png")),
+    "<MEMORY_ACTION>": _load_image(util.ICON_DIR.joinpath("memory_action.png")),
+    "<SUMMON_ACTION>": _load_image(util.ICON_DIR.joinpath("summon_action.png")),
+    "<COMBAT_ACTION>": _load_image(util.ICON_DIR.joinpath("combat_action.png")),
+    "<RANGED_ACTION>": _load_image(util.ICON_DIR.joinpath("ranged_action.png")),
+    "<ANY_ACTION>": _load_image(util.ICON_DIR.joinpath("any_action.png")),
+    "<BREAK_ACTION>": _load_image(util.ICON_DIR.joinpath("break_action.png")),
+    "<REVEAL_ACTION>": _load_image(util.ICON_DIR.joinpath("reveal.png")),
 }
 
 
@@ -283,9 +284,11 @@ class IconToken(Token):
   def is_token(cls, text: str) -> bool:
     return text in ICONS
 
+
 class EndCostToken(IconToken):
+
   def width(self):
-    return ICON_WIDTH//2
+    return ICON_WIDTH // 2
 
   @classmethod
   def is_token(cls, text: str) -> bool:
@@ -299,12 +302,12 @@ class ActionToken(IconToken):
     return text in ICONS and re.match("<[A-Z]+_ACTION>", text)
 
 
-def _get_token(desc: util.CardDesc, text: str, font:ImageFont.ImageFont) -> Token:
+def _get_token(desc: util.CardDesc, text: str,
+               font: ImageFont.ImageFont) -> Token:
   for token_class in [
       SpaceToken, Newline, EndCostToken, ActionToken, IconToken, ManaToken,
-      DamageToken, HealthToken, StrengthToken,
-      TextToken, StartTetherSegmentToken,
-      EndTetherSegmentToken, Token
+      DamageToken, HealthToken, StrengthToken, TextToken,
+      StartTetherSegmentToken, EndTetherSegmentToken, Token
   ]:
     if token_class.is_token(text):
       return token_class(desc, text, font)
@@ -323,7 +326,7 @@ class TextSegment():
     self.tokens = []
 
 
-def _get_logical_segments(tokens:List[Token]) -> List[TextSegment]:
+def _get_logical_segments(tokens: List[Token]) -> List[TextSegment]:
   segments = []
   current_segment = TextSegment()
   for token in tokens:
@@ -343,7 +346,8 @@ def _get_logical_segments(tokens:List[Token]) -> List[TextSegment]:
   segments.append(current_segment)
   return segments
 
-def _strip_tokens(tokens:List[Token])->List[Token]:
+
+def _strip_tokens(tokens: List[Token]) -> List[Token]:
   t = tokens[:]
   while len(t) > 0 and isinstance(t[0], SpaceToken):
     t.pop(0)
@@ -368,10 +372,12 @@ def _get_logical_lines(text_segment: TextSegment) -> List[Token]:
   lines = [l for l in lines if len(l) > 0]
   return lines
 
-def _parse_text(desc: util.CardDesc, text:str, font:ImageFont.ImageFont)->List[Token]:
+
+def _parse_text(desc: util.CardDesc, text: str,
+                font: ImageFont.ImageFont) -> List[Token]:
   text = text.replace("<THIS>", desc.title)
   text = text.strip()
-  text = re.sub("\s+", " ", text)
+  text = re.sub(r"\s+", " ", text)
   token_texts = [""]
   for c in text:
     if c in " <":
@@ -379,20 +385,20 @@ def _parse_text(desc: util.CardDesc, text:str, font:ImageFont.ImageFont)->List[T
     token_texts[-1] += c
     if c in " >":
       token_texts.append("")
-  return  [_get_token(desc, t, font) for t in token_texts]
+  return [_get_token(desc, t, font) for t in token_texts]
 
 
 class BodyTextWriter():
 
   def __init__(self, im: Image, draw: ImageDraw.Draw,
-               body_text_bb: util.BoundingBox, font:ImageFont.ImageFont):
+               body_text_bb: util.BoundingBox, font: ImageFont.ImageFont):
     util.assert_valid_bb(body_text_bb)
     self.im = im
     self.draw = draw
     self.left, self.top, self.right, self.bottom = body_text_bb
     self.cursor_x = self.left
     self.cursor_y = self.top + int(TEXT_HEIGHT / 2)
-    self.font=font
+    self.font = font
 
   def render_text(self, desc: util.CardDesc, text: str):
     for segment in _get_logical_segments(_parse_text(desc, text, self.font)):
@@ -455,10 +461,10 @@ class BodyTextWriter():
         if isinstance(t, EndCostToken):
           end_cost_idx = idx
       # This should remove cost_end from the tokens.
-      cost = [] if end_cost_idx is None else tokens[1:end_cost_idx+1]
+      cost = [] if end_cost_idx is None else tokens[1:end_cost_idx + 1]
       cost = [c for c in cost if not isinstance(c, SpaceToken)]
-      content = (tokens[1:] if end_cost_idx is None
-                 else tokens[end_cost_idx + 1:])
+      content = (tokens[1:] if end_cost_idx is None else tokens[end_cost_idx +
+                                                                1:])
       content = _strip_tokens(content)
       self._render_action_line(action, cost, content, dry_run)
     else:
@@ -472,15 +478,12 @@ class BodyTextWriter():
   def _render_cost_background(self, cost: List[Token]):
     assert isinstance(cost[-1], EndCostToken)
     cost_width = sum(
-        c.width()
-      for c in cost[:-1]) + COST_PADDING_X + ICON_WIDTH/2
-    bb = [self.cursor_x,
-          self.cursor_y - TEXT_HEIGHT//2 - 1,
-          self.cursor_x + cost_width,
-          self.cursor_y + TEXT_HEIGHT//2]
-    self.draw.rounded_rectangle(bb,
-                                radius=TEXT_HEIGHT//2,
-                                fill=COST_BG_COLOR)
+        c.width() for c in cost[:-1]) + COST_PADDING_X + ICON_WIDTH / 2
+    bb = [
+        self.cursor_x, self.cursor_y - TEXT_HEIGHT // 2 - 1,
+        self.cursor_x + cost_width, self.cursor_y + TEXT_HEIGHT // 2
+    ]
+    self.draw.rounded_rectangle(bb, radius=TEXT_HEIGHT // 2, fill=COST_BG_COLOR)
 
   def _render_action_line(self,
                           action: ActionToken,
@@ -535,7 +538,7 @@ def render_body_text(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
   text_area_right = bg_x2 - BODY_TEXT_MARGIN
   text_area_top = bg_y1 + BODY_TEXT_MARGIN
   text_area_bottom = bg_y2 - BODY_TEXT_MARGIN
-  flavor_text_top = 0.4*text_area_top + 0.6*text_area_bottom
+  flavor_text_top = 0.4 * text_area_top + 0.6 * text_area_bottom
   flavor_text_left = text_area_left + FLAVOR_TEXT_MARGIN
   flavor_text_right = text_area_right - FLAVOR_TEXT_MARGIN
 
@@ -548,9 +551,7 @@ def render_body_text(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
     flavor_text_top = max(writer.cursor_y, flavor_text_top)
 
   if desc.flavor_text is not None:
-    writer = BodyTextWriter(
-        im, draw,
-        [flavor_text_left, flavor_text_top, flavor_text_right, text_area_bottom],
-        FLAVOR_TEXT_FONT)
+    writer = BodyTextWriter(im, draw, [
+        flavor_text_left, flavor_text_top, flavor_text_right, text_area_bottom
+    ], FLAVOR_TEXT_FONT)
     writer.render_text(desc, desc.flavor_text)
-

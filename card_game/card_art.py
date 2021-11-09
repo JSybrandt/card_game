@@ -3,7 +3,7 @@ import dataclasses
 import hashlib
 import math
 import random
-from typing import List, Tuple, Optional
+from typing import List, Tuple
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -58,16 +58,18 @@ def get_nearby_hue(hue: float, closeness: float = 0.05) -> float:
   return hue
 
 
-def get_nearby_complimentary_hue(hue: float, closeness:float=0.4) -> float:
+def get_nearby_complimentary_hue(hue: float, closeness: float = 0.4) -> float:
   return get_nearby_hue((hue + 0.5) % 1, closeness)
 
 
-def get_nearby_hue_from_color(color: colors.Color, closeness:float=0.05) -> float:
+def get_nearby_hue_from_color(color: colors.Color,
+                              closeness: float = 0.05) -> float:
   hue, _, _ = colorsys.rgb_to_hsv(*color)
   return get_nearby_hue(hue, closeness)
 
 
-def get_nearby_hue_from_element(element: util.Element, closeness:float=0.05) -> float:
+def get_nearby_hue_from_element(element: util.Element,
+                                closeness: float = 0.05) -> float:
   if element == util.Element.GENERIC:
     return random.uniform(0, 1)
   return get_nearby_hue_from_color(element.get_primary_color(), closeness)
@@ -265,26 +267,31 @@ def render_boarder(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
     im.paste(right_border, image_bb, right_border)
 
 
-def render_card_back(im:Image, draw:ImageDraw.Draw):
+def render_card_back(im: Image, draw: ImageDraw.Draw):
   random.seed(hashlib.md5("TEMP".encode("utf-8")).hexdigest())
 
   edge_size = min(im.width, im.height)
   image_bb = [0, 0, im.width, im.height]
-  extended_bb = [-im.width//4, -im.height//4, im.width + im.width//4, im.height+im.height//4]
+  extended_bb = [
+      -im.width // 4, -im.height // 4, im.width + im.width // 4,
+      im.height + im.height // 4
+  ]
 
-  elements = [util.Element.WATER, util.Element.LIGHT, util.Element.DARK,
-              util.Element.NATURE, util.Element.FIRE, util.Element.GENERIC]
-
+  elements = [
+      util.Element.WATER, util.Element.LIGHT, util.Element.DARK,
+      util.Element.NATURE, util.Element.FIRE, util.Element.GENERIC
+  ]
 
   num_shapes = len(elements) * 15
   num_bg_shapes = len(elements) * 3
   num_fg_shapes = len(elements) * 3
   for idx in range(num_shapes):
-    frac = idx / num_shapes
     element = elements[idx % len(elements)]
-    base_color = random.choice([element.get_dark_color(),
-                                element.get_primary_color(),
-                                element.get_light_color()])
+    base_color = random.choice([
+        element.get_dark_color(),
+        element.get_primary_color(),
+        element.get_light_color()
+    ])
 
     hue = get_nearby_hue_from_color(base_color, 0.1)
     if idx < num_bg_shapes:
@@ -302,7 +309,8 @@ def render_card_back(im:Image, draw:ImageDraw.Draw):
 
     value *= 0.3
 
-    color = tuple(int(255 * c) for c in colorsys.hsv_to_rgb(hue, saturation, value))
+    color = tuple(
+        int(255 * c) for c in colorsys.hsv_to_rgb(hue, saturation, value))
 
     shape = rand_shape(random.uniform(extended_bb[0], extended_bb[2]),
                        random.uniform(extended_bb[1], extended_bb[3]),
@@ -311,8 +319,11 @@ def render_card_back(im:Image, draw:ImageDraw.Draw):
 
   title_font = ImageFont.truetype(str(util.LEAGUE_GOTHIC_FONT_PATH),
                                   int(util.PIXELS_PER_INCH * 0.75))
-  draw.text((im.width//2, int(im.height * 0.4)),
-            "Hawken", colors.WHITE, font=title_font, anchor="mm")
+  draw.text((im.width // 2, int(im.height * 0.4)),
+            "Hawken",
+            colors.WHITE,
+            font=title_font,
+            anchor="mm")
 
   draw.rounded_rectangle(
       image_bb,

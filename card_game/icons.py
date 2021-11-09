@@ -1,6 +1,5 @@
 # This  module produces icons.
 
-import math
 from typing import Optional
 
 from PIL import Image, ImageDraw, ImageFont
@@ -38,23 +37,27 @@ def draw_cost_icon(im: Image,
   draw.text(center, text, font_color, anchor="mm", font=font)
 
 
-STRENGTH_ICON_IMG = Image.open(util.ICON_DIR.joinpath("strength.png")).convert("RGBA")
+STRENGTH_ICON_IMG = Image.open(
+    util.ICON_DIR.joinpath("strength.png")).convert("RGBA")
+
 
 def draw_strength_with_text(im: Image, draw: ImageDraw.Draw, center: util.Coord,
                             icon_width: int, icon_height: int, text: str,
-                            font: ImageFont.ImageFont, font_color: colors.Color):
-  center_x, center_y = center
+                            font: ImageFont.ImageFont,
+                            font_color: colors.Color):
   bb = util.get_centered_bb(center, icon_width, icon_height)
   icon_img = STRENGTH_ICON_IMG.resize([icon_width, icon_height])
   im.paste(icon_img, bb, icon_img)
   draw.text(center, text, font_color, anchor="mm", font=font)
 
-TARGET_ICON_IMG = Image.open(util.ICON_DIR.joinpath("target.png")).convert("RGBA")
+
+TARGET_ICON_IMG = Image.open(
+    util.ICON_DIR.joinpath("target.png")).convert("RGBA")
+
 
 def draw_target_with_text(im: Image, draw: ImageDraw.Draw, center: util.Coord,
-                         icon_width: int, icon_height: int, text: str,
-                         font: ImageFont.ImageFont, font_color: colors.Color):
-  center_x, center_y = center
+                          icon_width: int, icon_height: int, text: str,
+                          font: ImageFont.ImageFont, font_color: colors.Color):
   bb = util.get_centered_bb(center, icon_width, icon_height)
   icon_img = TARGET_ICON_IMG.resize([icon_width, icon_height])
   im.paste(icon_img, bb, icon_img)
@@ -63,13 +66,11 @@ def draw_target_with_text(im: Image, draw: ImageDraw.Draw, center: util.Coord,
 
 HEART_ICON_IMG = Image.open(util.ICON_DIR.joinpath("heart.png")).convert("RGBA")
 
+
 def draw_heart_with_text(im: Image, draw: ImageDraw.Draw, center: util.Coord,
                          icon_width: int, icon_height: int, text: str,
                          font: ImageFont.ImageFont, font_color: colors.Color):
-  center_x, center_y = center
   bb = util.get_centered_bb(center, icon_width, icon_height)
   icon_img = HEART_ICON_IMG.resize([icon_width, icon_height])
   im.paste(icon_img, bb, icon_img)
   draw.text(center, text, font_color, anchor="mm", font=font)
-
-

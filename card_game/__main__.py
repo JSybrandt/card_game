@@ -2,15 +2,14 @@
 
 import argparse
 import datetime
-import flask
 import os
 import pathlib
 import pprint
 import shutil
 import tempfile
-
 from typing import Optional
 
+import flask
 from PIL import Image, ImageDraw, ImageFont
 
 from . import body_text, card_art, colors, gsheets, icons, upload, util
@@ -23,14 +22,13 @@ from . import body_text, card_art, colors, gsheets, icons, upload, util
 CARD_WIDTH = int(2.7 * util.PIXELS_PER_INCH)
 CARD_HEIGHT = int(3.7 * util.PIXELS_PER_INCH)
 CARD_MARGIN = int(0.275 * util.PIXELS_PER_INCH)
-CARD_PADDING = int(0.15* util.PIXELS_PER_INCH)
+CARD_PADDING = int(0.15 * util.PIXELS_PER_INCH)
 
 # Default icon params
 ICON_HEIGHT = ICON_WIDTH = int(0.35 * util.PIXELS_PER_INCH)
-ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
-                                     int(ICON_WIDTH * 0.75))
+ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH), int(ICON_WIDTH * 0.75))
 COST_ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH),
-                                     int(ICON_WIDTH * 0.9))
+                                    int(ICON_WIDTH * 0.9))
 ICON_FONT_COLOR = colors.WHITE
 
 TOP_ICON_Y = int(0.175 * util.PIXELS_PER_INCH) + CARD_MARGIN
@@ -104,17 +102,18 @@ def render_title(draw: ImageDraw.Draw, desc: util.CardDesc):
   text_width, _ = scaled_font.getsize(desc.title)
   if desc.cost is None:
     text_coord = (CARD_WIDTH // 2, CARD_MARGIN + TITLE_BG_HEIGHT // 2)
-    bg_width = text_width + 2 *CARD_PADDING 
+    bg_width = text_width + 2 * CARD_PADDING
     bg_bb = util.get_centered_bb(text_coord, bg_width, TITLE_BG_HEIGHT)
     text_anchor = "mm"
   else:
-    bg_width = text_width + 2 * CARD_PADDING+ ICON_WIDTH
+    bg_width = text_width + 2 * CARD_PADDING + ICON_WIDTH
     bg_bb = [
         CARD_MARGIN, CARD_MARGIN, bg_width + CARD_MARGIN,
         TITLE_BG_HEIGHT + CARD_MARGIN
     ]
-    text_coord = (CARD_MARGIN + CARD_PADDING if desc.cost is None else CARD_MARGIN + CARD_PADDING +
-                  ICON_WIDTH, TOP_ICON_Y)
+    text_coord = (CARD_MARGIN +
+                  CARD_PADDING if desc.cost is None else CARD_MARGIN +
+                  CARD_PADDING + ICON_WIDTH, TOP_ICON_Y)
     text_anchor = "lm"
   if desc.card_type == util.CardType.MEMORY:
     draw.rectangle(bg_bb,
@@ -147,8 +146,8 @@ def render_attributes(draw: ImageDraw.Draw, desc: util.CardDesc):
     text += f"— {desc.attributes}"
   font = _get_scaled_font(text, ATTRIBUTE_FONT, MAX_ATTRIBUTE_WIDTH)
   width, height = font.getsize(text)
-  width += 2 *CARD_PADDING 
-  height +=CARD_PADDING 
+  width += 2 * CARD_PADDING
+  height += CARD_PADDING
   bb = util.get_centered_bb(ATTRIBUTE_COORD, width, height)
   # Move top under image
   bb[1] -= 2 * ATTRIBUTE_BG_RADIUS
@@ -169,7 +168,8 @@ def render_attributes(draw: ImageDraw.Draw, desc: util.CardDesc):
             font=font,
             anchor=ATTRIBUTE_ANCHOR)
 
-def render_card_back(output_dir:pathlib.Path):
+
+def render_card_back(output_dir: pathlib.Path):
   output_path = output_dir.joinpath("card_back.png")
   im = Image.new(mode="RGBA", size=(CARD_WIDTH, CARD_HEIGHT))
   draw = ImageDraw.Draw(im)
@@ -178,9 +178,12 @@ def render_card_back(output_dir:pathlib.Path):
   im.save(output_path)
 
 
-def render_card(desc: util.CardDesc, output_dir:Optional[pathlib.Path]=None,
-                output_path:Optional[pathlib.Path]=None):
-  assert (output_path is None) != (output_dir is None), "Must call render_card with only output_dir or output_path."
+def render_card(desc: util.CardDesc,
+                output_dir: Optional[pathlib.Path] = None,
+                output_path: Optional[pathlib.Path] = None):
+  assert (output_path is None) != (
+      output_dir is
+      None), "Must call render_card with only output_dir or output_path."
   if output_path is None:
     output_path = util.get_output_path(output_dir, desc)
   if output_path.exists():
@@ -202,21 +205,19 @@ def render_card(desc: util.CardDesc, output_dir:Optional[pathlib.Path]=None,
   # Draw icons
   if desc.cost is not None:
     icons.draw_cost_icon(im, draw, COST_COORD, int(ICON_WIDTH * 1.2),
-                         int(ICON_HEIGHT * 1.2), desc.cost,
-                         COST_ICON_FONT, ICON_FONT_COLOR,
-                         desc.primary_element, desc.secondary_element)
+                         int(ICON_HEIGHT * 1.2), desc.cost, COST_ICON_FONT,
+                         ICON_FONT_COLOR, desc.primary_element,
+                         desc.secondary_element)
   if desc.health is not None:
-    icons.draw_heart_with_text(im, draw, HEALTH_COORD, ICON_HEIGHT,
-                               ICON_WIDTH, desc.health, ICON_FONT,
-                               ICON_FONT_COLOR)
+    icons.draw_heart_with_text(im, draw, HEALTH_COORD, ICON_HEIGHT, ICON_WIDTH,
+                               desc.health, ICON_FONT, ICON_FONT_COLOR)
   if desc.strength is not None:
     icons.draw_strength_with_text(im, draw, STRENGTH_COORD, ICON_HEIGHT,
-                                 ICON_WIDTH, desc.strength, ICON_FONT,
-                                 ICON_FONT_COLOR)
+                                  ICON_WIDTH, desc.strength, ICON_FONT,
+                                  ICON_FONT_COLOR)
   if desc.card_type == util.CardType.MEMORY:
-    icons.draw_cost_icon(im, draw, MANA_COORD, ICON_HEIGHT,
-                         ICON_WIDTH, "1", ICON_FONT,
-                         ICON_FONT_COLOR, desc.primary_element,
+    icons.draw_cost_icon(im, draw, MANA_COORD, ICON_HEIGHT, ICON_WIDTH, "1",
+                         ICON_FONT, ICON_FONT_COLOR, desc.primary_element,
                          desc.secondary_element)
 
   card_art.render_boarder(im, draw, desc, [0, 0, CARD_WIDTH, CARD_HEIGHT])
@@ -226,26 +227,27 @@ def render_card(desc: util.CardDesc, output_dir:Optional[pathlib.Path]=None,
 
 
 def _render_all_cards(db: gsheets.CardDatabase, output_dir: pathlib.Path):
-  for card_idx, card_desc in enumerate(db):
+  for card_desc in db:
     pprint.pprint(card_desc)
     render_card(card_desc, output_dir)
 
 
-def _start_render_server(image_dir:pathlib.Path, port:int, enable_debug:bool):
+def _start_render_server(image_dir: pathlib.Path, port: int,
+                         enable_debug: bool):
   app = flask.Flask(__name__)
 
   # we want to disable caching for the render server. Its not worth it.
   temp_dir = pathlib.Path(tempfile.mkdtemp())
 
   @app.route("/<name>")
-  def _retrieve_card(name:str):
+  def _retrieve_card(name: str):
     try:
       img_path = image_dir.joinpath(name)
       assert img_path.is_file()
       return flask.send_file(img_path.resolve())
-    except Exception as e:
-      print(e)
-      return str(e), 405
+    except Exception as exception:
+      print(exception)
+      return str(exception), 405
 
   @app.route("/", methods=["POST"])
   def _render_card():
@@ -262,7 +264,6 @@ def _start_render_server(image_dir:pathlib.Path, port:int, enable_debug:bool):
       print(e)
       return str(e), 405
 
-
   app.run(host='0.0.0.0', port=port, debug=enable_debug)
 
 
@@ -273,13 +274,12 @@ def _render_and_upload_all_cards(db: gsheets.CardDatabase,
                                  untap_password: str):
 
   card_metadata = []
-  for card_idx, desc in enumerate(db):
+  for desc in db:
     output_path = util.get_output_path(output_dir, desc)
     pprint.pprint(desc)
     render_card(desc, output_path=output_path)
     card_metadata.append(
-        upload.UploadCardMetadata(image_path=output_path,
-                                  desc=desc))
+        upload.UploadCardMetadata(image_path=output_path, desc=desc))
 
   upload.upload_cards(card_metadata, selenium_driver_path, card_set_name,
                       untap_username, untap_password)
@@ -346,17 +346,15 @@ def main():
     "Must specify untap username and password together."
 
   num_behavior_options = sum([
-      args.render_card is not None,
-      args.render_decklist is not None,
-      args.render_all,
-      args.untap_username is not None,
-      args.render_server,
+      args.render_card is not None, args.render_decklist is not None,
+      args.render_all, args.untap_username is not None, args.render_server,
       args.render_card_back
   ])
   assert (num_behavior_options == 1), "Must specify exactly one behavior."
 
   if args.render_server:
-    _start_render_server(args.output_dir, args.render_server_port, args.render_server_debug)
+    _start_render_server(args.output_dir, args.render_server_port,
+                         args.render_server_debug)
     return
 
   db = gsheets.CardDatabase(args.card_database_gsheets_id)
@@ -384,7 +382,6 @@ def main():
   if args.render_card_back:
     render_card_back(args.output_dir)
     return
-
 
 
 if __name__ == "__main__":

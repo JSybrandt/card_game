@@ -51,8 +51,10 @@ def _row_to_card_desc(row: List[str]) -> util.CardDesc:
     fields[header] = row[idx] if idx < len(row) else None
   return util.field_dict_to_card_desc(fields)
 
+
 # Columns after the first few are left for comments.
 NUM_IMPORTANT_COLUMNS = 10
+
 
 class CardDatabase():
 

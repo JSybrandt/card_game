@@ -1,9 +1,9 @@
 import dataclasses
 import enum
 import hashlib
+import json
 import math
 import pathlib
-import json
 from typing import Any, Dict, Optional, Tuple
 
 from . import colors
@@ -13,7 +13,7 @@ from . import colors
 
 CONFIG_PATH = pathlib.Path("./config.json")
 if CONFIG_PATH.is_file():
-  with open(CONFIG_PATH, "r") as config_file:
+  with open(CONFIG_PATH, "r", encoding="utf=8") as config_file:
     GLOBAL_CONFIG = json.loads(config_file.read())
   print("Loaded global config:", GLOBAL_CONFIG)
 else:
@@ -217,6 +217,8 @@ def sigmoid(x):
   sig = 1 / (1 + math.exp(-x))
   return sig
 
-def get_output_path(output_dir:pathlib.Path, card_desc:CardDesc)->pathlib.Path:
+
+def get_output_path(output_dir: pathlib.Path,
+                    card_desc: CardDesc) -> pathlib.Path:
   assert output_dir.is_dir()
   return output_dir.joinpath(f"{card_desc.hash_all()}.png")
