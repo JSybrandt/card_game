@@ -17,6 +17,8 @@ RAND_MAX_POINT_GEN_STEP_RADS = 2 * math.pi / 3
 RAND_MIN_SHAPES = 10
 RAND_MAX_SHAPES = 100
 
+IMAGE_CORNER_RADIUS = int(util.PIXELS_PER_INCH * 0.1)
+
 
 @dataclasses.dataclass
 class ColorPalette:
@@ -135,8 +137,8 @@ def _cut_corners(im: Image, corner_size: int):
   im.putalpha(mask)
 
 
-def render_card_art(im: Image, desc: util.CardDesc, image_bb: util.BoundingBox,
-                    radius: float) -> Image:
+def render_card_art(im: Image, desc: util.CardDesc,
+                    image_bb: util.BoundingBox) -> Image:
   # Seed random number gen with deterministic hash of card description. This
   # gives us the same image if we run the generation script twice.
   random.seed(desc.hash_title())
@@ -180,9 +182,9 @@ def render_card_art(im: Image, desc: util.CardDesc, image_bb: util.BoundingBox,
                    fill=rand_color(color_palette.primary_hue, min_saturation,
                                    max_saturation, min_value, max_value))
   if desc.card_type == util.CardType.MEMORY:
-    _cut_corners(art_image, radius)
+    _cut_corners(art_image, IMAGE_CORNER_RADIUS)
   else:
-    _round_corners(art_image, radius)
+    _round_corners(art_image, IMAGE_CORNER_RADIUS)
   im.paste(art_image, image_bb, art_image)
 
 

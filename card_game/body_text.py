@@ -14,12 +14,12 @@ from . import colors, icons, util
 # Customizations of the body text area.
 
 FONT_COLOR = colors.BLACK
-BG_RADIUS = int(util.PIXELS_PER_INCH * 0.05)
+BG_RADIUS = int(util.PIXELS_PER_INCH * 0.1)
 BG_COLOR = colors.GREY_50
-BODY_TEXT_MARGIN = int(util.PIXELS_PER_INCH * 0.05)
+BODY_TEXT_MARGIN = int(util.PIXELS_PER_INCH * 0.08)
 FLAVOR_TEXT_MARGIN = int(util.PIXELS_PER_INCH * 0.42)
 
-TEXT_HEIGHT = int(util.PIXELS_PER_INCH * 0.14)
+TEXT_HEIGHT = int(util.PIXELS_PER_INCH * 0.125)
 FONT = ImageFont.truetype(str(util.EB_GARAMOND_FONT_PATH), TEXT_HEIGHT)
 FLAVOR_TEXT_HEIGHT = int(util.PIXELS_PER_INCH * 0.12)
 FLAVOR_TEXT_FONT = ImageFont.truetype(str(util.GARAMOND_ITALIC_FONT_PATH),
@@ -34,11 +34,13 @@ TEXT_SEGMENT_PADDING_Y = int(0.03 * util.PIXELS_PER_INCH)
 TEXT_SEGMENT_BORDER_COLOR = colors.BLACK
 TEXT_SEGMENT_BORDER_WIDTH = int(0.01 * util.PIXELS_PER_INCH)
 TEXT_SEGMENT_FONT = ImageFont.truetype(str(util.EB_GARAMOND_FONT_PATH),
-                                       TEXT_HEIGHT // 2)
+                                       int(util.PIXELS_PER_INCH * 0.09))
 TEXT_SEGMENT_FONT_COLOR = colors.BLACK
 TEXT_SEGMENT_FONT_PADDING_Y = int(1.2 * TEXT_SEGMENT_FONT.size)
 
 UNKNOWN_TEXT = "[?]"
+
+ACTION_ICON_PADDING = int(util.PIXELS_PER_INCH * 0.075)
 
 
 class Token():
@@ -271,10 +273,8 @@ class IconToken(Token):
 
   def render(self, im: Image, draw: ImageDraw.Draw, cursor_x: int,
              cursor_y: int):
-    bb = [
-        cursor_x, cursor_y - TEXT_HEIGHT // 2, cursor_x + ICON_WIDTH,
-        cursor_y + TEXT_HEIGHT // 2
-    ]
+    bb = util.get_centered_bb((cursor_x + ICON_WIDTH // 2, cursor_y),
+                              ICON_WIDTH, ICON_HEIGHT)
     im.paste(ICONS[self.text], bb, ICONS[self.text])
 
   def width(self):
@@ -492,7 +492,7 @@ class BodyTextWriter():
                           dry_run: bool = False):
     if not dry_run:
       action.render(self.im, self.draw, self.cursor_x, self.cursor_y)
-    self.cursor_x += action.width() + TOKEN_PADDING_X
+    self.cursor_x += action.width() + ACTION_ICON_PADDING
     if len(cost) > 0:
       if not dry_run:
         self._render_cost_background(cost)
@@ -505,7 +505,7 @@ class BodyTextWriter():
     self.cursor_x += TOKEN_PADDING_X
     for token in content:
       if self.cursor_x + token.width() > self.right:
-        self._newline(action.width())
+        self._newline(action.width() + ACTION_ICON_PADDING)
         if isinstance(token, SpaceToken):
           # Don't render a space if we've just started a new line.
           continue

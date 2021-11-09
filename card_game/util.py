@@ -71,12 +71,11 @@ def get_bb_center(bb: BoundingBox) -> Coord:
 
 def get_centered_bb(center: Coord, width: int, height: int) -> BoundingBox:
   x, y = center
-  return [
-      int(x - width / 2),
-      int(y - height / 2),
-      int(x + width / 2),
-      int(y + height / 2)
-  ]
+  left = x - width // 2
+  top = y - height // 2
+  right = left + width
+  bottom = top + height
+  return [left, top, right, bottom]
 
 
 class CardType(enum.Enum):
