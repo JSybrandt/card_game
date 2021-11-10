@@ -410,7 +410,7 @@
        fx="31.750002"
        fy="44.450001"
        r="31.754612"
-       gradientTransform="matrix(1.5997675,2.9651066e-8,-7.0055862e-8,1.9997095,-19.042622,-44.437091)"
+       gradientTransform="matrix(1.567996,2.9232787e-8,-6.8664548e-8,1.9715002,-18.033881,-43.183192)"
        gradientUnits="userSpaceOnUse" />
     <clipPath
        clipPathUnits="userSpaceOnUse"
@@ -440,9 +440,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.6296963"
-     inkscape:cx="294.80942"
-     inkscape:cy="374.17469"
+     inkscape:zoom="11.473705"
+     inkscape:cx="218.82303"
+     inkscape:cy="25.364562"
      inkscape:document-units="mm"
      inkscape:current-layer="g949"
      inkscape:document-rotation="0"
@@ -458,10 +458,10 @@
      inkscape:snap-center="true"
      showguides="true"
      inkscape:guide-bbox="true"
-     inkscape:window-width="2560"
-     inkscape:window-height="1376"
-     inkscape:window-x="1440"
-     inkscape:window-y="683"
+     inkscape:window-width="1920"
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
      inkscape:window-maximized="1"
      inkscape:snap-nodes="true"
      inkscape:snap-global="true"
@@ -789,16 +789,6 @@
            cy="82.550003"
            r="1.27" />
       </g>
-      <rect
-         style="mix-blend-mode:normal;fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.27;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-         id="rect1392-3-5-0"
-         width="62.239223"
-         height="87.63945"
-         x="0.6303885"
-         y="0.63027495"
-         ry="5.719727"
-         inkscape:export-xdpi="300"
-         inkscape:export-ydpi="300" />
       <image
          width="116.94583"
          height="58.208332"
@@ -2251,13 +2241,23 @@
         </g>
       </g>
       <rect
-         style="mix-blend-mode:saturation;fill:url(#radialGradient1224-9);fill-opacity:1;stroke:#000000;stroke-width:1.27;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         style="mix-blend-mode:saturation;fill:url(#radialGradient1224-9);fill-opacity:1;stroke:#000000;stroke-width:2.54;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          id="rect1392-3-9"
-         width="62.239223"
-         height="87.63945"
-         x="0.6303885"
-         y="0.63027686"
-         ry="5.719727"
+         width="61.003147"
+         height="86.403152"
+         x="1.2484267"
+         y="1.2484238"
+         ry="5.6390409"
+         inkscape:export-xdpi="300"
+         inkscape:export-ydpi="300" />
+      <rect
+         style="mix-blend-mode:normal;fill:none;fill-opacity:1;stroke:#000000;stroke-width:2.53852;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect1392-3-5-0"
+         width="60.961479"
+         height="86.361481"
+         x="1.2692599"
+         y="1.26926"
+         ry="2.54074"
          inkscape:export-xdpi="300"
          inkscape:export-ydpi="300" />
     </g>

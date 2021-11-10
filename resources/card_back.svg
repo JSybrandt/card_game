@@ -219,12 +219,23 @@
        xlink:href="#linearGradient1066"
        id="radialGradient1074"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(0.9997098,-1.0076815e-4,1.4495844e-4,1.4396421,-31.729116,44.454295)"
+       gradientTransform="matrix(0.94043417,-9.652472e-5,1.3636344e-4,1.3790175,-27.965257,44.454114)"
        cx="63.502148"
        cy="-0.001821043"
        fx="63.502148"
        fy="-0.001821043"
        r="31.754612" />
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1066"
+       id="radialGradient1224-9"
+       cx="31.750002"
+       cy="44.450001"
+       fx="31.750002"
+       fy="44.450001"
+       r="31.754612"
+       gradientTransform="matrix(1.567996,2.9232787e-8,-6.8664548e-8,1.9715002,-18.055452,-43.161616)"
+       gradientUnits="userSpaceOnUse" />
   </defs>
   <sodipodi:namedview
      id="base"
@@ -233,9 +244,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.3758964"
-     inkscape:cx="95.504597"
-     inkscape:cy="179.66323"
+     inkscape:zoom="1.6439931"
+     inkscape:cx="99.025567"
+     inkscape:cy="176.39035"
      inkscape:document-units="mm"
      inkscape:current-layer="g949"
      inkscape:document-rotation="0"
@@ -249,12 +260,12 @@
      inkscape:snap-bbox="true"
      inkscape:snap-object-midpoints="true"
      inkscape:snap-center="false"
-     showguides="true"
+     showguides="false"
      inkscape:guide-bbox="true"
-     inkscape:window-width="2560"
-     inkscape:window-height="1376"
-     inkscape:window-x="1440"
-     inkscape:window-y="683"
+     inkscape:window-width="1920"
+     inkscape:window-height="1016"
+     inkscape:window-x="0"
+     inkscape:window-y="27"
      inkscape:window-maximized="1"
      inkscape:snap-nodes="true"
      inkscape:snap-global="true"
@@ -274,30 +285,6 @@
        position="31.750001,88.900003"
        orientation="1,0"
        id="guide983" />
-    <sodipodi:guide
-       position="31.750001,44.450001"
-       orientation="0,-1"
-       id="guide985" />
-    <sodipodi:guide
-       position="31.750001,57.150002"
-       orientation="0,-1"
-       id="guide989" />
-    <sodipodi:guide
-       position="12.7,49.530002"
-       orientation="1,0"
-       id="guide2032" />
-    <sodipodi:guide
-       position="50.800001,39.370001"
-       orientation="1,0"
-       id="guide2034" />
-    <sodipodi:guide
-       position="16.51,53.340001"
-       orientation="0,-1"
-       id="guide2036" />
-    <sodipodi:guide
-       position="13.97,53.340002"
-       orientation="1,0"
-       id="guide2038" />
   </sodipodi:namedview>
   <metadata
      id="metadata5">
@@ -921,23 +908,33 @@
         </g>
       </g>
       <rect
-         style="opacity:1;mix-blend-mode:hard-light;fill:none;fill-opacity:1;stroke:#000000;stroke-width:1.27;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         style="opacity:1;mix-blend-mode:hard-light;fill:none;fill-opacity:1;stroke:#000000;stroke-width:2.539;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          id="rect1392-3-3"
-         width="62.239223"
-         height="87.63945"
-         x="0.6303885"
-         y="0.63027495"
-         ry="5.719727"
+         width="60.961479"
+         height="86.361481"
+         x="1.2692608"
+         y="1.2692592"
+         ry="2.5407407"
          inkscape:export-xdpi="300"
          inkscape:export-ydpi="300" />
       <rect
-         style="mix-blend-mode:hard-light;fill:url(#radialGradient1074);fill-opacity:1;stroke:#000000;stroke-width:1.27;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;opacity:0.18070924"
+         style="opacity:0.180709;mix-blend-mode:hard-light;fill:url(#radialGradient1074);fill-opacity:1;stroke:#000000;stroke-width:2.41111;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
          id="rect1392-3"
-         width="62.239223"
-         height="87.63945"
-         x="0.63038826"
-         y="0.63027507"
-         ry="5.719727"
+         width="58.548882"
+         height="83.948883"
+         x="2.4755576"
+         y="2.4755592"
+         ry="4.2623439"
+         inkscape:export-xdpi="300"
+         inkscape:export-ydpi="300" />
+      <rect
+         style="mix-blend-mode:saturation;fill:url(#radialGradient1224-9);fill-opacity:1;stroke:none;stroke-width:2.54;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="rect1392-3-9"
+         width="61.003147"
+         height="86.403152"
+         x="1.2268529"
+         y="1.27"
+         ry="5.6390409"
          inkscape:export-xdpi="300"
          inkscape:export-ydpi="300" />
     </g>
