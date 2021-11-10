@@ -43,7 +43,7 @@ CONTENT_WIDTH = CARD_WIDTH - 2 * CARD_MARGIN
 
 # Card image parameters
 # Width and height of card image
-CARD_IMAGE_BOTTOM = int(1.6 * util.PIXELS_PER_INCH)
+CARD_IMAGE_BOTTOM = int(2 * util.PIXELS_PER_INCH)
 CARD_IMAGE_BB = [
     CARD_MARGIN,
     CARD_MARGIN,
