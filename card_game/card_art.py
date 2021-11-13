@@ -72,9 +72,9 @@ def get_nearby_hue_from_color(color: colors.Color,
 
 def get_nearby_hue_from_element(element: util.Element,
                                 closeness: float = 0.05) -> float:
-  if element == util.Element.GENERIC:
+  if element == util.Element.COLORLESS:
     return random.uniform(0, 1)
-  return get_nearby_hue_from_color(element.get_primary_color(), closeness)
+  return get_nearby_hue_from_color(element.get_color(), closeness)
 
 
 def rand_color_palette(desc: util.CardDesc) -> ColorPalette:
@@ -164,8 +164,8 @@ def render_card_art(im: Image, desc: util.CardDesc,
   x_max_offset = width * 0.9
   y_min_offset = height * 0.1
   y_max_offset = height * 0.9
-  min_saturation = 0.1 if desc.primary_element == util.Element.GENERIC else 0.6
-  max_saturation = 0.5 if desc.primary_element == util.Element.GENERIC else 1
+  min_saturation = 0.1 if desc.primary_element == util.Element.COLORLESS else 0.6
+  max_saturation = 0.5 if desc.primary_element == util.Element.COLORLESS else 1
   min_value = 0.6
   max_value = 1
   min_radius = min(width, height) * 0.3
@@ -219,8 +219,8 @@ def render_background(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
 
   x_cords = _get_random_coords(bg_left, bg_right, BG_PATTERN_SIZE, 0.2)
   y_cords = _get_random_coords(bg_top, bg_bottom, BG_PATTERN_SIZE, 0.2)
-  min_saturation = 0 if desc.primary_element == util.Element.GENERIC else 0.1
-  max_saturation = 0 if desc.primary_element == util.Element.GENERIC else 0.3
+  min_saturation = 0 if desc.primary_element == util.Element.COLORLESS else 0.1
+  max_saturation = 0 if desc.primary_element == util.Element.COLORLESS else 0.3
 
   for x, _ in enumerate(x_cords):
     this_offset = 0 if x % 2 == 0 else int(BG_PATTERN_SIZE / 2)
@@ -246,13 +246,13 @@ def render_boarder(im: Image, draw: ImageDraw.Draw, desc: util.CardDesc,
                    image_bb: util.BoundingBox):
   draw.rounded_rectangle(
       image_bb,
-      outline=desc.primary_element.get_dark_color(),
+      outline=desc.primary_element.get_color(),
       width=BORDER_WIDTH,
       radius=BORDER_CORNER_RADIUS,
   )
   if desc.secondary_element is not None:
     right_border = Image.new("RGBA", (im.width, im.height),
-                             color=desc.secondary_element.get_dark_color())
+                             color=desc.secondary_element.get_color())
     right_mask = Image.new("L", (im.width, im.height), color=0)
     right_mask_draw = ImageDraw.Draw(right_mask)
     # Cut out the border
@@ -279,21 +279,16 @@ def render_card_back(im: Image, draw: ImageDraw.Draw):
       im.height + im.height // 4
   ]
 
-  elements = [
-      util.Element.WATER, util.Element.LIGHT, util.Element.DARK,
-      util.Element.NATURE, util.Element.FIRE, util.Element.GENERIC
-  ]
+  elements = [ util.Element.BLUE, util.Element.RED, util.Element.GREEN,
+               util.Element.ORANGE, util.Element.PURPLE, util.Element.YELLOW,
+               util.Element.BROWN, util.Element.SILVER, util.Element.COLORLESS]
 
   num_shapes = len(elements) * 15
   num_bg_shapes = len(elements) * 3
   num_fg_shapes = len(elements) * 3
   for idx in range(num_shapes):
     element = elements[idx % len(elements)]
-    base_color = random.choice([
-        element.get_dark_color(),
-        element.get_primary_color(),
-        element.get_light_color()
-    ])
+    base_color = element.get_color();
 
     hue = get_nearby_hue_from_color(base_color, 0.1)
     if idx < num_bg_shapes:

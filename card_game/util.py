@@ -88,56 +88,31 @@ class CardType(enum.Enum):
 
 
 class Element(enum.Enum):
-  FIRE = "F"
-  WATER = "W"
-  LIGHT = "L"
-  DARK = "D"
-  NATURE = "N"
-  GENERIC = "G"
 
-  def get_primary_color(self) -> colors.Color:
-    if self == Element.FIRE:
-      return colors.RED_500
-    if self == Element.WATER:
-      return colors.BLUE_500
-    if self == Element.LIGHT:
-      return colors.YELLOW_500
-    if self == Element.DARK:
-      return colors.PURPLE_500
-    if self == Element.NATURE:
-      return colors.GREEN_500
-    if self == Element.GENERIC:
-      return colors.GREY_400
-    return colors.BLACK
+  BLUE="B"
+  RED="R"
+  GREEN="G"
+  ORANGE="O"
+  PURPLE="P"
+  BROWN="W"
+  SILVER="S"
+  COLORLESS="X"
 
-  def get_light_color(self) -> colors.Color:
-    if self == Element.FIRE:
-      return colors.RED_200
-    if self == Element.WATER:
-      return colors.BLUE_200
-    if self == Element.LIGHT:
-      return colors.YELLOW_200
-    if self == Element.DARK:
-      return colors.PURPLE_200
-    if self == Element.NATURE:
-      return colors.GREEN_200
-    if self == Element.GENERIC:
-      return colors.GREY_200
-    return colors.BLACK
-
-  def get_dark_color(self) -> colors.Color:
-    if self == Element.FIRE:
-      return colors.RED_900
-    if self == Element.WATER:
-      return colors.BLUE_900
-    if self == Element.LIGHT:
-      return colors.YELLOW_900
-    if self == Element.DARK:
-      return colors.PURPLE_900
-    if self == Element.NATURE:
-      return colors.GREEN_900
-    if self == Element.GENERIC:
-      return colors.GREY_600
+  def get_color(self) -> colors.Color:
+    if self == Element.BLUE:
+      return (48, 63, 159)
+    if self ==  Element.RED:
+      return ( 197, 17, 98)
+    if self ==  Element.GREEN:
+      return ( 104, 159, 56)
+    if self ==  Element.ORANGE:
+      return ( 245, 124, 0)
+    if self ==  Element.PURPLE:
+      return ( 170, 0, 255)
+    if self ==  Element.BROWN:
+      return ( 121, 85, 72)
+    if self ==  Element.SILVER:
+      return ( 120, 144, 156)
     return colors.BLACK
 
 

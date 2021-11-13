@@ -60,7 +60,7 @@ class Token():
     cursor location has been placed such that this rendering will stay within
     the border of the card.
     """
-    print(f"Warning, unidentified token: {self.text}")
+    print(f"Warning, unidentified token: `{self.text}`")
     draw.text((cursor_x, cursor_y),
               UNKNOWN_TEXT,
               FONT_COLOR,
@@ -132,7 +132,8 @@ ICON_HEIGHT = ICON_WIDTH
 ICON_FONT = ImageFont.truetype(str(util.LATO_FONT_PATH), int(TEXT_HEIGHT * 0.8))
 ICON_FONT_COLOR = colors.WHITE
 
-MANA_ICON_REGEX = "<([0-9X]+)([FWDLNG])>"
+ALL_ELEMENT_CHARS = "".join(e.value for e in util.Element)
+MANA_ICON_REGEX = f"<([0-9X])([{ALL_ELEMENT_CHARS}])>"
 
 
 class ManaToken(Token):

@@ -22,10 +22,10 @@ def draw_cost_icon(im: Image,
                    secondary_element: Optional[util.Element] = None):
   side = min(icon_width, icon_height)
   icon_bb = util.get_centered_bb(center, side, side)
-  draw.ellipse(icon_bb, fill=primary_element.get_dark_color())
+  draw.ellipse(icon_bb, fill=primary_element.get_color())
   if secondary_element is not None:
     secondary_im = Image.new("RGBA", (side, side),
-                             color=secondary_element.get_dark_color())
+                             color=secondary_element.get_color())
     secondary_mask = Image.new("L", (side, side))
     secondary_mask_draw = ImageDraw.Draw(secondary_mask)
     # Fill in the center
